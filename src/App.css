@@ -1,47 +1,26 @@
-/* src/App.css */
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  min-height: 100vh;
-}
-
 .app {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
 
 .app-header {
-  background: white;
+  background: rgba(255, 255, 255, 0.95);
   padding: 1rem 2rem;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
+  text-align: center;
 }
 
 .app-header h1 {
-  font-size: 2rem;
-  color: #333;
   margin: 0;
+  color: #333;
+  font-size: 2rem;
 }
 
 .app-header p {
+  margin: 0.5rem 0;
   color: #666;
-  margin: 0.5rem 0 0 0;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
 }
 
 .change-location-btn {
@@ -49,14 +28,14 @@ body {
   color: white;
   border: none;
   padding: 0.5rem 1rem;
-  border-radius: 6px;
+  border-radius: 20px;
   cursor: pointer;
   font-size: 0.9rem;
-  transition: background 0.2s;
+  margin-top: 0.5rem;
 }
 
 .change-location-btn:hover {
-  background: #5a67d8;
+  background: #5a6fd8;
 }
 
 .app-main {
@@ -65,106 +44,20 @@ body {
   margin: 0 auto;
 }
 
-.main-content {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 2rem;
-  min-height: 600px;
-}
-
-.salon-list-container {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  overflow-y: auto;
-  max-height: 800px;
-}
-
-.map-container {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  position: sticky;
-  top: 2rem;
-  height: fit-content;
-}
-
 .search-loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
-}
-
-.search-loading .spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #667eea;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 1rem;
-}
-
-.search-loading p {
-  color: #666;
-  font-size: 1.1rem;
-}
-
-/* Loading and Error States */
-.app-loading, .app-error {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 2rem;
-}
-
-.loading-content, .error-content {
-  background: white;
-  padding: 3rem;
-  border-radius: 12px;
   text-align: center;
-  max-width: 500px;
-  width: 100%;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-}
-
-.loading-content h2, .error-content h2 {
-  color: #333;
-  margin-bottom: 1rem;
-}
-
-.loading-content p, .error-content p {
-  color: #666;
-  margin-bottom: 1.5rem;
+  color: white;
+  margin: 2rem 0;
 }
 
 .spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #667eea;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top: 3px solid white;
   border-radius: 50%;
+  width: 30px;
+  height: 30px;
   animation: spin 1s linear infinite;
-  margin: 0 auto 1.5rem;
-}
-
-.spinner.small {
-  width: 20px;
-  height: 20px;
-  border-width: 2px;
-  margin: 0 0.5rem 0 0;
-  display: inline-block;
-  vertical-align: middle;
+  margin: 0 auto 1rem;
 }
 
 @keyframes spin {
@@ -172,80 +65,119 @@ body {
   100% { transform: rotate(360deg); }
 }
 
-.error-content button {
-  background: #667eea;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background 0.2s;
+.main-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: start;
 }
 
-.error-content button:hover {
-  background: #5a67d8;
+.salon-list {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
-.api-key-help {
-  background: #f7fafc;
-  padding: 1.5rem;
-  border-radius: 8px;
-  margin: 1.5rem 0;
-  text-align: left;
+.map-container {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  padding: 1rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  height: 80vh;
+  position: sticky;
+  top: 2rem;
 }
 
-.api-key-help h3 {
+.salon-map {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .main-content {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .map-container {
+    height: 50vh;
+    position: static;
+  }
+  
+  .salon-list {
+    max-height: none;
+  }
+}
+
+.salon-list h2 {
+  margin: 0 0 1.5rem 0;
   color: #333;
+  font-size: 1.5rem;
+}
+
+.salon-card {
+  background: white;
+  border-radius: 10px;
+  padding: 1.5rem;
   margin-bottom: 1rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #667eea;
+  transition: transform 0.2s ease;
 }
 
-.api-key-help ol {
+.salon-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.salon-info h3 {
+  margin: 0 0 0.5rem 0;
+  color: #333;
+  font-size: 1.3rem;
+}
+
+.salon-type {
+  color: #667eea;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.salon-address {
   color: #666;
-  padding-left: 1.5rem;
+  margin: 0 0 0.5rem 0;
 }
 
-.api-key-help ol li {
-  margin-bottom: 0.5rem;
+.salon-rating {
+  color: #f39c12;
+  font-weight: 600;
+  margin: 0.5rem 0;
 }
 
-.api-key-help code {
-  background: #e2e8f0;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-family: monospace;
+.salon-distance {
+  color: #3498db;
+  font-weight: 600;
+  margin: 0.5rem 0;
   font-size: 0.9rem;
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .main-content {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-  
-  .map-container {
-    position: relative;
-    top: auto;
-  }
+.salon-status {
+  margin: 0.5rem 0;
+  font-weight: 600;
 }
 
-@media (max-width: 768px) {
-  .app-header {
-    padding: 1rem;
-    text-align: center;
-  }
-  
-  .app-header h1 {
-    font-size: 1.5rem;
-  }
-  
-  .app-main {
-    padding: 1rem;
-  }
-  
-  .salon-list-container,
-  .map-container {
-    padding: 1rem;
-  }
+.salon-queue {
+  color: #e74c3c;
+  margin: 0.5rem 0;
+  font-weight: 600;
+}
+
+.salon-services {
+  color: #666;
+  margin: 0.5rem 0 0 0;
+  font-size: 0.9rem;
 }
