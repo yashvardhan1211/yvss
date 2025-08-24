@@ -1,0 +1,136 @@
+.owner-login {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.login-container {
+  background: white;
+  border-radius: 20px;
+  padding: 3rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.login-header h1 {
+  margin: 0 0 0.5rem 0;
+  color: #2c3e50;
+  font-size: 2rem;
+}
+
+.login-header p {
+  margin: 0;
+  color: #7f8c8d;
+  font-size: 1rem;
+}
+
+.login-form {
+  margin-bottom: 2rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #ecf0f1;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.login-btn {
+  width: 100%;
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 1rem;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.login-btn:hover:not(:disabled) {
+  background: #2980b9;
+}
+
+.login-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.spinner.small {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+}
+
+.login-footer {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.login-footer p {
+  margin: 0;
+  color: #7f8c8d;
+}
+
+.toggle-btn {
+  background: none;
+  border: none;
+  color: #3498db;
+  cursor: pointer;
+  font-weight: 600;
+  margin-left: 0.5rem;
+  text-decoration: underline;
+}
+
+.toggle-btn:hover {
+  color: #2980b9;
+}
+
+.back-to-customer {
+  text-align: center;
+  padding-top: 1rem;
+  border-top: 1px solid #ecf0f1;
+}
+
+.back-to-customer a {
+  color: #7f8c8d;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.back-to-customer a:hover {
+  color: #3498db;
+}

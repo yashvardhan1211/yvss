@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import './App.css';
 import LocationSetup from './components/LocationSetup';
+import OwnerLogin from './components/OwnerLogin';
+import OwnerDashboard from './components/OwnerDashboard';
 
-// Simple salon finder that actually works
-function App() {
+// Customer App Component
+function CustomerApp() {
   const [userLocation, setUserLocation] = useState(null);
   const [locationName, setLocationName] = useState('');
   const [salons, setSalons] = useState([]);
@@ -536,13 +539,20 @@ function App() {
   // Render location setup if no location
   if (!userLocation) {
     return (
-      <LocationSetup 
-        onLocationDetection={handleLocationDetection}
-        onLocationSearch={handleLocationSearch}
-        loading={loading}
-        loadingStatus={loadingStatus}
-        error={error}
-      />
+      <div>
+        <div className="app-nav">
+          <Link to="/owner" className="owner-link">
+            💼 Salon Owner? Manage Your Queue →
+          </Link>
+        </div>
+        <LocationSetup 
+          onLocationDetection={handleLocationDetection}
+          onLocationSearch={handleLocationSearch}
+          loading={loading}
+          loadingStatus={loadingStatus}
+          error={error}
+        />
+      </div>
     );
   }
 
@@ -552,12 +562,17 @@ function App() {
       <header className="app-header">
         <h1>🗺️ Real Salon Finder</h1>
         <p>📍 {locationName}</p>
-        <button 
-          onClick={() => setUserLocation(null)}
-          className="change-location-btn"
-        >
-          Change Location
-        </button>
+        <div className="header-actions">
+          <button 
+            onClick={() => setUserLocation(null)}
+            className="change-location-btn"
+          >
+            Change Location
+          </button>
+          <Link to="/owner" className="owner-link-header">
+            💼 Owner Dashboard
+          </Link>
+        </div>
       </header>
 
       <main className="app-main">
@@ -606,6 +621,37 @@ function App() {
         </div>
       </main>
     </div>
+  );
+}
+
+// Owner Portal Component
+function OwnerPortal() {
+  const [ownerData, setOwnerData] = useState(null);
+
+  const handleLogin = (data) => {
+    setOwnerData(data);
+  };
+
+  const handleLogout = () => {
+    setOwnerData(null);
+  };
+
+  if (!ownerData) {
+    return <OwnerLogin onLogin={handleLogin} />;
+  }
+
+  return <OwnerDashboard ownerData={ownerData} onLogout={handleLogout} />;
+}
+
+// Main App with Routing
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<CustomerApp />} />
+        <Route path="/owner" element={<OwnerPortal />} />
+      </Routes>
+    </Router>
   );
 }
 

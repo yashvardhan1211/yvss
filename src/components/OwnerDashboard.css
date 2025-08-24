@@ -1,0 +1,427 @@
+.owner-dashboard {
+  min-height: 100vh;
+  background: #f8f9fa;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.dashboard-header {
+  background: white;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-left h1 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.8rem;
+}
+
+.header-left p {
+  margin: 0.25rem 0 0 0;
+  color: #7f8c8d;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.shop-status {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.status-indicator {
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  background: #ecf0f1;
+}
+
+.status-indicator.open {
+  background: #d5f4e6;
+  color: #27ae60;
+}
+
+.status-indicator.closed {
+  background: #fadbd8;
+  color: #e74c3c;
+}
+
+.toggle-status-btn, .logout-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.toggle-status-btn {
+  background: #3498db;
+  color: white;
+}
+
+.toggle-status-btn:hover {
+  background: #2980b9;
+}
+
+.logout-btn {
+  background: #e74c3c;
+  color: white;
+}
+
+.logout-btn:hover {
+  background: #c0392b;
+}
+
+.dashboard-content {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.stat-icon {
+  font-size: 2rem;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  border-radius: 50%;
+}
+
+.stat-info h3 {
+  margin: 0;
+  font-size: 2rem;
+  color: #2c3e50;
+}
+
+.stat-info p {
+  margin: 0.25rem 0 0 0;
+  color: #7f8c8d;
+  font-size: 0.9rem;
+}
+
+.dashboard-main {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+}
+
+.queue-management, .services-panel {
+  background: white;
+  border-radius: 15px;
+  padding: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.section-header h2 {
+  margin: 0;
+  color: #2c3e50;
+}
+
+.queue-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.queue-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.queue-btn.decrease {
+  background: #e74c3c;
+  color: white;
+}
+
+.queue-btn.decrease:hover:not(:disabled) {
+  background: #c0392b;
+}
+
+.queue-btn.increase {
+  background: #27ae60;
+  color: white;
+}
+
+.queue-btn.increase:hover {
+  background: #229954;
+}
+
+.queue-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.current-queue {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  margin: 2rem 0;
+  padding: 2rem;
+  background: #f8f9fa;
+  border-radius: 15px;
+}
+
+.queue-display, .wait-time-display {
+  text-align: center;
+}
+
+.queue-number, .wait-time-number {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #3498db;
+  margin-bottom: 0.5rem;
+}
+
+.queue-label, .wait-time-label {
+  color: #7f8c8d;
+  font-weight: 600;
+}
+
+.recent-customers h3 {
+  margin: 2rem 0 1rem 0;
+  color: #2c3e50;
+}
+
+.empty-queue {
+  text-align: center;
+  padding: 2rem;
+  color: #7f8c8d;
+}
+
+.customer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.customer-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border-left: 4px solid #3498db;
+}
+
+.customer-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.customer-number {
+  background: #3498db;
+  color: white;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.customer-details h4 {
+  margin: 0;
+  color: #2c3e50;
+}
+
+.customer-details p {
+  margin: 0.25rem 0 0 0;
+  color: #7f8c8d;
+  font-size: 0.9rem;
+}
+
+.customer-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status.waiting {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status.in-progress {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.complete-btn {
+  background: #27ae60;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.complete-btn:hover {
+  background: #229954;
+}
+
+.services-panel h2 {
+  margin: 0 0 2rem 0;
+  color: #2c3e50;
+}
+
+.services-list h3 {
+  margin: 0 0 1rem 0;
+  color: #2c3e50;
+}
+
+.service-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+  margin-bottom: 0.5rem;
+}
+
+.service-info h4 {
+  margin: 0;
+  color: #2c3e50;
+}
+
+.service-info p {
+  margin: 0.25rem 0 0 0;
+  color: #7f8c8d;
+  font-size: 0.9rem;
+}
+
+.edit-service-btn, .add-service-btn {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.edit-service-btn:hover, .add-service-btn:hover {
+  background: #2980b9;
+}
+
+.add-service-btn {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.quick-actions {
+  margin-top: 2rem;
+}
+
+.quick-actions h3 {
+  margin: 0 0 1rem 0;
+  color: #2c3e50;
+}
+
+.action-btn {
+  width: 100%;
+  background: #ecf0f1;
+  color: #2c3e50;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+.action-btn:hover {
+  background: #d5dbdb;
+  transform: translateY(-1px);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .header-right {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .shop-status {
+    justify-content: center;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .dashboard-main {
+    grid-template-columns: 1fr;
+  }
+  
+  .current-queue {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .customer-item {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+}
