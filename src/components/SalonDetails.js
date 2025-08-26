@@ -1,305 +1,394 @@
-// src/components/SalonDetails.js
 import React, { useState, useEffect } from 'react';
+import { processRazorpayPayment } from '../services/paymentService';
+import { createBooking } from '../services/salonService';
+import toast from 'react-hot-toast';
 import './SalonDetails.css';
 
-const SalonDetails = ({ salon, onBack, salonFinder }) => {
-  const [detailedInfo, setDetailedInfo] = useState(null);
-  const [loading, setLoading] = useState(true);
+const SalonDetails = ({ salon, onClose, onBookingComplete }) => {
   const [activeTab, setActiveTab] = useState('overview');
+  const [selectedServices, setSelectedServices] = useState([]);
+  const [bookingStep, setBookingStep] = useState(1); // 1: Services, 2: Details, 3: Payment
+  const [customerDetails, setCustomerDetails] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    preferredTime: '',
+    specialRequests: ''
+  });
 
-  useEffect(() => {
-    const fetchDetails = async () => {
-      setLoading(true);
-      try {
-        const details = await salonFinder.getPlaceDetails(salon.place_id);
-        setDetailedInfo(details);
-      } catch (error) {
-        console.error('Failed to fetch detailed info:', error);
-      } finally {
-        setLoading(false);
-      }
+  // Enhanced services based on salon type
+  const getServicesForSalon = (salon) => {
+    const baseServices = {
+      'Beauty Salon': [
+        { id: 1, name: 'Haircut & Styling', duration: 45, price: 500, description: 'Professional haircut with styling' },
+        { id: 2, name: 'Hair Wash & Blow Dry', duration: 30, price: 300, description: 'Deep cleansing and styling' },
+        { id: 3, name: 'Facial Treatment', duration: 60, price: 800, description: 'Deep cleansing facial with mask' },
+        { id: 4, name: 'Eyebrow Threading', duration: 15, price: 150, description: 'Precise eyebrow shaping' },
+        { id: 5, name: 'Manicure', duration: 45, price: 400, description: 'Complete nail care and polish' },
+        { id: 6, name: 'Pedicure', duration: 60, price: 600, description: 'Foot care and nail polish' }
+      ],
+      'Barber Shop': [
+        { id: 1, name: 'Classic Haircut', duration: 30, price: 300, description: 'Traditional men\'s haircut' },
+        { id: 2, name: 'Beard Trim & Style', duration: 20, price: 200, description: 'Professional beard grooming' },
+        { id: 3, name: 'Hot Towel Shave', duration: 30, price: 350, description: 'Traditional wet shave experience' },
+        { id: 4, name: 'Hair Wash & Style', duration: 25, price: 250, description: 'Shampoo and styling' },
+        { id: 5, name: 'Mustache Trim', duration: 10, price: 100, description: 'Precise mustache grooming' }
+      ],
+      'Spa & Salon': [
+        { id: 1, name: 'Luxury Haircut', duration: 60, price: 800, description: 'Premium haircut with consultation' },
+        { id: 2, name: 'Deep Tissue Massage', duration: 90, price: 1500, description: 'Therapeutic full body massage' },
+        { id: 3, name: 'Aromatherapy Facial', duration: 75, price: 1200, description: 'Relaxing facial with essential oils' },
+        { id: 4, name: 'Body Spa Package', duration: 120, price: 2500, description: 'Complete body treatment' },
+        { id: 5, name: 'Hair Spa Treatment', duration: 90, price: 1000, description: 'Deep conditioning hair treatment' }
+      ],
+      'Unisex Salon': [
+        { id: 1, name: 'Haircut (Men/Women)', duration: 45, price: 400, description: 'Professional unisex haircut' },
+        { id: 2, name: 'Hair Coloring', duration: 120, price: 1200, description: 'Professional hair coloring service' },
+        { id: 3, name: 'Facial Treatment', duration: 60, price: 700, description: 'Suitable for all skin types' },
+        { id: 4, name: 'Threading & Waxing', duration: 30, price: 300, description: 'Hair removal services' },
+        { id: 5, name: 'Bridal Package', duration: 180, price: 3000, description: 'Complete bridal makeover' }
+      ]
     };
 
-    fetchDetails();
-  }, [salon.place_id, salonFinder]);
+    return baseServices[salon.type] || baseServices['Beauty Salon'];
+  };
 
-  const handleCall = () => {
-    const phone = detailedInfo?.formatted_phone_number || salon.formatted_phone_number;
-    if (phone) {
-      window.open(`tel:${phone.replace(/\s/g, '')}`, '_self');
+  const services = getServicesForSalon(salon);
+  const timeSlots = [
+    '9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM',
+    '12:00 PM', '12:30 PM', '1:00 PM', '1:30 PM', '2:00 PM', '2:30 PM',
+    '3:00 PM', '3:30 PM', '4:00 PM', '4:30 PM', '5:00 PM', '5:30 PM'
+  ];
+
+  const handleServiceToggle = (service) => {
+    const isSelected = selectedServices.find(s => s.id === service.id);
+    if (isSelected) {
+      setSelectedServices(selectedServices.filter(s => s.id !== service.id));
+    } else {
+      setSelectedServices([...selectedServices, service]);
     }
   };
 
-  const handleDirections = () => {
-    const { lat, lng } = salon.geometry.location;
-    window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank');
+  const getTotalAmount = () => {
+    return selectedServices.reduce((total, service) => total + service.price, 0);
   };
 
-  const handleWebsite = () => {
-    if (detailedInfo?.website) {
-      window.open(detailedInfo.website, '_blank');
-    }
+  const getTotalDuration = () => {
+    return selectedServices.reduce((total, service) => total + service.duration, 0);
   };
 
-  const getOpeningHoursText = () => {
-    if (!detailedInfo?.opening_hours?.weekday_text) {
-      return salon.opening_hours?.open_now ? 'Currently Open' : 'Currently Closed';
+  const handleBookingSubmit = async () => {
+    if (selectedServices.length === 0) {
+      toast.error('Please select at least one service');
+      return;
     }
-    return detailedInfo.opening_hours.weekday_text;
+
+    if (!customerDetails.name || !customerDetails.email || !customerDetails.phone) {
+      toast.error('Please fill in all required details');
+      return;
+    }
+
+    if (!customerDetails.preferredTime) {
+      toast.error('Please select a preferred time');
+      return;
+    }
+
+    try {
+      // Create booking data
+      const bookingData = {
+        id: `booking_${Date.now()}`,
+        salonId: salon.place_id,
+        salonName: salon.name,
+        customerName: customerDetails.name,
+        customerEmail: customerDetails.email,
+        customerPhone: customerDetails.phone,
+        selectedServices: selectedServices,
+        preferredTime: customerDetails.preferredTime,
+        specialRequests: customerDetails.specialRequests,
+        totalAmount: getTotalAmount(),
+        totalDuration: getTotalDuration(),
+        status: 'pending'
+      };
+
+      // Process payment with Razorpay
+      const paymentResult = await processRazorpayPayment(bookingData);
+      
+      if (paymentResult.success) {
+        // Create booking in Firebase
+        await createBooking({
+          ...bookingData,
+          paymentId: paymentResult.paymentData.razorpay_payment_id,
+          status: 'confirmed'
+        });
+
+        toast.success('Booking confirmed! 🎉');
+        onBookingComplete(bookingData);
+        onClose();
+      }
+    } catch (error) {
+      console.error('Booking failed:', error);
+      toast.error('Booking failed. Please try again.');
+    }
   };
 
   return (
-    <div className="salon-details">
-      <div className="salon-details-header">
-        <button onClick={onBack} className="back-btn">
-          ← Back to Results
-        </button>
-        
-        <div className="salon-title">
-          <h1>{salon.name}</h1>
-          <div className="salon-subtitle">
-            <span className="salon-type">{salon.type}</span>
-            <div className={`status ${salon.opening_hours?.open_now ? 'open' : 'closed'}`}>
-              {salon.opening_hours?.open_now === true ? '🟢 Open Now' : 
-               salon.opening_hours?.open_now === false ? '🔴 Closed' : '🟡 Hours Unknown'}
+    <div className="salon-details-overlay">
+      <div className="salon-details-modal">
+        <div className="salon-details-header">
+          <button className="close-btn" onClick={onClose}>×</button>
+          <div className="salon-header-info">
+            <h2>{salon.name}</h2>
+            <p className="salon-type">{salon.type}</p>
+            <p className="salon-address">{salon.vicinity}</p>
+            <div className="salon-meta">
+              <span className="rating">⭐ {salon.rating}</span>
+              <span className="distance">📍 {salon.distance < 1 ? 
+                `${Math.round(salon.distance * 1000)}m` : 
+                `${salon.distance.toFixed(1)}km`} away</span>
+              <span className={`status ${salon.opening_hours?.open_now ? 'open' : 'closed'}`}>
+                {salon.opening_hours?.open_now ? '🟢 Open' : '🔴 Closed'}
+              </span>
             </div>
           </div>
         </div>
 
-        <div className="quick-actions">
+        <div className="salon-details-tabs">
           <button 
-            onClick={handleCall} 
-            className="action-btn primary"
-            disabled={!detailedInfo?.formatted_phone_number && !salon.formatted_phone_number}
+            className={`tab ${activeTab === 'overview' ? 'active' : ''}`}
+            onClick={() => setActiveTab('overview')}
           >
-            📞 Call Now
+            Overview
           </button>
-          <button onClick={handleDirections} className="action-btn secondary">
-            🗺️ Get Directions
+          <button 
+            className={`tab ${activeTab === 'services' ? 'active' : ''}`}
+            onClick={() => setActiveTab('services')}
+          >
+            Services & Booking
           </button>
-          {detailedInfo?.website && (
-            <button onClick={handleWebsite} className="action-btn secondary">
-              🌐 Website
-            </button>
-          )}
+          <button 
+            className={`tab ${activeTab === 'reviews' ? 'active' : ''}`}
+            onClick={() => setActiveTab('reviews')}
+          >
+            Reviews
+          </button>
         </div>
-      </div>
 
-      <div className="salon-details-tabs">
-        <button 
-          className={`tab ${activeTab === 'overview' ? 'active' : ''}`}
-          onClick={() => setActiveTab('overview')}
-        >
-          Overview
-        </button>
-        <button 
-          className={`tab ${activeTab === 'reviews' ? 'active' : ''}`}
-          onClick={() => setActiveTab('reviews')}
-        >
-          Reviews
-        </button>
-        <button 
-          className={`tab ${activeTab === 'photos' ? 'active' : ''}`}
-          onClick={() => setActiveTab('photos')}
-        >
-          Photos
-        </button>
-      </div>
-
-      <div className="salon-details-content">
-        {activeTab === 'overview' && (
-          <div className="overview-tab">
-            <div className="overview-grid">
-              <div className="info-section">
-                <h3>📍 Location & Contact</h3>
-                <div className="info-item">
-                  <strong>Address:</strong>
-                  <span>{salon.vicinity || salon.formatted_address}</span>
+        <div className="salon-details-content">
+          {activeTab === 'overview' && (
+            <div className="overview-tab">
+              <div className="salon-info-grid">
+                <div className="info-card">
+                  <h3>📍 Location</h3>
+                  <p>{salon.formatted_address || salon.vicinity}</p>
                 </div>
-                
-                {loading ? (
-                  <div className="loading-info">Loading contact details...</div>
-                ) : (
-                  <>
-                    {detailedInfo?.formatted_phone_number && (
-                      <div className="info-item">
-                        <strong>Phone:</strong>
-                        <span>{detailedInfo.formatted_phone_number}</span>
-                      </div>
-                    )}
-                    
-                    {detailedInfo?.website && (
-                      <div className="info-item">
-                        <strong>Website:</strong>
-                        <a href={detailedInfo.website} target="_blank" rel="noopener noreferrer">
-                          Visit Website
-                        </a>
-                      </div>
-                    )}
-                  </>
-                )}
-
-                <div className="info-item">
-                  <strong>Distance:</strong>
-                  <span>{salon.distance?.toFixed(1)} km away</span>
+                <div className="info-card">
+                  <h3>⏰ Current Status</h3>
+                  <p>Queue: {salon.queueLength} people</p>
+                  <p>Wait time: ~{salon.waitTime} minutes</p>
+                </div>
+                <div className="info-card">
+                  <h3>💰 Price Range</h3>
+                  <p>{'₹'.repeat(salon.price_level || 2)} Budget-friendly</p>
+                </div>
+                <div className="info-card">
+                  <h3>📞 Contact</h3>
+                  <p>Call for appointments</p>
+                  <p>Walk-ins welcome</p>
                 </div>
               </div>
-
-              <div className="info-section">
-                <h3>⭐ Rating & Reviews</h3>
-                <div className="rating-display">
-                  <div className="stars-large">
-                    {'★'.repeat(Math.floor(salon.rating || 0))}
-                    {'☆'.repeat(5 - Math.floor(salon.rating || 0))}
-                  </div>
-                  <div className="rating-text">
-                    <strong>{salon.rating?.toFixed(1) || 'No rating'}</strong>
-                    <span>({salon.user_ratings_total || 0} reviews)</span>
-                  </div>
+              
+              <div className="quick-book-section">
+                <h3>Quick Actions</h3>
+                <div className="quick-actions">
+                  <button 
+                    className="quick-book-btn"
+                    onClick={() => setActiveTab('services')}
+                  >
+                    📅 Book Appointment
+                  </button>
+                  <button className="call-btn">📞 Call Salon</button>
+                  <button className="directions-btn">🗺️ Get Directions</button>
                 </div>
-
-                {salon.price_level && (
-                  <div className="price-info">
-                    <strong>Price Level:</strong>
-                    <span className="price-symbols">
-                      {'₹'.repeat(salon.price_level)}
-                      {'○'.repeat(4 - salon.price_level)}
-                    </span>
-                    <span>
-                      ({salon.price_level === 1 ? 'Budget-friendly' : 
-                        salon.price_level === 2 ? 'Moderate pricing' : 
-                        salon.price_level === 3 ? 'Expensive' : 'Premium pricing'})
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              <div className="info-section">
-                <h3>⏰ Queue & Timing</h3>
-                <div className="queue-display">
-                  <div className="queue-item">
-                    <span className="queue-icon">👥</span>
-                    <div>
-                      <strong>{salon.queueLength}</strong>
-                      <span>people in queue</span>
-                    </div>
-                  </div>
-                  <div className="queue-item">
-                    <span className="queue-icon">⏱️</span>
-                    <div>
-                      <strong>~{salon.waitTime} min</strong>
-                      <span>estimated wait</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="info-section">
-                <h3>✂️ Services Offered</h3>
-                <div className="services-grid">
-                  {salon.services?.map((service, index) => (
-                    <div key={index} className="service-item">
-                      {service}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="info-section full-width">
-                <h3>🕐 Opening Hours</h3>
-                {loading ? (
-                  <div className="loading-info">Loading hours...</div>
-                ) : (
-                  <div className="opening-hours">
-                    {typeof getOpeningHoursText() === 'string' ? (
-                      <p>{getOpeningHoursText()}</p>
-                    ) : (
-                      <ul>
-                        {getOpeningHoursText().map((hours, index) => (
-                          <li key={index}>{hours}</li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                )}
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {activeTab === 'reviews' && (
-          <div className="reviews-tab">
-            {loading ? (
-              <div className="loading-content">
-                <div className="spinner"></div>
-                <p>Loading reviews...</p>
-              </div>
-            ) : (
-              <>
-                {detailedInfo?.reviews && detailedInfo.reviews.length > 0 ? (
-                  <div className="reviews-list">
-                    {detailedInfo.reviews.map((review, index) => (
-                      <div key={index} className="review-item">
-                        <div className="review-header">
-                          <div className="reviewer-info">
-                            <img 
-                              src={review.profile_photo_url} 
-                              alt={review.author_name}
-                              className="reviewer-photo"
-                              onError={(e) => {
-                                e.target.src = 'https://via.placeholder.com/40x40?text=' + 
-                                  review.author_name.charAt(0);
-                              }}
-                            />
-                            <div>
-                              <strong>{review.author_name}</strong>
-                              <div className="review-time">
-                                {new Date(review.time * 1000).toLocaleDateString()}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="review-rating">
-                            {'★'.repeat(review.rating)}
-                            {'☆'.repeat(5 - review.rating)}
+          {activeTab === 'services' && (
+            <div className="services-tab">
+              {bookingStep === 1 && (
+                <div className="service-selection">
+                  <h3>Select Services</h3>
+                  <div className="services-grid">
+                    {services.map(service => (
+                      <div 
+                        key={service.id}
+                        className={`service-card ${selectedServices.find(s => s.id === service.id) ? 'selected' : ''}`}
+                        onClick={() => handleServiceToggle(service)}
+                      >
+                        <div className="service-info">
+                          <h4>{service.name}</h4>
+                          <p className="service-description">{service.description}</p>
+                          <div className="service-meta">
+                            <span className="duration">⏱️ {service.duration} min</span>
+                            <span className="price">₹{service.price}</span>
                           </div>
                         </div>
-                        <p className="review-text">{review.text}</p>
+                        <div className="service-checkbox">
+                          {selectedServices.find(s => s.id === service.id) ? '✅' : '⭕'}
+                        </div>
                       </div>
                     ))}
                   </div>
-                ) : (
-                  <div className="no-reviews">
-                    <h3>No reviews available</h3>
-                    <p>This salon doesn't have any Google reviews yet.</p>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        )}
+                  
+                  {selectedServices.length > 0 && (
+                    <div className="selection-summary">
+                      <div className="summary-info">
+                        <p><strong>Selected:</strong> {selectedServices.length} service(s)</p>
+                        <p><strong>Total Duration:</strong> {getTotalDuration()} minutes</p>
+                        <p><strong>Total Amount:</strong> ₹{getTotalAmount()}</p>
+                      </div>
+                      <button 
+                        className="continue-btn"
+                        onClick={() => setBookingStep(2)}
+                      >
+                        Continue to Details
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
 
-        {activeTab === 'photos' && (
-          <div className="photos-tab">
-            {salon.photos && salon.photos.length > 0 ? (
-              <div className="photos-grid">
-                {salon.photos.slice(0, 12).map((photo, index) => (
-                  <img
-                    key={index}
-                    src={photo.getUrl({ maxWidth: 400, maxHeight: 300 })}
-                    alt={`${salon.name} photo ${index + 1}`}
-                    className="salon-photo"
-                    onClick={() => window.open(photo.getUrl(), '_blank')}
-                  />
-                ))}
+              {bookingStep === 2 && (
+                <div className="customer-details">
+                  <h3>Your Details</h3>
+                  <div className="form-grid">
+                    <div className="form-group">
+                      <label>Full Name *</label>
+                      <input
+                        type="text"
+                        value={customerDetails.name}
+                        onChange={(e) => setCustomerDetails({...customerDetails, name: e.target.value})}
+                        placeholder="Enter your full name"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Email *</label>
+                      <input
+                        type="email"
+                        value={customerDetails.email}
+                        onChange={(e) => setCustomerDetails({...customerDetails, email: e.target.value})}
+                        placeholder="Enter your email"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Phone Number *</label>
+                      <input
+                        type="tel"
+                        value={customerDetails.phone}
+                        onChange={(e) => setCustomerDetails({...customerDetails, phone: e.target.value})}
+                        placeholder="Enter your phone number"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Preferred Time *</label>
+                      <select
+                        value={customerDetails.preferredTime}
+                        onChange={(e) => setCustomerDetails({...customerDetails, preferredTime: e.target.value})}
+                      >
+                        <option value="">Select time slot</option>
+                        {timeSlots.map(time => (
+                          <option key={time} value={time}>{time}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="form-group full-width">
+                      <label>Special Requests (Optional)</label>
+                      <textarea
+                        value={customerDetails.specialRequests}
+                        onChange={(e) => setCustomerDetails({...customerDetails, specialRequests: e.target.value})}
+                        placeholder="Any special requests or preferences..."
+                        rows="3"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="booking-summary">
+                    <h4>Booking Summary</h4>
+                    <div className="summary-details">
+                      {selectedServices.map(service => (
+                        <div key={service.id} className="summary-item">
+                          <span>{service.name}</span>
+                          <span>₹{service.price}</span>
+                        </div>
+                      ))}
+                      <div className="summary-total">
+                        <strong>Total: ₹{getTotalAmount()}</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="booking-actions">
+                    <button 
+                      className="back-btn"
+                      onClick={() => setBookingStep(1)}
+                    >
+                      ← Back to Services
+                    </button>
+                    <button 
+                      className="pay-now-btn"
+                      onClick={handleBookingSubmit}
+                    >
+                      Pay ₹{getTotalAmount()} & Book Now
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'reviews' && (
+            <div className="reviews-tab">
+              <div className="reviews-summary">
+                <div className="rating-overview">
+                  <div className="rating-score">
+                    <span className="score">{salon.rating}</span>
+                    <div className="stars">⭐⭐⭐⭐⭐</div>
+                    <p>{salon.user_ratings_total} reviews</p>
+                  </div>
+                </div>
               </div>
-            ) : (
-              <div className="no-photos">
-                <h3>No photos available</h3>
-                <p>This salon doesn't have photos uploaded to Google.</p>
+              
+              <div className="reviews-list">
+                <div className="review-item">
+                  <div className="review-header">
+                    <strong>Priya S.</strong>
+                    <span className="review-rating">⭐⭐⭐⭐⭐</span>
+                  </div>
+                  <p>"Excellent service! The staff was very professional and the haircut was exactly what I wanted."</p>
+                  <span className="review-date">2 days ago</span>
+                </div>
+                
+                <div className="review-item">
+                  <div className="review-header">
+                    <strong>Rahul M.</strong>
+                    <span className="review-rating">⭐⭐⭐⭐⭐</span>
+                  </div>
+                  <p>"Great atmosphere and skilled barbers. Will definitely come back!"</p>
+                  <span className="review-date">1 week ago</span>
+                </div>
+                
+                <div className="review-item">
+                  <div className="review-header">
+                    <strong>Anjali K.</strong>
+                    <span className="review-rating">⭐⭐⭐⭐⭐</span>
+                  </div>
+                  <p>"Amazing facial treatment. My skin feels so refreshed and glowing!"</p>
+                  <span className="review-date">2 weeks ago</span>
+                </div>
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

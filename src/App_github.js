@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
 import './App.css';
 import LocationSetup from './components/LocationSetup';
 import OwnerLogin from './components/OwnerLogin';
 import OwnerDashboard from './components/OwnerDashboard';
-import SalonDetails from './components/SalonDetails';
 
 // Customer App Component
 function CustomerApp() {
@@ -15,8 +13,6 @@ function CustomerApp() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [loadingStatus, setLoadingStatus] = useState('');
-  const [selectedSalon, setSelectedSalon] = useState(null);
-  const [showSalonDetails, setShowSalonDetails] = useState(false);
 
   // Initialize map when salons are loaded
   useEffect(() => {
@@ -72,60 +68,44 @@ function CustomerApp() {
     });
   };
 
-  // Load Google Maps API with your key
+  // Load Google Maps API
   const loadGoogleMaps = () => {
     return new Promise((resolve, reject) => {
-      if (window.google && window.google.maps && window.google.maps.places) {
-        console.log('✅ Google Maps already loaded');
+      if (window.google && window.google.maps) {
         resolve();
         return;
       }
 
-      console.log('🔄 Loading Google Maps API...');
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}&libraries=places&callback=initMap`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}&libraries=places`;
       script.async = true;
       script.defer = true;
       
-      // Add callback function to window
-      window.initMap = () => {
-        console.log('✅ Google Maps API loaded successfully');
+      script.onload = () => {
+        console.log('✅ Google Maps loaded');
         resolve();
       };
       
-      script.onload = () => {
-        // Fallback if callback doesn't work
-        setTimeout(() => {
-          if (window.google && window.google.maps) {
-            console.log('✅ Google Maps loaded (fallback)');
-            resolve();
-          }
-        }, 1000);
-      };
-      
-      script.onerror = (error) => {
-        console.error('❌ Failed to load Google Maps:', error);
-        reject(new Error('Failed to load Google Maps API'));
+      script.onerror = () => {
+        reject(new Error('Failed to load Google Maps'));
       };
       
       document.head.appendChild(script);
     });
   };
 
-  // Search for REAL nearby salons using Google Places API with your key
+  // Search for REAL nearby salons using Google Places API
   const searchNearbyPlaces = async (location) => {
     console.log('🔍 Searching for REAL salons near:', location);
     
     try {
-      // Load Google Maps API
+      // Load Google Maps if not loaded
       await loadGoogleMaps();
       
       // Wait for Google Maps to be fully available
       while (!window.google || !window.google.maps || !window.google.maps.places) {
         await new Promise(resolve => setTimeout(resolve, 100));
       }
-      
-      console.log('✅ Google Maps loaded, starting Places API search...');
       
       // Create a map for PlacesService
       const mapDiv = document.createElement('div');
@@ -135,111 +115,114 @@ function CustomerApp() {
       });
       
       const service = new window.google.maps.places.PlacesService(map);
-      let allResults = [];
       
-      // Method 1: Text Search for salons
-      console.log('🔍 Starting text search for salons...');
-      const textSearchQueries = [
-        'hair salon',
-        'beauty salon', 
-        'barber shop',
-        'spa salon'
+      // Try text search first (often works better)
+      const searchQueries = [
+        'hair salon near me',
+        'beauty salon near me', 
+        'barber shop near me',
+        'spa near me'
       ];
       
-      for (const query of textSearchQueries) {
-        try {
-          console.log(`Searching for: ${query}`);
-          const results = await new Promise((resolve, reject) => {
-            const request = {
-              query: query,
-              location: new window.google.maps.LatLng(location.lat, location.lng),
-              radius: 10000 // 10km radius
-            };
-            
-            service.textSearch(request, (results, status) => {
-              console.log(`${query} search status: ${status}`);
-              console.log(`${query} results: ${results?.length || 0}`);
-              
-              if (status === window.google.maps.places.PlacesServiceStatus.OK) {
-                resolve(results || []);
-              } else if (status === window.google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
-                resolve([]);
-              } else if (status === window.google.maps.places.PlacesServiceStatus.REQUEST_DENIED) {
-                console.error('❌ Places API request denied - check API key');
-                reject(new Error('Places API request denied'));
-              } else {
-                console.warn(`${query} search failed: ${status}`);
-                resolve([]);
-              }
-            });
-          });
-          
-          if (results.length > 0) {
-            console.log(`✅ Found ${results.length} results for "${query}"`);
-            allResults = allResults.concat(results);
-          }
-          
-          // Small delay to avoid rate limiting
-          await new Promise(resolve => setTimeout(resolve, 100));
-        } catch (error) {
-          console.error(`Text search failed for "${query}":`, error);
-        }
-      }
+      let allResults = [];
       
-      // Method 2: Nearby Search if text search didn't work well
-      if (allResults.length < 5) {
-        console.log('🔍 Adding nearby search results...');
-        const nearbyTypes = ['beauty_salon', 'hair_care', 'spa'];
+      for (const query of searchQueries) {
+        console.log(`🔍 Text searching for: ${query}`);
         
-        for (const type of nearbyTypes) {
-          try {
-            console.log(`Nearby search for: ${type}`);
-            const results = await new Promise((resolve, reject) => {
-              const request = {
-                location: new window.google.maps.LatLng(location.lat, location.lng),
-                radius: 15000, // 15km radius
-                type: type
-              };
-              
-              service.nearbySearch(request, (results, status) => {
-                console.log(`${type} nearby status: ${status}`);
-                console.log(`${type} nearby results: ${results?.length || 0}`);
+        const request = {
+          query: query,
+          location: new window.google.maps.LatLng(location.lat, location.lng),
+          radius: 5000
+        };
+        
+        try {
+          const results = await Promise.race([
+            new Promise((resolve, reject) => {
+              service.textSearch(request, (results, status) => {
+                console.log(`"${query}" search status:`, status);
+                console.log(`"${query}" results:`, results?.length || 0);
                 
                 if (status === window.google.maps.places.PlacesServiceStatus.OK) {
                   resolve(results || []);
                 } else if (status === window.google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
                   resolve([]);
+                } else if (status === window.google.maps.places.PlacesServiceStatus.REQUEST_DENIED) {
+                  reject(new Error('Places API request denied - check your API key'));
                 } else {
-                  console.warn(`${type} nearby search failed: ${status}`);
+                  console.warn(`"${query}" search failed with status:`, status);
                   resolve([]);
                 }
               });
-            });
+            }),
+            new Promise((_, reject) => 
+              setTimeout(() => reject(new Error(`"${query}" search timeout`)), 5000)
+            )
+          ]);
+          
+          allResults = allResults.concat(results);
+        } catch (error) {
+          console.warn(`Text search failed for "${query}":`, error.message);
+        }
+      }
+      
+      // If text search fails, try nearby search as fallback
+      if (allResults.length === 0) {
+        console.log('🔄 Text search found nothing, trying nearby search...');
+        
+        const searchTypes = ['beauty_salon', 'hair_care'];
+        
+        for (const type of searchTypes) {
+          console.log(`🔍 Nearby searching for ${type}...`);
+          
+          const request = {
+            location: new window.google.maps.LatLng(location.lat, location.lng),
+            radius: 10000, // Increase radius to 10km
+            type: [type]
+          };
+          
+          try {
+            const results = await Promise.race([
+              new Promise((resolve, reject) => {
+                service.nearbySearch(request, (results, status) => {
+                  console.log(`${type} nearby search status:`, status);
+                  console.log(`${type} nearby results:`, results?.length || 0);
+                  
+                  if (status === window.google.maps.places.PlacesServiceStatus.OK) {
+                    resolve(results || []);
+                  } else if (status === window.google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
+                    resolve([]);
+                  } else if (status === window.google.maps.places.PlacesServiceStatus.REQUEST_DENIED) {
+                    reject(new Error('Places API request denied - check your API key'));
+                  } else {
+                    console.warn(`${type} nearby search failed with status:`, status);
+                    resolve([]);
+                  }
+                });
+              }),
+              new Promise((_, reject) => 
+                setTimeout(() => reject(new Error(`${type} nearby search timeout`)), 5000)
+              )
+            ]);
             
-            if (results.length > 0) {
-              console.log(`✅ Found ${results.length} nearby results for "${type}"`);
-              allResults = allResults.concat(results);
-            }
-            
-            await new Promise(resolve => setTimeout(resolve, 100));
+            allResults = allResults.concat(results);
           } catch (error) {
-            console.error(`Nearby search failed for "${type}":`, error);
+            console.warn(`Nearby search failed for ${type}:`, error.message);
           }
         }
       }
       
-      // Remove duplicates based on place_id
+      // Remove duplicates
       const uniqueResults = allResults.filter((place, index, self) => 
         index === self.findIndex(p => p.place_id === place.place_id)
       );
       
-      console.log(`✅ Total unique results: ${uniqueResults.length}`);
+      console.log(`✅ Found ${uniqueResults.length} REAL salons from Google Places API`);
       
       if (uniqueResults.length === 0) {
-        throw new Error('No salons found in your area. Try a different location.');
+        throw new Error('No salons found in this area');
       }
       
-      // Process and format results
+      // Process results
       const processedSalons = uniqueResults.map(place => {
         const distance = calculateDistance(
           location.lat,
@@ -252,7 +235,7 @@ function CustomerApp() {
           place_id: place.place_id,
           name: place.name,
           type: determineSalonType(place),
-          vicinity: place.vicinity || place.formatted_address,
+          vicinity: place.vicinity,
           formatted_address: place.formatted_address || place.vicinity,
           geometry: {
             location: {
@@ -260,9 +243,9 @@ function CustomerApp() {
               lng: place.geometry.location.lng()
             }
           },
-          rating: place.rating || 4.0,
-          user_ratings_total: place.user_ratings_total || Math.floor(Math.random() * 50) + 10,
-          price_level: place.price_level || 2,
+          rating: place.rating,
+          user_ratings_total: place.user_ratings_total,
+          price_level: place.price_level,
           opening_hours: place.opening_hours,
           photos: place.photos,
           types: place.types,
@@ -271,16 +254,21 @@ function CustomerApp() {
           waitTime: Math.floor(Math.random() * 35) + 10,
           services: generateServices(determineSalonType(place))
         };
-      })
-      .sort((a, b) => a.distance - b.distance) // Sort by distance
-      .slice(0, 15); // Limit to 15 results
+      }).sort((a, b) => a.distance - b.distance);
       
-      console.log(`✅ Returning ${processedSalons.length} processed REAL salons`);
       return processedSalons;
       
     } catch (error) {
-      console.error('❌ Places API search completely failed:', error);
-      throw new Error(`Failed to find salons: ${error.message}`);
+      console.error('❌ Places API search failed:', error);
+      
+      // If Places API fails, show a helpful error message
+      if (error.message.includes('request denied')) {
+        throw new Error('Google Places API is not enabled. Please enable it in Google Cloud Console.');
+      } else if (error.message.includes('timeout')) {
+        throw new Error('Search is taking too long. Please try again.');
+      } else {
+        throw new Error('Unable to search for salons. Please check your internet connection and try again.');
+      }
     }
   };
 
@@ -457,7 +445,6 @@ function CustomerApp() {
     try {
       setLoadingStatus('Getting your location...');
       const location = await getCurrentLocation();
-      console.log('📍 Location obtained:', location);
       
       setLoadingStatus('Finding address...');
       const address = `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}`;
@@ -467,20 +454,19 @@ function CustomerApp() {
       
       setLoadingStatus('Searching for nearby salons...');
       
-      const results = await searchNearbyPlaces(location);
+      // Add timeout for the entire search
+      const searchPromise = searchNearbyPlaces(location);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Search timeout')), 10000)
+      );
       
-      if (results && results.length > 0) {
-        setSalons(results);
-        console.log(`✅ Successfully loaded ${results.length} salons`);
-        setLoadingStatus('');
-      } else {
-        throw new Error('No salons found in your area. Try a different location.');
-      }
+      const results = await Promise.race([searchPromise, timeoutPromise]);
+      setSalons(results);
       
+      console.log(`✅ Found ${results.length} salons`);
     } catch (error) {
-      console.error('❌ Location detection failed:', error);
+      console.error('Search failed:', error);
       setError(error.message);
-      setLoadingStatus('');
     } finally {
       setLoading(false);
     }
@@ -533,27 +519,18 @@ function CustomerApp() {
     try {
       setLoadingStatus('Finding location...');
       const result = await geocodeAddress(address);
-      console.log('📍 Geocoded location:', result);
       
       setUserLocation({ lat: result.lat, lng: result.lng });
       setLocationName(result.formatted_address);
       
       setLoadingStatus('Searching for nearby salons...');
-      
       const results = await searchNearbyPlaces({ lat: result.lat, lng: result.lng });
+      setSalons(results);
       
-      if (results && results.length > 0) {
-        setSalons(results);
-        console.log(`✅ Successfully loaded ${results.length} salons`);
-        setLoadingStatus('');
-      } else {
-        throw new Error('No salons found in this area. Try a different location.');
-      }
-      
+      console.log(`✅ Found ${results.length} salons`);
     } catch (error) {
-      console.error('❌ Location search failed:', error);
+      console.error('Location search failed:', error);
       setError(error.message);
-      setLoadingStatus('');
     } finally {
       setLoading(false);
     }
@@ -610,15 +587,7 @@ function CustomerApp() {
           <div className="salon-list">
             <h2>Nearby Salons ({salons.length})</h2>
             {salons.map(salon => (
-              <div 
-                key={salon.place_id} 
-                className="salon-card"
-                onClick={() => {
-                  setSelectedSalon(salon);
-                  setShowSalonDetails(true);
-                }}
-                style={{ cursor: 'pointer' }}
-              >
+              <div key={salon.place_id} className="salon-card">
                 <div className="salon-info">
                   <h3>{salon.name}</h3>
                   <p className="salon-type">{salon.type}</p>
@@ -650,21 +619,6 @@ function CustomerApp() {
             <div id="salon-map" className="salon-map"></div>
           </div>
         </div>
-
-        {/* Salon Details Modal */}
-        {showSalonDetails && selectedSalon && (
-          <SalonDetails
-            salon={selectedSalon}
-            onClose={() => {
-              setShowSalonDetails(false);
-              setSelectedSalon(null);
-            }}
-            onBookingComplete={(bookingData) => {
-              console.log('Booking completed:', bookingData);
-              // You can add additional logic here like updating the salon queue
-            }}
-          />
-        )}
       </main>
     </div>
   );
@@ -693,13 +647,10 @@ function OwnerPortal() {
 function App() {
   return (
     <Router>
-      <div>
-        <Toaster position="top-right" />
-        <Routes>
-          <Route path="/" element={<CustomerApp />} />
-          <Route path="/owner" element={<OwnerPortal />} />
-        </Routes>
-      </div>
+      <Routes>
+        <Route path="/" element={<CustomerApp />} />
+        <Route path="/owner" element={<OwnerPortal />} />
+      </Routes>
     </Router>
   );
 }
