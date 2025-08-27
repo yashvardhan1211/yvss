@@ -711,8 +711,11 @@ function OwnerPortal() {
 
 // Main App with Routing
 function App() {
+  // Only use basename for GitHub Pages, not for localhost or Vercel
+  const basename = process.env.NODE_ENV === 'production' && window.location.hostname === 'yashvardhan1211.github.io' ? '/yvss' : '';
+  
   return (
-    <Router basename="/yvss">
+    <Router basename={basename}>
       <div>
         <Toaster position="top-right" />
         <Routes>
