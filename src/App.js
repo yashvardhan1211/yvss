@@ -17,6 +17,7 @@ function CustomerApp() {
   const [loadingStatus, setLoadingStatus] = useState('');
   const [selectedSalon, setSelectedSalon] = useState(null);
   const [showSalonDetails, setShowSalonDetails] = useState(false);
+  const [salonDetailsInitialTab, setSalonDetailsInitialTab] = useState('overview');
 
   // Initialize map when salons are loaded
   useEffect(() => {
@@ -610,36 +611,53 @@ function CustomerApp() {
           <div className="salon-list">
             <h2>Nearby Salons ({salons.length})</h2>
             {salons.map(salon => (
-              <div 
-                key={salon.place_id} 
-                className="salon-card"
-                onClick={() => {
-                  setSelectedSalon(salon);
-                  setShowSalonDetails(true);
-                }}
-                style={{ cursor: 'pointer' }}
-              >
-                <div className="salon-info">
-                  <h3>{salon.name}</h3>
-                  <p className="salon-type">{salon.type}</p>
-                  <p className="salon-address">{salon.vicinity}</p>
-                  <div className="salon-rating">
-                    ⭐ {salon.rating} ({salon.user_ratings_total} reviews)
+              <div key={salon.place_id} className="salon-card">
+                <div className="salon-card-content">
+                  <div className="salon-main-info">
+                    <h3>{salon.name}</h3>
+                    <p className="salon-type">{salon.type}</p>
+                    <p className="salon-address">{salon.vicinity}</p>
+                    <div className="salon-rating">
+                      ⭐ {salon.rating} ({salon.user_ratings_total} reviews)
+                    </div>
+                    <div className="salon-distance">
+                      📍 {salon.distance < 1 ? 
+                        `${Math.round(salon.distance * 1000)}m away` : 
+                        `${salon.distance.toFixed(1)}km away`
+                      }
+                    </div>
+                    <div className="salon-status">
+                      {salon.opening_hours?.open_now ? '🟢 Open' : '🔴 Closed'}
+                    </div>
+                    <div className="salon-services">
+                      Services: {salon.services.join(', ')}
+                    </div>
                   </div>
-                  <div className="salon-distance">
-                    📍 {salon.distance < 1 ? 
-                      `${Math.round(salon.distance * 1000)}m away` : 
-                      `${salon.distance.toFixed(1)}km away`
-                    }
-                  </div>
-                  <div className="salon-status">
-                    {salon.opening_hours?.open_now ? '🟢 Open' : '🔴 Closed'}
-                  </div>
-                  <div className="salon-queue">
-                    👥 Queue: {salon.queueLength} people (~{salon.waitTime} min wait)
-                  </div>
-                  <div className="salon-services">
-                    Services: {salon.services.join(', ')}
+                  
+                  <div className="salon-actions">
+                    <div className={`queue-status ${salon.queueLength <= 3 ? 'low' : salon.queueLength >= 6 ? 'high' : ''}`}>
+                      {salon.queueLength} in queue
+                    </div>
+                    <button 
+                      className="book-now-btn"
+                      onClick={() => {
+                        setSelectedSalon(salon);
+                        setSalonDetailsInitialTab('quickActions');
+                        setShowSalonDetails(true);
+                      }}
+                    >
+                      Quick Actions
+                    </button>
+                    <button 
+                      className="more-details-btn"
+                      onClick={() => {
+                        setSelectedSalon(salon);
+                        setSalonDetailsInitialTab('overview');
+                        setShowSalonDetails(true);
+                      }}
+                    >
+                      More Details
+                    </button>
                   </div>
                 </div>
               </div>
@@ -655,9 +673,11 @@ function CustomerApp() {
         {showSalonDetails && selectedSalon && (
           <SalonDetails
             salon={selectedSalon}
+            initialTab={salonDetailsInitialTab}
             onClose={() => {
               setShowSalonDetails(false);
               setSelectedSalon(null);
+              setSalonDetailsInitialTab('overview');
             }}
             onBookingComplete={(bookingData) => {
               console.log('Booking completed:', bookingData);
