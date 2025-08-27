@@ -712,7 +712,7 @@ function OwnerPortal() {
 // Main App with Routing
 function App() {
   return (
-    <Router>
+    <Router basename="/yvss">
       <div>
         <Toaster position="top-right" />
         <Routes>
