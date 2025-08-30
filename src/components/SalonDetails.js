@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { processRazorpayPayment } from '../services/paymentService';
 import { createBooking } from '../services/salonService';
+import { useRealTimeQueue } from '../hooks/useRealTimeQueue';
+import websocketService from '../services/websocketService';
+import QueueModal from './QueueModal';
 import toast from 'react-hot-toast';
 import './SalonDetails.css';
 
@@ -16,11 +19,22 @@ const SalonDetails = ({ salon, onClose, onBookingComplete, initialTab = 'overvie
     specialRequests: ''
   });
   
-  // Queue management state
-  const [isInQueue, setIsInQueue] = useState(false);
-  const [queuePosition, setQueuePosition] = useState(null);
-  const [estimatedWaitTime, setEstimatedWaitTime] = useState(null);
   const [showQueueModal, setShowQueueModal] = useState(false);
+  
+  // Generate a unique customer ID for this session
+  const [customerId] = useState(() => `customer_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
+  
+  // Use real-time queue hook
+  const {
+    queueData,
+    customerStatus,
+    isConnected,
+    joinQueue,
+    leaveQueue,
+    isCustomerInQueue,
+    customerPosition,
+    estimatedWaitTime
+  } = useRealTimeQueue(salon.place_id, 'customer', customerId);
 
   // Enhanced services based on salon type
   const getServicesForSalon = (salon) => {
@@ -136,6 +150,15 @@ const SalonDetails = ({ salon, onClose, onBookingComplete, initialTab = 'overvie
           // Continue anyway since payment was successful
         }
 
+        // Send booking to WebSocket server for real-time updates
+        if (isConnected) {
+          websocketService.createBooking({
+            ...bookingData,
+            paymentId: paymentResult.paymentData.razorpay_payment_id,
+            status: 'confirmed'
+          });
+        }
+
         toast.success('Booking confirmed! 🎉');
         onBookingComplete(bookingData);
         onClose();
@@ -147,58 +170,89 @@ const SalonDetails = ({ salon, onClose, onBookingComplete, initialTab = 'overvie
   };
 
   // Handle joining the live queue
-  const handleJoinQueue = () => {
+  const handleJoinQueueClick = () => {
     setShowQueueModal(true);
   };
 
-  // Join queue with customer details
-  const joinQueue = async (queueCustomerDetails) => {
+  // Join queue with customer details and payment
+  const handleJoinQueue = async (queueCustomerDetails) => {
     try {
       console.log('🚶‍♂️ Joining queue for salon:', salon.name);
-      
-      // Generate queue position (current queue + 1)
-      const newPosition = salon.queueLength + 1;
-      const waitTime = newPosition * 15; // Estimate 15 minutes per person
       
       // Calculate total amount and duration from selected services
       const totalAmount = queueCustomerDetails.selectedServices.reduce((total, service) => total + service.price, 0);
       const totalDuration = queueCustomerDetails.selectedServices.reduce((total, service) => total + service.duration, 0);
       
-      // Create queue entry
-      const queueEntry = {
-        id: `queue_${Date.now()}`,
+      // Create queue booking data for payment
+      const queueBookingData = {
+        id: `queue_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         salonId: salon.place_id,
         salonName: salon.name,
         customerName: queueCustomerDetails.name,
+        customerEmail: queueCustomerDetails.email || `${queueCustomerDetails.phone}@temp.com`,
         customerPhone: queueCustomerDetails.phone,
         selectedServices: queueCustomerDetails.selectedServices,
         totalAmount: totalAmount,
         totalDuration: totalDuration,
-        position: newPosition,
-        estimatedWaitTime: waitTime,
-        joinedAt: new Date().toISOString(),
-        status: 'waiting',
-        notificationPreference: queueCustomerDetails.notificationPreference
+        type: 'queue',
+        status: 'pending'
       };
 
-      // Store in localStorage for persistence
-      localStorage.setItem('currentQueue', JSON.stringify(queueEntry));
+      // Process payment first
+      console.log('💳 Processing payment for queue joining...');
+      const paymentResult = await processRazorpayPayment(queueBookingData);
       
-      // Update state
-      setIsInQueue(true);
-      setQueuePosition(newPosition);
-      setEstimatedWaitTime(waitTime);
-      setShowQueueModal(false);
-      
-      // Show success message
-      toast.success(`You're #${newPosition} in queue! We'll notify you when it's your turn.`);
-      
-      // Start queue monitoring
-      startQueueMonitoring(queueEntry);
-      
-      // Send notification permission request
-      if ('Notification' in window && Notification.permission === 'default') {
-        Notification.requestPermission();
+      if (paymentResult.success) {
+        console.log('✅ Payment successful, joining queue...');
+        
+        // Prepare queue data with payment info
+        const queueData = {
+          customerName: queueCustomerDetails.name,
+          customerPhone: queueCustomerDetails.phone,
+          customerEmail: queueCustomerDetails.email || `${queueCustomerDetails.phone}@temp.com`,
+          selectedServices: queueCustomerDetails.selectedServices,
+          totalAmount: totalAmount,
+          totalDuration: totalDuration,
+          paymentId: paymentResult.paymentData.razorpay_payment_id,
+          bookingId: queueBookingData.id,
+          notificationPreference: queueCustomerDetails.notificationPreference || 'both'
+        };
+
+        // Use the real-time queue hook
+        const success = await joinQueue(queueData);
+        
+        if (success) {
+          setShowQueueModal(false);
+          
+          // Save to ongoing bookings
+          const queueBooking = {
+            id: queueBookingData.id,
+            ...queueBookingData,
+            paymentId: paymentResult.paymentData.razorpay_payment_id,
+            status: 'in_queue',
+            queuePosition: customerPosition || 1,
+            estimatedWaitTime: estimatedWaitTime || 15,
+            createdAt: new Date().toISOString(),
+            type: 'queue'
+          };
+          
+          // Save to localStorage for ongoing bookings
+          const existingBookings = JSON.parse(localStorage.getItem('userBookings') || '[]');
+          const updatedBookings = [...existingBookings, queueBooking];
+          localStorage.setItem('userBookings', JSON.stringify(updatedBookings));
+          
+          // Send to WebSocket for real-time updates
+          if (isConnected) {
+            websocketService.createBooking(queueBooking);
+          }
+          
+          toast.success('Payment successful! You\'re now in the queue! 🎉');
+          
+          // Request notification permission
+          if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+          }
+        }
       }
       
     } catch (error) {
@@ -223,8 +277,9 @@ const SalonDetails = ({ salon, onClose, onBookingComplete, initialTab = 'overvie
           currentQueue.estimatedWaitTime = newWaitTime;
           localStorage.setItem('currentQueue', JSON.stringify(currentQueue));
           
-          setQueuePosition(newPosition);
-          setEstimatedWaitTime(newWaitTime);
+          // Position and wait time are managed by the real-time queue hook
+          // setQueuePosition(newPosition);
+          // setEstimatedWaitTime(newWaitTime);
           
           // Notify about position change
           if (newPosition <= 3) {
@@ -267,25 +322,26 @@ const SalonDetails = ({ salon, onClose, onBookingComplete, initialTab = 'overvie
   };
 
   // Leave queue
-  const leaveQueue = () => {
-    localStorage.removeItem('currentQueue');
-    localStorage.removeItem('queueMonitorId');
-    setIsInQueue(false);
-    setQueuePosition(null);
-    setEstimatedWaitTime(null);
-    toast.success('You have left the queue.');
+  const handleLeaveQueue = async () => {
+    try {
+      const success = await leaveQueue();
+      if (success) {
+        // Additional cleanup if needed
+        localStorage.removeItem('queueMonitorId');
+      }
+    } catch (error) {
+      console.error('Failed to leave queue:', error);
+      toast.error('Failed to leave queue. Please try again.');
+    }
   };
 
   // Check if user is already in queue on component mount
   React.useEffect(() => {
-    const currentQueue = JSON.parse(localStorage.getItem('currentQueue') || '{}');
-    if (currentQueue.salonId === salon.place_id) {
-      setIsInQueue(true);
-      setQueuePosition(currentQueue.position);
-      setEstimatedWaitTime(currentQueue.estimatedWaitTime);
-      
-      // Resume monitoring
-      startQueueMonitoring(currentQueue);
+    const stored = JSON.parse(localStorage.getItem('queueStatus') || '{}');
+    if (stored.salonId === salon.place_id && stored.customerId) {
+      // use hook's state setters via dispatch events already handled in hook
+      // We only need to display using hook's exposed values
+      // No direct local setters here
     }
   }, [salon.place_id]);
 
@@ -347,8 +403,9 @@ const SalonDetails = ({ salon, onClose, onBookingComplete, initialTab = 'overvie
                 </div>
                 <div className="info-card">
                   <h3>⏰ Current Status</h3>
-                  <p>Queue: {salon.queueLength} people</p>
-                  <p>Wait time: ~{salon.waitTime} minutes</p>
+                  <p>Queue: {queueData.currentQueue || salon.queueLength} people</p>
+                  <p>Wait time: ~{queueData.estimatedWaitTime || salon.waitTime} minutes</p>
+                  {isConnected && <p className="live-indicator">🔴 Live Updates</p>}
                 </div>
                 <div className="info-card">
                   <h3>💰 Price Range</h3>
@@ -372,9 +429,9 @@ const SalonDetails = ({ salon, onClose, onBookingComplete, initialTab = 'overvie
                   </button>
                   <button 
                     className="join-queue-btn"
-                    onClick={() => handleJoinQueue()}
+                    onClick={handleJoinQueueClick}
                   >
-                    🚶‍♂️ Join Live Queue ({salon.queueLength} people)
+                    🚶‍♂️ Join Live Queue ({queueData.currentQueue || salon.queueLength} people)
                   </button>
                   <CallSalonButton salon={salon} />
                   <DirectionsButton salon={salon} />
@@ -409,23 +466,23 @@ const SalonDetails = ({ salon, onClose, onBookingComplete, initialTab = 'overvie
                     <h4>Join Live Queue</h4>
                     <p>Get in line virtually</p>
                     <div className="queue-stats">
-                      <span className="queue-count">{salon.queueLength} people ahead</span>
-                      <span className="wait-time">~{salon.waitTime} min wait</span>
+                      <span className="queue-count">{queueData.currentQueue || salon.queueLength} people ahead</span>
+                      <span className="wait-time">~{queueData.estimatedWaitTime || salon.waitTime} min wait</span>
                     </div>
-                    {!isInQueue ? (
+                    {!isCustomerInQueue ? (
                       <button 
                         className="join-queue-btn"
-                        onClick={() => handleJoinQueue()}
+                        onClick={handleJoinQueueClick}
                       >
                         Join Queue Now
                       </button>
                     ) : (
                       <div className="in-queue-status">
-                        <p className="queue-position">You're #{queuePosition} in queue</p>
+                        <p className="queue-position">You're #{customerPosition} in queue</p>
                         <p className="estimated-time">~{estimatedWaitTime} min remaining</p>
                         <button 
                           className="leave-queue-btn"
-                          onClick={leaveQueue}
+                          onClick={handleLeaveQueue}
                         >
                           Leave Queue
                         </button>
@@ -706,12 +763,12 @@ const SalonDetails = ({ salon, onClose, onBookingComplete, initialTab = 'overvie
         </div>
 
         {/* Queue Status Display */}
-        {isInQueue && (
+        {isCustomerInQueue && (
           <div className="queue-status-banner">
             <div className="queue-status-content">
               <h4>🚶‍♂️ You're in Queue!</h4>
               <div className="queue-info">
-                <span className="position">Position: #{queuePosition}</span>
+                <span className="position">Position: #{customerPosition}</span>
                 <span className="wait-time">Est. Wait: {estimatedWaitTime} min</span>
                 <button 
                   className="leave-queue-btn"
@@ -726,9 +783,10 @@ const SalonDetails = ({ salon, onClose, onBookingComplete, initialTab = 'overvie
 
         {/* Queue Join Modal */}
         {showQueueModal && (
-          <QueueJoinModal
+          <QueueModal
             salon={salon}
-            onJoin={joinQueue}
+            services={services}
+            onJoinQueue={handleJoinQueue}
             onClose={() => setShowQueueModal(false)}
           />
         )}
@@ -737,202 +795,7 @@ const SalonDetails = ({ salon, onClose, onBookingComplete, initialTab = 'overvie
   );
 };
 
-// Queue Join Modal Component
-const QueueJoinModal = ({ salon, onJoin, onClose }) => {
-  const [queueDetails, setQueueDetails] = useState({
-    name: '',
-    phone: '',
-    notificationPreference: 'browser',
-    selectedServices: []
-  });
-
-  // Get services for this salon
-  const getServicesForSalon = (salon) => {
-    const baseServices = {
-      'Beauty Salon': [
-        { id: 1, name: 'Haircut & Styling', duration: 45, price: 500, description: 'Professional haircut with styling' },
-        { id: 2, name: 'Hair Wash & Blow Dry', duration: 30, price: 300, description: 'Deep cleansing and styling' },
-        { id: 3, name: 'Facial Treatment', duration: 60, price: 800, description: 'Deep cleansing facial with mask' },
-        { id: 4, name: 'Eyebrow Threading', duration: 15, price: 150, description: 'Precise eyebrow shaping' },
-        { id: 5, name: 'Manicure', duration: 45, price: 400, description: 'Complete nail care and polish' },
-        { id: 6, name: 'Pedicure', duration: 60, price: 600, description: 'Foot care and nail polish' }
-      ],
-      'Barber Shop': [
-        { id: 1, name: 'Classic Haircut', duration: 30, price: 300, description: 'Traditional men\'s haircut' },
-        { id: 2, name: 'Beard Trim & Style', duration: 20, price: 200, description: 'Professional beard grooming' },
-        { id: 3, name: 'Hot Towel Shave', duration: 30, price: 350, description: 'Traditional wet shave experience' },
-        { id: 4, name: 'Hair Wash & Style', duration: 25, price: 250, description: 'Shampoo and styling' },
-        { id: 5, name: 'Mustache Trim', duration: 10, price: 100, description: 'Precise mustache grooming' }
-      ],
-      'Spa & Salon': [
-        { id: 1, name: 'Luxury Haircut', duration: 60, price: 800, description: 'Premium haircut with consultation' },
-        { id: 2, name: 'Deep Tissue Massage', duration: 90, price: 1500, description: 'Therapeutic full body massage' },
-        { id: 3, name: 'Aromatherapy Facial', duration: 75, price: 1200, description: 'Relaxing facial with essential oils' },
-        { id: 4, name: 'Body Spa Package', duration: 120, price: 2500, description: 'Complete body treatment' },
-        { id: 5, name: 'Hair Spa Treatment', duration: 90, price: 1000, description: 'Deep conditioning hair treatment' }
-      ],
-      'Unisex Salon': [
-        { id: 1, name: 'Haircut (Men/Women)', duration: 45, price: 400, description: 'Professional unisex haircut' },
-        { id: 2, name: 'Hair Coloring', duration: 120, price: 1200, description: 'Professional hair coloring service' },
-        { id: 3, name: 'Facial Treatment', duration: 60, price: 700, description: 'Suitable for all skin types' },
-        { id: 4, name: 'Threading & Waxing', duration: 30, price: 300, description: 'Hair removal services' },
-        { id: 5, name: 'Bridal Package', duration: 180, price: 3000, description: 'Complete bridal makeover' }
-      ]
-    };
-
-    return baseServices[salon.type] || baseServices['Beauty Salon'];
-  };
-
-  const services = getServicesForSalon(salon);
-
-  const handleServiceToggle = (service) => {
-    const isSelected = queueDetails.selectedServices.find(s => s.id === service.id);
-    if (isSelected) {
-      setQueueDetails({
-        ...queueDetails,
-        selectedServices: queueDetails.selectedServices.filter(s => s.id !== service.id)
-      });
-    } else {
-      setQueueDetails({
-        ...queueDetails,
-        selectedServices: [...queueDetails.selectedServices, service]
-      });
-    }
-  };
-
-  const getTotalAmount = () => {
-    return queueDetails.selectedServices.reduce((total, service) => total + service.price, 0);
-  };
-
-  const getTotalDuration = () => {
-    return queueDetails.selectedServices.reduce((total, service) => total + service.duration, 0);
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    if (!queueDetails.name || !queueDetails.phone) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
-
-    if (queueDetails.selectedServices.length === 0) {
-      toast.error('Please select at least one service');
-      return;
-    }
-
-    onJoin(queueDetails);
-  };
-
-  return (
-    <div className="queue-modal-overlay">
-      <div className="queue-modal">
-        <div className="queue-modal-header">
-          <h3>🚶‍♂️ Join Queue at {salon.name}</h3>
-          <button className="close-btn" onClick={onClose}>×</button>
-        </div>
-        
-        <div className="queue-modal-content">
-          <div className="queue-info-display">
-            <p><strong>Current Queue:</strong> {salon.queueLength} people</p>
-            <p><strong>Your Position:</strong> #{salon.queueLength + 1}</p>
-            <p><strong>Estimated Wait:</strong> ~{(salon.queueLength + 1) * 15} minutes</p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="queue-form">
-            {/* Service Selection */}
-            <div className="queue-services-section">
-              <h4>Select Services *</h4>
-              <div className="queue-services-grid">
-                {services.map(service => (
-                  <div 
-                    key={service.id}
-                    className={`queue-service-card ${queueDetails.selectedServices.find(s => s.id === service.id) ? 'selected' : ''}`}
-                    onClick={() => handleServiceToggle(service)}
-                  >
-                    <div className="queue-service-info">
-                      <h5>{service.name}</h5>
-                      <div className="queue-service-meta">
-                        <span className="queue-service-price">₹{service.price}</span>
-                        <span className="queue-service-duration">{service.duration} min</span>
-                      </div>
-                    </div>
-                    <div className="queue-service-checkbox">
-                      {queueDetails.selectedServices.find(s => s.id === service.id) ? '✅' : '⭕'}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              
-              {queueDetails.selectedServices.length > 0 && (
-                <div className="queue-selection-summary">
-                  <div className="queue-summary-info">
-                    <p><strong>Selected:</strong> {queueDetails.selectedServices.length} service(s)</p>
-                    <p><strong>Total Duration:</strong> {getTotalDuration()} minutes</p>
-                    <p><strong>Total Amount:</strong> ₹{getTotalAmount()}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="form-group">
-              <label>Your Name *</label>
-              <input
-                type="text"
-                value={queueDetails.name}
-                onChange={(e) => setQueueDetails({...queueDetails, name: e.target.value})}
-                placeholder="Enter your name"
-                required
-              />
-            </div>
-            
-            <div className="form-group">
-              <label>Phone Number *</label>
-              <input
-                type="tel"
-                value={queueDetails.phone}
-                onChange={(e) => setQueueDetails({...queueDetails, phone: e.target.value})}
-                placeholder="Enter your phone number"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Notification Preference</label>
-              <select
-                value={queueDetails.notificationPreference}
-                onChange={(e) => setQueueDetails({...queueDetails, notificationPreference: e.target.value})}
-              >
-                <option value="browser">Browser Notifications</option>
-                <option value="sms">SMS (Coming Soon)</option>
-                <option value="both">Both (Coming Soon)</option>
-              </select>
-            </div>
-
-            <div className="queue-benefits">
-              <h4>✨ Queue Benefits:</h4>
-              <ul>
-                <li>🔔 Real-time position updates</li>
-                <li>📱 Instant notifications when it's your turn</li>
-                <li>⏰ Accurate wait time estimates</li>
-                <li>🚶‍♂️ No need to wait physically at the salon</li>
-              </ul>
-            </div>
-
-            <div className="queue-modal-actions">
-              <button type="button" onClick={onClose} className="cancel-btn">
-                Cancel
-              </button>
-              <button type="submit" className="join-queue-submit-btn">
-                Join Queue {queueDetails.selectedServices.length > 0 ? `(₹${getTotalAmount()})` : ''}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  );
-};
+// Queue Join Modal Component - Replaced with separate QueueModal component
 
 // Reviews Tab Component
 const ReviewsTab = ({ salon }) => {

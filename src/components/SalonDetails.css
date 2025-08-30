@@ -249,11 +249,15 @@
 
 .quick-book-section h3 {
   margin: 0 0 20px 0;
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 22px;
+  font-weight: 700;
   color: #ffffff;
-  letter-spacing: -0.022em;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  letter-spacing: -0.02em;
+  font-family: 'Playfair Display', serif;
+  background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .quick-actions {
@@ -280,7 +284,7 @@
   text-decoration: none;
   min-width: 140px;
   justify-content: center;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  font-family: 'Inter', sans-serif;
   position: relative;
   overflow: hidden;
   flex-direction: column;
@@ -1751,5 +1755,283 @@ Actions Tab Styles */
   
   .quick-action-card h4 {
     font-size: 18px;
+  }
+}/
+* Real-time status indicators */
+.live-indicator {
+  color: #28a745 !important;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.live-status {
+  color: #28a745;
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 8px;
+  padding: 4px 8px;
+  background: rgba(40, 167, 69, 0.1);
+  border-radius: 12px;
+  border: 1px solid #28a745;
+}
+
+.offline-status {
+  color: #ffc107;
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 8px;
+  padding: 4px 8px;
+  background: rgba(255, 193, 7, 0.1);
+  border-radius: 12px;
+  border: 1px solid #ffc107;
+}
+
+/* Queue status banner enhancements */
+.queue-status-banner {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+  padding: 16px 24px;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(40, 167, 69, 0.3);
+  z-index: 1000;
+  min-width: 300px;
+  text-align: center;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateX(-50%) translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+.queue-status-content h4 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.queue-status-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.queue-position-info {
+  text-align: left;
+}
+
+.queue-position-number {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.queue-position-label {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.queue-time-info {
+  text-align: right;
+}
+
+.queue-time-number {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.queue-time-label {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.queue-status-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.queue-action-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.queue-action-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.queue-action-btn.leave {
+  background: rgba(220, 53, 69, 0.8);
+  border-color: rgba(220, 53, 69, 0.9);
+}
+
+.queue-action-btn.leave:hover {
+  background: rgba(220, 53, 69, 0.9);
+}
+
+/* Connection status indicator */
+.connection-status {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+.connection-status.connected {
+  background: rgba(40, 167, 69, 0.1);
+  color: #28a745;
+  border: 1px solid #28a745;
+}
+
+.connection-status.disconnected {
+  background: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+  border: 1px solid #dc3545;
+}
+
+.connection-status.connecting {
+  background: rgba(255, 193, 7, 0.1);
+  color: #ffc107;
+  border: 1px solid #ffc107;
+}
+
+/* Pulse animation for live updates */
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.live-indicator::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: #28a745;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+  margin-right: 4px;
+}
+
+/* Enhanced queue modal */
+.queue-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.queue-modal {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.queue-modal-header {
+  padding: 24px 24px 0 24px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 24px;
+}
+
+.queue-modal-header h3 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+.queue-modal-header p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.queue-modal-content {
+  padding: 0 24px 24px 24px;
+}
+
+.queue-info-display {
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.queue-info-display p {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.queue-info-display p:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive design for queue features */
+@media (max-width: 768px) {
+  .queue-status-banner {
+    left: 20px;
+    right: 20px;
+    transform: none;
+    min-width: auto;
+  }
+  
+  .queue-status-details {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+  
+  .connection-status {
+    top: 10px;
+    right: 10px;
+    font-size: 11px;
+    padding: 6px 10px;
   }
 }

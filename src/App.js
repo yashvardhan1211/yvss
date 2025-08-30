@@ -12,19 +12,87 @@ function CustomerApp() {
   const [userLocation, setUserLocation] = useState(null);
   const [locationName, setLocationName] = useState('');
   const [salons, setSalons] = useState([]);
+  const [filteredSalons, setFilteredSalons] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [loadingStatus, setLoadingStatus] = useState('');
   const [selectedSalon, setSelectedSalon] = useState(null);
   const [showSalonDetails, setShowSalonDetails] = useState(false);
   const [salonDetailsInitialTab, setSalonDetailsInitialTab] = useState('overview');
+  
+  // New state for filtering and sorting
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('distance');
+  const [filterByService, setFilterByService] = useState('all');
+  const [filterByRating, setFilterByRating] = useState('all');
+  const [filterByPrice, setFilterByPrice] = useState('all');
+  const [showFilters, setShowFilters] = useState(false);
+  
+  // Bookings state
+  const [userBookings, setUserBookings] = useState([]);
+  const [showBookings, setShowBookings] = useState(false);
 
-  // Initialize map when salons are loaded
+  // Map removed for cleaner design
+
+  // Filter and sort salons when criteria change
   useEffect(() => {
-    if (salons.length > 0 && userLocation) {
-      initializeMap(salons, userLocation);
+    let filtered = [...salons];
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      filtered = filtered.filter(salon =>
+        salon.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        salon.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        salon.vicinity.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        salon.services.some(service => 
+          service.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      );
     }
-  }, [salons, userLocation]);
+
+    // Apply service filter
+    if (filterByService !== 'all') {
+      filtered = filtered.filter(salon =>
+        salon.services.some(service =>
+          service.toLowerCase().includes(filterByService.toLowerCase())
+        )
+      );
+    }
+
+    // Apply rating filter
+    if (filterByRating !== 'all') {
+      const minRating = parseFloat(filterByRating);
+      filtered = filtered.filter(salon => salon.rating >= minRating);
+    }
+
+    // Apply price filter
+    if (filterByPrice !== 'all') {
+      const priceLevel = parseInt(filterByPrice);
+      filtered = filtered.filter(salon => salon.price_level === priceLevel);
+    }
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'distance':
+          return a.distance - b.distance;
+        case 'rating':
+          return b.rating - a.rating;
+        case 'price_low':
+          return (a.price_level || 2) - (b.price_level || 2);
+        case 'price_high':
+          return (b.price_level || 2) - (a.price_level || 2);
+        case 'queue':
+          return a.queueLength - b.queueLength;
+        case 'name':
+          return a.name.localeCompare(b.name);
+        default:
+          return 0;
+      }
+    });
+
+    setFilteredSalons(filtered);
+  }, [salons, searchQuery, sortBy, filterByService, filterByRating, filterByPrice]);
 
   // Get user's current location
   const getCurrentLocation = () => {
@@ -474,6 +542,9 @@ function CustomerApp() {
         setSalons(results);
         console.log(`✅ Successfully loaded ${results.length} salons`);
         setLoadingStatus('');
+        
+        // Load user bookings from localStorage
+        loadUserBookings();
       } else {
         throw new Error('No salons found in your area. Try a different location.');
       }
@@ -547,6 +618,9 @@ function CustomerApp() {
         setSalons(results);
         console.log(`✅ Successfully loaded ${results.length} salons`);
         setLoadingStatus('');
+        
+        // Load user bookings from localStorage
+        loadUserBookings();
       } else {
         throw new Error('No salons found in this area. Try a different location.');
       }
@@ -558,6 +632,75 @@ function CustomerApp() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Load user bookings from localStorage
+  const loadUserBookings = () => {
+    try {
+      const savedBookings = localStorage.getItem('userBookings');
+      if (savedBookings) {
+        const bookings = JSON.parse(savedBookings);
+        setUserBookings(bookings);
+      }
+    } catch (error) {
+      console.error('Failed to load bookings:', error);
+    }
+  };
+
+  // Save booking to localStorage
+  const saveBooking = (bookingData) => {
+    try {
+      const booking = {
+        id: `booking_${Date.now()}`,
+        ...bookingData,
+        status: 'confirmed',
+        createdAt: new Date().toISOString(),
+        type: bookingData.type || 'appointment' // 'appointment' or 'queue'
+      };
+
+      const updatedBookings = [...userBookings, booking];
+      setUserBookings(updatedBookings);
+      localStorage.setItem('userBookings', JSON.stringify(updatedBookings));
+      
+      return booking;
+    } catch (error) {
+      console.error('Failed to save booking:', error);
+      return null;
+    }
+  };
+
+  // Update booking status
+  const updateBookingStatus = (bookingId, newStatus) => {
+    try {
+      const updatedBookings = userBookings.map(booking =>
+        booking.id === bookingId
+          ? { ...booking, status: newStatus, updatedAt: new Date().toISOString() }
+          : booking
+      );
+      
+      setUserBookings(updatedBookings);
+      localStorage.setItem('userBookings', JSON.stringify(updatedBookings));
+    } catch (error) {
+      console.error('Failed to update booking:', error);
+    }
+  };
+
+  // Get all available services from salons
+  const getAllServices = () => {
+    const allServices = new Set();
+    salons.forEach(salon => {
+      salon.services.forEach(service => allServices.add(service));
+    });
+    return Array.from(allServices).sort();
+  };
+
+  // Clear all filters
+  const clearFilters = () => {
+    setSearchQuery('');
+    setSortBy('distance');
+    setFilterByService('all');
+    setFilterByRating('all');
+    setFilterByPrice('all');
   };
 
   // Render location setup if no location
@@ -584,20 +727,119 @@ function CustomerApp() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>🗺️ Real Salon Finder</h1>
+        <h1>✨ Salon Finder</h1>
         <p>📍 {locationName}</p>
         <div className="header-actions">
+          <button 
+            onClick={() => setShowBookings(true)}
+            className="bookings-btn"
+          >
+            📋 My Bookings ({userBookings.length})
+          </button>
           <button 
             onClick={() => setUserLocation(null)}
             className="change-location-btn"
           >
-            Change Location
+            📍 Change Location
           </button>
           <Link to="/owner" className="owner-link-header">
             💼 Owner Dashboard
           </Link>
         </div>
       </header>
+
+      {/* Search and Filter Bar */}
+      <div className="search-filter-bar">
+        <div className="search-section">
+          <div className="search-input-container">
+            <input
+              type="text"
+              placeholder="Search salons, services, or areas..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="search-input"
+            />
+            <span className="search-icon">🔍</span>
+          </div>
+        </div>
+
+        <div className="filter-section">
+          <button 
+            onClick={() => setShowFilters(!showFilters)}
+            className={`filter-toggle-btn ${showFilters ? 'active' : ''}`}
+          >
+            🔧 Filters {(filterByService !== 'all' || filterByRating !== 'all' || filterByPrice !== 'all') && '●'}
+          </button>
+
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="sort-select"
+          >
+            <option value="distance">📍 Sort by Distance</option>
+            <option value="rating">⭐ Sort by Rating</option>
+            <option value="price_low">💰 Price: Low to High</option>
+            <option value="price_high">💰 Price: High to Low</option>
+            <option value="queue">👥 Shortest Queue</option>
+            <option value="name">🔤 Sort by Name</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Advanced Filters */}
+      {showFilters && (
+        <div className="advanced-filters">
+          <div className="filter-row">
+            <div className="filter-group">
+              <label>Service:</label>
+              <select
+                value={filterByService}
+                onChange={(e) => setFilterByService(e.target.value)}
+                className="filter-select"
+              >
+                <option value="all">All Services</option>
+                {getAllServices().map(service => (
+                  <option key={service} value={service}>{service}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="filter-group">
+              <label>Rating:</label>
+              <select
+                value={filterByRating}
+                onChange={(e) => setFilterByRating(e.target.value)}
+                className="filter-select"
+              >
+                <option value="all">Any Rating</option>
+                <option value="4.5">4.5+ Stars</option>
+                <option value="4.0">4.0+ Stars</option>
+                <option value="3.5">3.5+ Stars</option>
+                <option value="3.0">3.0+ Stars</option>
+              </select>
+            </div>
+
+            <div className="filter-group">
+              <label>Price Range:</label>
+              <select
+                value={filterByPrice}
+                onChange={(e) => setFilterByPrice(e.target.value)}
+                className="filter-select"
+              >
+                <option value="all">Any Price</option>
+                <option value="1">💰 Budget</option>
+                <option value="2">💰💰 Moderate</option>
+                <option value="3">💰💰💰 Premium</option>
+                <option value="4">💰💰💰💰 Luxury</option>
+              </select>
+            </div>
+
+            <button onClick={clearFilters} className="clear-filters-btn">
+              🗑️ Clear All
+            </button>
+          </div>
+        </div>
+      )}
 
       <main className="app-main">
         {loading && (
@@ -609,8 +851,18 @@ function CustomerApp() {
 
         <div className="main-content">
           <div className="salon-list">
-            <h2>Nearby Salons ({salons.length})</h2>
-            {salons.map(salon => (
+            <div className="salon-list-header">
+              <h2>
+                {searchQuery || filterByService !== 'all' || filterByRating !== 'all' || filterByPrice !== 'all'
+                  ? `Found ${filteredSalons.length} salons`
+                  : `Nearby Salons (${salons.length})`
+                }
+              </h2>
+              {filteredSalons.length === 0 && salons.length > 0 && (
+                <p className="no-results">No salons match your criteria. Try adjusting your filters.</p>
+              )}
+            </div>
+            {(filteredSalons.length > 0 ? filteredSalons : salons).map(salon => (
               <div key={salon.place_id} className="salon-card">
                 <div className="salon-card-content">
                   <div className="salon-main-info">
@@ -664,9 +916,7 @@ function CustomerApp() {
             ))}
           </div>
           
-          <div className="map-container">
-            <div id="salon-map" className="salon-map"></div>
-          </div>
+          {/* Map removed for cleaner design */}
         </div>
 
         {/* Salon Details Modal */}
@@ -681,8 +931,22 @@ function CustomerApp() {
             }}
             onBookingComplete={(bookingData) => {
               console.log('Booking completed:', bookingData);
-              // You can add additional logic here like updating the salon queue
+              // Save the booking
+              const savedBooking = saveBooking(bookingData);
+              if (savedBooking) {
+                console.log('Booking saved:', savedBooking);
+              }
             }}
+          />
+        )}
+
+        {/* My Bookings Modal */}
+        {showBookings && (
+          <MyBookingsModal
+            bookings={userBookings}
+            onClose={() => setShowBookings(false)}
+            onUpdateBooking={updateBookingStatus}
+            salons={salons}
           />
         )}
       </main>
@@ -724,6 +988,288 @@ function App() {
         </Routes>
       </div>
     </Router>
+  );
+}
+
+// My Bookings Modal Component
+function MyBookingsModal({ bookings, onClose, onUpdateBooking, salons }) {
+  const [activeTab, setActiveTab] = useState('ongoing');
+
+  const ongoingBookings = bookings.filter(booking => 
+    booking.status === 'confirmed' || booking.status === 'in_progress' || booking.status === 'waiting' || booking.status === 'in_queue'
+  );
+
+  const completedBookings = bookings.filter(booking => 
+    booking.status === 'completed' || booking.status === 'cancelled'
+  );
+
+  const getSalonName = (salonId) => {
+    const salon = salons.find(s => s.place_id === salonId);
+    return salon ? salon.name : 'Unknown Salon';
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'confirmed': return '#28a745';
+      case 'in_progress': return '#007bff';
+      case 'waiting': return '#ffc107';
+      case 'in_queue': return '#17a2b8';
+      case 'completed': return '#6c757d';
+      case 'cancelled': return '#dc3545';
+      default: return '#6c757d';
+    }
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'confirmed': return '✅';
+      case 'in_progress': return '🔄';
+      case 'waiting': return '⏳';
+      case 'in_queue': return '🚶‍♂️';
+      case 'completed': return '✨';
+      case 'cancelled': return '❌';
+      default: return '📋';
+    }
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString() + ' at ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const calculateTotal = (services) => {
+    if (!services || !Array.isArray(services)) return 0;
+    return services.reduce((total, service) => total + (service.price || 0), 0);
+  };
+
+  return (
+    <div className="bookings-modal-overlay">
+      <div className="bookings-modal">
+        <div className="bookings-modal-header">
+          <h2>📋 My Bookings</h2>
+          <button onClick={onClose} className="close-modal-btn">×</button>
+        </div>
+
+        <div className="bookings-tabs">
+          <button 
+            className={`bookings-tab ${activeTab === 'ongoing' ? 'active' : ''}`}
+            onClick={() => setActiveTab('ongoing')}
+          >
+            🔄 Ongoing ({ongoingBookings.length})
+          </button>
+          <button 
+            className={`bookings-tab ${activeTab === 'completed' ? 'active' : ''}`}
+            onClick={() => setActiveTab('completed')}
+          >
+            ✨ History ({completedBookings.length})
+          </button>
+        </div>
+
+        <div className="bookings-content">
+          {activeTab === 'ongoing' && (
+            <div className="bookings-list">
+              {ongoingBookings.length === 0 ? (
+                <div className="no-bookings">
+                  <div className="no-bookings-icon">📅</div>
+                  <h3>No ongoing bookings</h3>
+                  <p>Your current appointments and queue entries will appear here.</p>
+                </div>
+              ) : (
+                ongoingBookings.map(booking => (
+                  <div key={booking.id} className="booking-card">
+                    <div className="booking-header">
+                      <div className="booking-salon">
+                        <h3>{getSalonName(booking.salonId)}</h3>
+                        <p className="booking-type">
+                          {booking.type === 'queue' ? '👥 Queue Entry' : '📅 Appointment'}
+                        </p>
+                      </div>
+                      <div className="booking-status">
+                        <span 
+                          className="status-badge"
+                          style={{ backgroundColor: getStatusColor(booking.status) }}
+                        >
+                          {getStatusIcon(booking.status)} {booking.status}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="booking-details">
+                      <div className="booking-info">
+                        <div className="info-item">
+                          <span className="label">Customer:</span>
+                          <span className="value">{booking.customerName}</span>
+                        </div>
+                        <div className="info-item">
+                          <span className="label">Phone:</span>
+                          <span className="value">{booking.customerPhone}</span>
+                        </div>
+                        {booking.preferredTime && (
+                          <div className="info-item">
+                            <span className="label">Time:</span>
+                            <span className="value">{booking.preferredTime}</span>
+                          </div>
+                        )}
+                        <div className="info-item">
+                          <span className="label">Booked:</span>
+                          <span className="value">{formatDate(booking.createdAt)}</span>
+                        </div>
+                        {booking.type === 'queue' && (
+                          <>
+                            <div className="info-item queue-position">
+                              <span className="label">Queue Position:</span>
+                              <span className="value queue-number">#{booking.queuePosition || 'Updating...'}</span>
+                            </div>
+                            <div className="info-item queue-wait">
+                              <span className="label">Est. Wait Time:</span>
+                              <span className="value">~{booking.estimatedWaitTime || 15} minutes</span>
+                            </div>
+                          </>
+                        )}
+                      </div>
+
+                      <div className="booking-services">
+                        <h4>Services:</h4>
+                        <div className="services-list">
+                          {booking.selectedServices?.map((service, index) => (
+                            <div key={index} className="service-item">
+                              <span className="service-name">{service.name}</span>
+                              <span className="service-price">₹{service.price}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="booking-total">
+                        <strong>Total: ₹{booking.totalAmount || calculateTotal(booking.selectedServices)}</strong>
+                      </div>
+
+                      {booking.specialRequests && (
+                        <div className="booking-notes">
+                          <h4>Special Requests:</h4>
+                          <p>{booking.specialRequests}</p>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="booking-actions">
+                      {booking.status === 'confirmed' && (
+                        <button 
+                          onClick={() => onUpdateBooking(booking.id, 'cancelled')}
+                          className="cancel-booking-btn"
+                        >
+                          ❌ Cancel Booking
+                        </button>
+                      )}
+                      {booking.paymentId && (
+                        <div className="payment-info">
+                          💳 Payment ID: {booking.paymentId.slice(-8)}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
+          {activeTab === 'completed' && (
+            <div className="bookings-list">
+              {completedBookings.length === 0 ? (
+                <div className="no-bookings">
+                  <div className="no-bookings-icon">📜</div>
+                  <h3>No booking history</h3>
+                  <p>Your completed and cancelled bookings will appear here.</p>
+                </div>
+              ) : (
+                completedBookings.map(booking => (
+                  <div key={booking.id} className="booking-card completed">
+                    <div className="booking-header">
+                      <div className="booking-salon">
+                        <h3>{getSalonName(booking.salonId)}</h3>
+                        <p className="booking-type">
+                          {booking.type === 'queue' ? '👥 Queue Entry' : '📅 Appointment'}
+                        </p>
+                      </div>
+                      <div className="booking-status">
+                        <span 
+                          className="status-badge"
+                          style={{ backgroundColor: getStatusColor(booking.status) }}
+                        >
+                          {getStatusIcon(booking.status)} {booking.status}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="booking-details">
+                      <div className="booking-info">
+                        <div className="info-item">
+                          <span className="label">Customer:</span>
+                          <span className="value">{booking.customerName}</span>
+                        </div>
+                        <div className="info-item">
+                          <span className="label">Date:</span>
+                          <span className="value">{formatDate(booking.createdAt)}</span>
+                        </div>
+                        {booking.updatedAt && booking.updatedAt !== booking.createdAt && (
+                          <div className="info-item">
+                            <span className="label">
+                              {booking.status === 'completed' ? 'Completed:' : 'Updated:'}
+                            </span>
+                            <span className="value">{formatDate(booking.updatedAt)}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="booking-services">
+                        <h4>Services:</h4>
+                        <div className="services-list">
+                          {booking.selectedServices?.map((service, index) => (
+                            <div key={index} className="service-item">
+                              <span className="service-name">{service.name}</span>
+                              <span className="service-price">₹{service.price}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="booking-total">
+                        <strong>Total: ₹{booking.totalAmount || calculateTotal(booking.selectedServices)}</strong>
+                      </div>
+
+                      {booking.paymentId && (
+                        <div className="payment-info">
+                          💳 Payment ID: {booking.paymentId}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="booking-actions">
+                      {booking.status === 'completed' && (
+                        <button 
+                          onClick={() => {
+                            // Find the salon and open it for rebooking
+                            const salon = salons.find(s => s.place_id === booking.salonId);
+                            if (salon) {
+                              onClose();
+                              // This would trigger opening the salon details
+                              // You might need to pass this up to the parent component
+                            }
+                          }}
+                          className="rebook-btn"
+                        >
+                          🔄 Book Again
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 

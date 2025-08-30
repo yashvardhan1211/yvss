@@ -6,6 +6,7 @@
   justify-content: center;
   padding: 20px;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  color: #1d1d1f; /* Override global dark theme */
 }
 
 .login-container {
@@ -17,6 +18,11 @@
   width: 100%;
   max-width: 400px;
   animation: slideUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  color: #1d1d1f; /* Ensure all text is dark */
+}
+
+.login-container * {
+  color: inherit; /* Inherit the dark color */
 }
 
 @keyframes slideUp {
@@ -74,14 +80,26 @@
   font-size: 16px;
   transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   box-sizing: border-box;
-  background: white;
+  background: white !important;
+  color: #1d1d1f !important;
+  font-family: inherit;
+  -webkit-text-fill-color: #1d1d1f !important; /* For Safari */
+}
+
+.form-group input::placeholder {
+  color: #86868b !important;
+  opacity: 1;
 }
 
 .form-group input:focus {
   outline: none;
   border-color: #007aff;
   box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+  background: white !important;
+  color: #1d1d1f !important;
 }
+
+
 
 .login-btn {
   width: 100%;
