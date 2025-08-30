@@ -73,8 +73,9 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.8);
   font-size: 14px;
+  font-weight: 500;
   transition: all 0.3s ease;
 }
 
@@ -103,7 +104,18 @@
 
 .queue-modal-content {
   padding: 20px;
-  color: white;
+  color: #ffffff;
+}
+
+.queue-modal-content p,
+.queue-modal-content span,
+.queue-modal-content div {
+  color: #ffffff;
+}
+
+.queue-modal-content .text-muted {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 500;
 }
 
 .service-selection h3,
@@ -114,13 +126,15 @@
 }
 
 .queue-info {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
   padding: 15px;
   border-radius: 10px;
   margin-bottom: 20px;
   font-size: 14px;
   line-height: 1.5;
-  border-left: 4px solid rgba(255, 255, 255, 0.3);
+  border-left: 4px solid rgba(255, 255, 255, 0.5);
+  color: #ffffff;
+  font-weight: 500;
 }
 
 .services-grid {
@@ -161,13 +175,17 @@
 .service-description {
   margin: 0 0 10px 0;
   font-size: 14px;
-  opacity: 0.9;
+  color: #ffffff;
+  opacity: 1;
+  font-weight: 400;
 }
 
 .service-meta {
   display: flex;
   gap: 15px;
   font-size: 14px;
+  color: #ffffff;
+  font-weight: 500;
 }
 
 .service-checkbox {
@@ -188,6 +206,8 @@
 .summary-info p {
   margin: 5px 0;
   font-size: 14px;
+  color: #ffffff;
+  font-weight: 500;
 }
 
 .continue-btn,
@@ -229,7 +249,8 @@
 .form-group label {
   font-size: 14px;
   font-weight: 600;
-  opacity: 0.9;
+  color: #ffffff;
+  opacity: 1;
 }
 
 .form-group input,
@@ -244,7 +265,8 @@
 }
 
 .form-group input::placeholder {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 400;
 }
 
 .form-group input:focus,
@@ -277,6 +299,8 @@
   display: flex;
   justify-content: space-between;
   font-size: 14px;
+  color: #ffffff;
+  font-weight: 500;
 }
 
 .summary-divider {
@@ -344,8 +368,9 @@
 
 .queue-benefits li {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.9);
+  color: #ffffff;
   padding: 5px 0;
+  font-weight: 500;
 }
 
 /* Mobile Responsive */
@@ -375,6 +400,34 @@
   .queue-benefits ul {
     grid-template-columns: 1fr;
   }
+}
+
+/* Text Visibility Enhancements */
+.queue-modal strong {
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+.queue-modal .emoji-text {
+  color: #ffffff;
+  font-weight: 500;
+}
+
+/* Ensure all text elements are visible */
+.queue-modal * {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.queue-modal input,
+.queue-modal select,
+.queue-modal textarea {
+  color: #ffffff !important;
+}
+
+.queue-modal input::placeholder,
+.queue-modal select::placeholder,
+.queue-modal textarea::placeholder {
+  color: rgba(255, 255, 255, 0.8) !important;
 }
 
 /* Animation */
