@@ -14,25 +14,25 @@
 }
 
 .queue-modal {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   border-radius: 20px;
   max-width: 600px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
   position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .queue-modal-header {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
   padding: 20px;
   border-radius: 20px 20px 0 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .queue-modal-header h2 {
@@ -73,19 +73,20 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: rgba(255, 255, 255, 0.8);
+  color: #64748b;
   font-size: 14px;
   font-weight: 500;
   transition: all 0.3s ease;
 }
 
 .step.active {
-  color: white;
+  color: #1e293b;
   font-weight: 600;
 }
 
 .step span {
-  background: rgba(255, 255, 255, 0.2);
+  background: #e2e8f0;
+  color: #64748b;
   width: 24px;
   height: 24px;
   border-radius: 50%;
@@ -98,43 +99,45 @@
 }
 
 .step.active span {
-  background: rgba(255, 255, 255, 0.9);
-  color: #667eea;
+  background: #3b82f6;
+  color: white;
 }
 
 .queue-modal-content {
   padding: 20px;
-  color: #ffffff;
+  color: #1e293b;
 }
 
 .queue-modal-content p,
 .queue-modal-content span,
 .queue-modal-content div {
-  color: #ffffff;
+  color: #1e293b;
 }
 
 .queue-modal-content .text-muted {
-  color: rgba(255, 255, 255, 0.9) !important;
+  color: #64748b !important;
   font-weight: 500;
 }
 
 .service-selection h3,
 .customer-details h3 {
-  margin: 0 0 15px 0;
-  font-size: 1.3rem;
+  margin: 0 0 20px 0;
+  font-size: 1.4rem;
   font-weight: 600;
+  color: #1e293b;
 }
 
 .queue-info {
-  background: rgba(255, 255, 255, 0.15);
-  padding: 15px;
-  border-radius: 10px;
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  padding: 16px;
+  border-radius: 12px;
   margin-bottom: 20px;
   font-size: 14px;
-  line-height: 1.5;
-  border-left: 4px solid rgba(255, 255, 255, 0.5);
-  color: #ffffff;
+  line-height: 1.6;
+  border-left: 4px solid #3b82f6;
+  color: #1e40af;
   font-weight: 500;
+  border: 1px solid #93c5fd;
 }
 
 .services-grid {
@@ -144,39 +147,41 @@
 }
 
 .service-card {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 2px solid transparent;
-  border-radius: 15px;
-  padding: 15px;
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .service-card:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: #f8fafc;
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .service-card.selected {
-  border-color: rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.2);
+  border-color: #3b82f6;
+  background: #eff6ff;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .service-info h4 {
-  margin: 0 0 5px 0;
+  margin: 0 0 6px 0;
   font-size: 1.1rem;
   font-weight: 600;
+  color: #1e293b;
 }
 
 .service-description {
-  margin: 0 0 10px 0;
+  margin: 0 0 8px 0;
   font-size: 14px;
-  color: #ffffff;
-  opacity: 1;
+  color: #64748b;
   font-weight: 400;
 }
 
@@ -184,7 +189,7 @@
   display: flex;
   gap: 15px;
   font-size: 14px;
-  color: #ffffff;
+  color: #475569;
   font-weight: 500;
 }
 
@@ -193,10 +198,11 @@
 }
 
 .selection-summary {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 15px;
+  background: #f1f5f9;
+  border-radius: 12px;
   padding: 20px;
   margin-top: 20px;
+  border: 1px solid #cbd5e1;
 }
 
 .summary-info {
@@ -204,9 +210,9 @@
 }
 
 .summary-info p {
-  margin: 5px 0;
+  margin: 8px 0;
   font-size: 14px;
-  color: #ffffff;
+  color: #334155;
   font-weight: 500;
 }
 
@@ -249,31 +255,33 @@
 .form-group label {
   font-size: 14px;
   font-weight: 600;
-  color: #ffffff;
-  opacity: 1;
+  color: #374151;
+  margin-bottom: 6px;
+  display: block;
 }
 
 .form-group input,
 .form-group select {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 10px;
+  background: #ffffff;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
   padding: 12px;
-  color: white;
+  color: #1f2937;
   font-size: 14px;
   transition: all 0.3s ease;
+  width: 100%;
 }
 
 .form-group input::placeholder {
-  color: rgba(255, 255, 255, 0.8);
+  color: #9ca3af;
   font-weight: 400;
 }
 
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: rgba(255, 255, 255, 0.6);
-  background: rgba(255, 255, 255, 0.15);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .queue-summary {
@@ -324,11 +332,11 @@
 }
 
 .back-btn {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: none;
+  background: #f1f5f9;
+  color: #475569;
+  border: 2px solid #cbd5e1;
   padding: 12px 24px;
-  border-radius: 25px;
+  border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -336,7 +344,8 @@
 }
 
 .back-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: #e2e8f0;
+  border-color: #94a3b8;
 }
 
 .pay-join-btn {
@@ -344,15 +353,15 @@
 }
 
 .queue-modal-footer {
-  background: rgba(255, 255, 255, 0.05);
+  background: #f8fafc;
   padding: 20px;
   border-radius: 0 0 20px 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid #e2e8f0;
 }
 
 .queue-benefits h4 {
   margin: 0 0 15px 0;
-  color: white;
+  color: #1e293b;
   font-size: 1.1rem;
   font-weight: 600;
 }
@@ -368,7 +377,7 @@
 
 .queue-benefits li {
   font-size: 14px;
-  color: #ffffff;
+  color: #475569;
   padding: 5px 0;
   font-weight: 500;
 }
@@ -402,32 +411,50 @@
   }
 }
 
-/* Text Visibility Enhancements */
+/* Clean Modern Styling */
 .queue-modal strong {
-  color: #ffffff !important;
+  color: #1e293b;
   font-weight: 600;
 }
 
 .queue-modal .emoji-text {
-  color: #ffffff;
+  color: #1e293b;
   font-weight: 500;
 }
 
-/* Ensure all text elements are visible */
-.queue-modal * {
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+.queue-summary {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid #e2e8f0;
 }
 
-.queue-modal input,
-.queue-modal select,
-.queue-modal textarea {
-  color: #ffffff !important;
+.queue-summary h4 {
+  margin: 0 0 15px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
 }
 
-.queue-modal input::placeholder,
-.queue-modal select::placeholder,
-.queue-modal textarea::placeholder {
-  color: rgba(255, 255, 255, 0.8) !important;
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #475569;
+  font-weight: 500;
+  margin: 8px 0;
+}
+
+.summary-total {
+  display: flex;
+  justify-content: space-between;
+  font-size: 16px;
+  font-weight: 600;
+  padding-top: 12px;
+  border-top: 2px solid #e2e8f0;
+  color: #1e293b;
+  margin-top: 12px;
 }
 
 /* Animation */
