@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './OwnerLogin.css';
+import razorpayService from '../services/razorpayService';
 
 const OwnerLogin = ({ onLogin }) => {
   const [formData, setFormData] = useState({
@@ -19,6 +20,23 @@ const OwnerLogin = ({ onLogin }) => {
     shopImages: [],
     documents: []
   });
+  const [razorpayLoaded, setRazorpayLoaded] = useState(false);
+
+  useEffect(() => {
+    // Check if Razorpay is loaded
+    const checkRazorpay = () => {
+      if (window.Razorpay) {
+        setRazorpayLoaded(true);
+        console.log('Razorpay SDK loaded successfully');
+      } else {
+        console.log('Razorpay SDK not loaded yet');
+        // Try again after a short delay
+        setTimeout(checkRazorpay, 1000);
+      }
+    };
+
+    checkRazorpay();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -76,14 +94,101 @@ const OwnerLogin = ({ onLogin }) => {
     setCurrentStep(2);
   };
 
-  const handlePayment = () => {
-    // Simulate payment for direct registration
+  const handlePayment = async () => {
+    // Validate required fields before payment
+    if (!formData.salonName || !formData.email || !formData.phone || !formData.address || !formData.password) {
+      alert('Please fill all required fields before proceeding to payment.');
+      return;
+    }
+
+    if (uploadedFiles.shopImages.length < 3) {
+      alert('Please upload at least 3 shop images before proceeding to payment.');
+      return;
+    }
+
+    if (uploadedFiles.documents.length === 0) {
+      alert('Please upload at least one business document before proceeding to payment.');
+      return;
+    }
+
     setLoading(true);
-    setTimeout(() => {
+
+    // Check if Razorpay is loaded
+    if (!window.Razorpay) {
+      console.error('Razorpay SDK not loaded');
       setLoading(false);
-      setCurrentStep(3);
-      alert('Payment successful! Our agent will call you within 24 hours.');
-    }, 2000);
+      alert('🚀 DEMO MODE: Razorpay SDK not loaded\n\n' +
+            'In production, this will open Razorpay checkout for ₹100 payment.\n\n' +
+            'Proceeding with demo registration...');
+      setTimeout(() => {
+        setCurrentStep(3);
+      }, 1000);
+      return;
+    }
+
+    try {
+      // Razorpay checkout options
+      const options = {
+        key: process.env.REACT_APP_RAZORPAY_KEY_ID || 'rzp_test_1DP5mmOlF5G5ag',
+        amount: 10000, // ₹100 in paise
+        currency: 'INR',
+        name: 'Salon Finder',
+        description: 'Salon Registration Fee - ₹100',
+        image: '/logo192.png',
+        prefill: {
+          name: formData.salonName,
+          email: formData.email,
+          contact: formData.phone,
+        },
+        notes: {
+          address: formData.address,
+          salonName: formData.salonName,
+          registrationType: 'direct'
+        },
+        theme: {
+          color: '#007aff'
+        },
+        handler: function (response) {
+          // Payment successful
+          console.log('Payment successful:', response);
+          setLoading(false);
+          setCurrentStep(3);
+          
+          // Store payment details for verification
+          localStorage.setItem('salonPayment', JSON.stringify({
+            paymentId: response.razorpay_payment_id,
+            orderId: response.razorpay_order_id,
+            signature: response.razorpay_signature,
+            salonData: formData,
+            timestamp: new Date().toISOString()
+          }));
+          
+          console.log('Payment details stored for backend verification');
+        },
+        modal: {
+          ondismiss: function() {
+            setLoading(false);
+            console.log('Payment modal closed by user');
+          }
+        }
+      };
+
+      // Create and open Razorpay checkout
+      const rzp = new window.Razorpay(options);
+      
+      rzp.on('payment.failed', function (response) {
+        setLoading(false);
+        console.error('Payment failed:', response.error);
+        alert(`Payment failed: ${response.error.description}`);
+      });
+
+      rzp.open();
+
+    } catch (error) {
+      console.error('Payment initialization error:', error);
+      setLoading(false);
+      alert('Failed to initialize payment. Please try again.');
+    }
   };
 
   const handleChange = (e) => {
@@ -397,10 +502,15 @@ const OwnerLogin = ({ onLogin }) => {
               {loading ? (
                 <>
                   <div className="spinner"></div>
-                  Processing Payment...
+                  {razorpayLoaded ? 'Opening Razorpay...' : 'Loading Payment...'}
                 </>
               ) : (
-                'Pay ₹100 & Register'
+                <>
+                  💳 Pay ₹100 via Razorpay
+                  {!razorpayLoaded && <small style={{display: 'block', fontSize: '12px', opacity: 0.8}}>
+                    (Demo mode - Razorpay loading...)
+                  </small>}
+                </>
               )}
             </button>
           </div>

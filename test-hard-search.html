@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hard Search Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .test-section {
+            background: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+        }
+        .error {
+            border-left-color: #f44336;
+        }
+        .warning {
+            border-left-color: #ff9800;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        #results {
+            background: #333;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .salon-result {
+            background: #444;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border-left: 3px solid #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 HARD SEARCH TEST</h1>
+    <p>This page tests the Google Places API directly to verify salon search functionality.</p>
+    
+    <div class="test-section">
+        <h2>🔑 API Key Test</h2>
+        <button onclick="testApiKey()">Test API Key</button>
+        <div id="api-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🎯 Salon Search Test</h2>
+        <button onclick="testPatiaSearch()">Search Patia, Bhubaneswar</button>
+        <button onclick="testMumbaiSearch()">Search Mumbai (High Density)</button>
+        <button onclick="testDelhiSearch()">Search Delhi (Major City)</button>
+        <div id="salon-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>📊 Results</h2>
+        <div id="results">Click a test button above to see results...</div>
+    </div>
+
+    <script>
+        const API_KEY = 'AIzaSyB-wh6X3rBs'; // Your API key (last part hidden for security)
+        
+        function log(message) {
+            const results = document.getElementById('results');
+            results.textContent += new Date().toLocaleTimeString() + ': ' + message + '\n';
+            results.scrollTop = results.scrollHeight;
+        }
+        
+        async function testApiKey() {
+            log('🔑 Testing API Key...');
+            
+            try {
+                const response = await fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=20.3499,85.8197&radius=1000&type=establishment&key=${API_KEY}`);
+                const data = await response.json();
+                
+                if (data.status === 'OK') {
+                    log('✅ API Key is working!');
+                    log(`📍 Found ${data.results.length} establishments near Patia`);
+                    document.getElementById('api-results').innerHTML = '<span style="color: #4CAF50;">✅ API Key Valid</span>';
+                } else if (data.status === 'REQUEST_DENIED') {
+                    log('❌ API Key is invalid or restricted');
+                    log('Error: ' + data.error_message);
+                    document.getElementById('api-results').innerHTML = '<span style="color: #f44336;">❌ API Key Invalid</span>';
+                } else {
+                    log('⚠️ API Error: ' + data.status);
+                    document.getElementById('api-results').innerHTML = '<span style="color: #ff9800;">⚠️ API Error</span>';
+                }
+            } catch (error) {
+                log('❌ Network error: ' + error.message);
+                document.getElementById('api-results').innerHTML = '<span style="color: #f44336;">❌ Network Error</span>';
+            }
+        }
+        
+        async function testPatiaSearch() {
+            log('🎯 Testing Patia, Bhubaneswar salon search...');
+            
+            const queries = [
+                'salon Patia Bhubaneswar',
+                'beauty salon Patia',
+                'hair salon Bhubaneswar',
+                'Lakme Salon Patia',
+                'unisex salon Patia'
+            ];
+            
+            let totalResults = 0;
+            const foundSalons = new Set();
+            
+            for (const query of queries) {
+                try {
+                    log(`🔍 Searching: "${query}"`);
+                    const response = await fetch(`https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&location=20.3499,85.8197&radius=20000&key=${API_KEY}`);
+                    const data = await response.json();
+                    
+                    if (data.status === 'OK') {
+                        log(`✅ Found ${data.results.length} results for "${query}"`);
+                        totalResults += data.results.length;
+                        
+                        data.results.forEach(salon => {
+                            if (!foundSalons.has(salon.place_id)) {
+                                foundSalons.add(salon.place_id);
+                                log(`   📍 ${salon.name} - ${salon.formatted_address}`);
+                            }
+                        });
+                    } else {
+                        log(`⚠️ No results for "${query}": ${data.status}`);
+                    }
+                    
+                    // Small delay to avoid rate limiting
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                } catch (error) {
+                    log(`❌ Error searching "${query}": ${error.message}`);
+                }
+            }
+            
+            log(`\n🎯 PATIA SEARCH COMPLETE:`);
+            log(`   Total API calls: ${queries.length}`);
+            log(`   Total results: ${totalResults}`);
+            log(`   Unique salons: ${foundSalons.size}`);
+            
+            if (foundSalons.size > 0) {
+                document.getElementById('salon-results').innerHTML = `<span style="color: #4CAF50;">✅ Found ${foundSalons.size} salons in Patia</span>`;
+            } else {
+                document.getElementById('salon-results').innerHTML = '<span style="color: #f44336;">❌ No salons found in Patia</span>';
+            }
+        }
+        
+        async function testMumbaiSearch() {
+            log('🎯 Testing Mumbai salon search (high density area)...');
+            
+            try {
+                const response = await fetch(`https://maps.googleapis.com/maps/api/place/textsearch/json?query=salon Mumbai&location=19.0760,72.8777&radius=10000&key=${API_KEY}`);
+                const data = await response.json();
+                
+                if (data.status === 'OK') {
+                    log(`✅ Mumbai search successful: ${data.results.length} salons found`);
+                    data.results.slice(0, 5).forEach(salon => {
+                        log(`   📍 ${salon.name} - ${salon.formatted_address}`);
+                    });
+                    document.getElementById('salon-results').innerHTML = `<span style="color: #4CAF50;">✅ Found ${data.results.length} salons in Mumbai</span>`;
+                } else {
+                    log(`❌ Mumbai search failed: ${data.status}`);
+                    document.getElementById('salon-results').innerHTML = '<span style="color: #f44336;">❌ Mumbai search failed</span>';
+                }
+            } catch (error) {
+                log('❌ Mumbai search error: ' + error.message);
+            }
+        }
+        
+        async function testDelhiSearch() {
+            log('🎯 Testing Delhi salon search (major city)...');
+            
+            try {
+                const response = await fetch(`https://maps.googleapis.com/maps/api/place/textsearch/json?query=salon Delhi&location=28.6139,77.2090&radius=10000&key=${API_KEY}`);
+                const data = await response.json();
+                
+                if (data.status === 'OK') {
+                    log(`✅ Delhi search successful: ${data.results.length} salons found`);
+                    data.results.slice(0, 5).forEach(salon => {
+                        log(`   📍 ${salon.name} - ${salon.formatted_address}`);
+                    });
+                    document.getElementById('salon-results').innerHTML = `<span style="color: #4CAF50;">✅ Found ${data.results.length} salons in Delhi</span>`;
+                } else {
+                    log(`❌ Delhi search failed: ${data.status}`);
+                    document.getElementById('salon-results').innerHTML = '<span style="color: #f44336;">❌ Delhi search failed</span>';
+                }
+            } catch (error) {
+                log('❌ Delhi search error: ' + error.message);
+            }
+        }
+        
+        // Auto-run API key test on page load
+        window.onload = function() {
+            log('🚀 Hard Search Test Page Loaded');
+            log('📝 This page tests Google Places API directly');
+            log('🔧 Use the buttons above to run different tests');
+            log('');
+        };
+    </script>
+</body>
+</html>

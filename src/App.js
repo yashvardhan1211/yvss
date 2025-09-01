@@ -181,20 +181,34 @@ function CustomerApp() {
     });
   };
 
-  // Search for REAL nearby salons using Google Places API with your key
+  // HARD SEARCH: Aggressive multi-strategy salon discovery
   const searchNearbyPlaces = async (location) => {
-    console.log('🔍 Searching for REAL salons near:', location);
+    console.log('🔍 HARD SEARCH: Starting aggressive salon discovery near:', location);
+    console.log('🔍 Location data received:', {
+      lat: location.lat,
+      lng: location.lng,
+      address: location.address
+    });
     
     try {
-      // Load Google Maps API
+      // Load Google Maps API with timeout
+      console.log('🔄 Loading Google Maps API...');
       await loadGoogleMaps();
       
-      // Wait for Google Maps to be fully available
-      while (!window.google || !window.google.maps || !window.google.maps.places) {
+      // Wait for Google Maps to be fully available with timeout
+      let attempts = 0;
+      const maxAttempts = 100; // 10 seconds timeout
+      
+      while ((!window.google || !window.google.maps || !window.google.maps.places) && attempts < maxAttempts) {
         await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
       }
       
-      console.log('✅ Google Maps loaded, starting Places API search...');
+      if (!window.google || !window.google.maps || !window.google.maps.places) {
+        throw new Error('Google Maps API failed to load. Check your API key and internet connection.');
+      }
+      
+      console.log('✅ Google Maps loaded, starting HARD SEARCH...');
       
       // Create a map for PlacesService
       const mapDiv = document.createElement('div');
@@ -204,11 +218,73 @@ function CustomerApp() {
       });
       
       const service = new window.google.maps.places.PlacesService(map);
+      
+      // Test API key with a simple request first
+      console.log('🔑 Testing Google Places API key...');
+      try {
+        await new Promise((resolve, reject) => {
+          service.nearbySearch({
+            location: new window.google.maps.LatLng(location.lat, location.lng),
+            radius: 1000,
+            type: 'establishment'
+          }, (results, status) => {
+            console.log('🔑 API Key Test Status:', status);
+            if (status === window.google.maps.places.PlacesServiceStatus.REQUEST_DENIED) {
+              reject(new Error('❌ Google Places API key is INVALID or RESTRICTED. Check your .env file and Google Console API key settings.'));
+            } else if (status === window.google.maps.places.PlacesServiceStatus.OVER_QUERY_LIMIT) {
+              reject(new Error('❌ Google Places API QUOTA EXCEEDED. You have hit the daily limit. Wait 24 hours or upgrade your plan.'));
+            } else {
+              console.log('✅ API key test successful - proceeding with HARD SEARCH');
+              resolve();
+            }
+          });
+        });
+      } catch (apiError) {
+        throw apiError;
+      }
+      
       let allResults = [];
       
-      // Method 1: Text Search for salons
-      console.log('🔍 Starting text search for salons...');
+      // STRATEGY 1: Comprehensive Text Search with location-specific queries
+      console.log('🎯 STRATEGY 1: Comprehensive text search for salons...');
+      
+      // Add location-specific famous salon searches
+      const locationSpecificQueries = [];
+      const locationLower = (location.address || '').toLowerCase();
+      
+      console.log('🔍 Processing location:', locationLower);
+      
+      if (locationLower.includes('patia') || locationLower.includes('bhubaneswar')) {
+        locationSpecificQueries.push(
+          'Looks Salon Patia',
+          'Naturals Salon Bhubaneswar',
+          'Lakme Salon Bhubaneswar',
+          'VLCC Bhubaneswar',
+          'Jawed Habib Bhubaneswar',
+          'Green Trends Bhubaneswar',
+          'Bounce Salon Bhubaneswar',
+          'Enrich Salon Bhubaneswar',
+          'salon Patia Bhubaneswar',
+          'beauty parlour Patia',
+          'hair salon Jaydev Vihar',
+          'unisex salon Patia Square'
+        );
+      }
+      
       const textSearchQueries = [
+        ...locationSpecificQueries,
+        `salon ${location.address}`,
+        `beauty salon ${location.address}`,
+        `hair salon ${location.address}`,
+        `parlour ${location.address}`,
+        `barber ${location.address}`,
+        `spa ${location.address}`,
+        'salon near me',
+        'beauty parlour',
+        'hair cutting salon',
+        'unisex salon',
+        'ladies salon',
+        'gents salon',
         'hair salon',
         'beauty salon', 
         'barber shop',
@@ -222,7 +298,7 @@ function CustomerApp() {
             const request = {
               query: query,
               location: new window.google.maps.LatLng(location.lat, location.lng),
-              radius: 10000 // 10km radius
+              radius: 20000 // 20km radius for hard search
             };
             
             service.textSearch(request, (results, status) => {
@@ -255,61 +331,193 @@ function CustomerApp() {
         }
       }
       
-      // Method 2: Nearby Search if text search didn't work well
-      if (allResults.length < 5) {
-        console.log('🔍 Adding nearby search results...');
-        const nearbyTypes = ['beauty_salon', 'hair_care', 'spa'];
+      // STRATEGY 2: Comprehensive Nearby Search (always run)
+      console.log('🎯 STRATEGY 2: Comprehensive nearby search...');
+      const nearbySearches = [
+        { type: 'beauty_salon', radius: 25000, keyword: null },
+        { type: 'hair_care', radius: 25000, keyword: null },
+        { type: 'spa', radius: 20000, keyword: null },
+        { type: 'establishment', radius: 15000, keyword: 'salon' },
+        { type: 'establishment', radius: 15000, keyword: 'beauty' },
+        { type: 'establishment', radius: 15000, keyword: 'parlour' },
+        { type: 'establishment', radius: 15000, keyword: 'barber' },
+        { type: 'establishment', radius: 15000, keyword: 'hair' }
+      ];
+      
+      for (const search of nearbySearches) {
+        try {
+          console.log(`🔍 Nearby search: ${search.type} (${search.radius/1000}km)${search.keyword ? ` - ${search.keyword}` : ''}`);
+          const results = await new Promise((resolve, reject) => {
+            const request = {
+              location: new window.google.maps.LatLng(location.lat, location.lng),
+              radius: search.radius,
+              type: search.type
+            };
+            
+            if (search.keyword) {
+              request.keyword = search.keyword;
+            }
+            
+            service.nearbySearch(request, (results, status) => {
+              console.log(`${search.type}${search.keyword ? ` (${search.keyword})` : ''} - Status: ${status}, Results: ${results?.length || 0}`);
+              
+              if (status === window.google.maps.places.PlacesServiceStatus.OK) {
+                resolve(results || []);
+              } else if (status === window.google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
+                resolve([]);
+              } else {
+                console.warn(`${search.type} search failed: ${status}`);
+                resolve([]);
+              }
+            });
+          });
+          
+          if (results.length > 0) {
+            console.log(`✅ Found ${results.length} results for ${search.type}${search.keyword ? ` (${search.keyword})` : ''}`);
+            allResults = allResults.concat(results);
+          }
+          
+          // Longer delay to avoid rate limiting
+          await new Promise(resolve => setTimeout(resolve, 300));
+        } catch (error) {
+          console.error(`Nearby search failed for ${search.type}:`, error);
+        }
+      }
+      
+      // STRATEGY 3: Broader area search if still limited results
+      if (allResults.length < 10) {
+        console.log('🎯 STRATEGY 3: Broader area search...');
+        const cityName = (location.address || 'nearby area').split(',')[0].trim(); // Get city name
+        const broadQueries = [
+          `salon ${cityName}`,
+          `beauty parlour ${cityName}`,
+          `hair salon ${cityName}`,
+          `barber shop ${cityName}`,
+          `spa ${cityName}`,
+          `unisex salon ${cityName}`
+        ];
         
-        for (const type of nearbyTypes) {
+        for (const query of broadQueries) {
           try {
-            console.log(`Nearby search for: ${type}`);
+            console.log(`🔍 Broad search: "${query}"`);
             const results = await new Promise((resolve, reject) => {
               const request = {
+                query: query,
                 location: new window.google.maps.LatLng(location.lat, location.lng),
-                radius: 15000, // 15km radius
-                type: type
+                radius: 50000 // 50km radius for very broad search
               };
               
-              service.nearbySearch(request, (results, status) => {
-                console.log(`${type} nearby status: ${status}`);
-                console.log(`${type} nearby results: ${results?.length || 0}`);
-                
+              service.textSearch(request, (results, status) => {
                 if (status === window.google.maps.places.PlacesServiceStatus.OK) {
                   resolve(results || []);
-                } else if (status === window.google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
-                  resolve([]);
                 } else {
-                  console.warn(`${type} nearby search failed: ${status}`);
                   resolve([]);
                 }
               });
             });
             
             if (results.length > 0) {
-              console.log(`✅ Found ${results.length} nearby results for "${type}"`);
+              console.log(`✅ Broad search found ${results.length} results for "${query}"`);
               allResults = allResults.concat(results);
             }
             
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await new Promise(resolve => setTimeout(resolve, 400));
           } catch (error) {
-            console.error(`Nearby search failed for "${type}":`, error);
+            console.error(`Broad search failed for "${query}":`, error);
           }
         }
       }
       
-      // Remove duplicates based on place_id
-      const uniqueResults = allResults.filter((place, index, self) => 
-        index === self.findIndex(p => p.place_id === place.place_id)
-      );
+      // Process and filter all results with enhanced filtering
+      console.log(`🔍 Processing ${allResults.length} total results...`);
       
-      console.log(`✅ Total unique results: ${uniqueResults.length}`);
+      // Remove duplicates based on place_id and apply enhanced filtering
+      const uniqueResults = [];
+      const seenIds = new Set();
       
-      if (uniqueResults.length === 0) {
-        throw new Error('No salons found in your area. Try a different location.');
+      for (const place of allResults) {
+        if (!seenIds.has(place.place_id)) {
+          seenIds.add(place.place_id);
+          
+          // Enhanced filtering - be more inclusive for hard search
+          const name = place.name.toLowerCase();
+          const types = place.types ? place.types.join(' ').toLowerCase() : '';
+          const vicinity = (place.vicinity || '').toLowerCase();
+          
+          const isSalonRelated = 
+            name.includes('salon') || 
+            name.includes('beauty') || 
+            name.includes('hair') || 
+            name.includes('parlour') || 
+            name.includes('parlor') ||
+            name.includes('spa') ||
+            name.includes('unisex') ||
+            name.includes('barber') ||
+            name.includes('cut') ||
+            name.includes('style') ||
+            name.includes('glamour') ||
+            name.includes('looks') ||
+            name.includes('makeover') ||
+            name.includes('trim') ||
+            name.includes('shave') ||
+            types.includes('beauty_salon') ||
+            types.includes('hair_care') ||
+            types.includes('spa') ||
+            vicinity.includes('salon') ||
+            vicinity.includes('beauty');
+          
+          if (isSalonRelated) {
+            uniqueResults.push(place);
+          }
+        }
       }
       
+      console.log(`✅ HARD SEARCH COMPLETE: Found ${uniqueResults.length} unique salon-related businesses`);
+      
+      // Debug: Show what we found
+      if (uniqueResults.length > 0) {
+        console.log('🎯 HARD SEARCH RESULTS:');
+        uniqueResults.slice(0, 10).forEach((place, index) => {
+          const distance = calculateDistance(location.lat, location.lng, 
+            place.geometry.location.lat(), place.geometry.location.lng());
+          console.log(`${index + 1}. ${place.name} - ${distance.toFixed(1)}km - Rating: ${place.rating || 'N/A'}`);
+        });
+      }
+      
+      if (uniqueResults.length === 0) {
+        console.log('❌ HARD SEARCH FOUND ZERO SALONS - Possible reasons:');
+        console.log('   • Google Places API quota exceeded (1000 requests/day limit)');
+        console.log('   • No salons registered in Google Maps for this specific area');
+        console.log('   • API key restrictions or billing issues');
+        console.log('   • Network connectivity problems');
+        console.log('   • Location coordinates invalid or not recognized');
+        console.log('');
+        console.log('🔧 TROUBLESHOOTING STEPS:');
+        console.log('   1. Check Google Console > APIs & Services > Quotas');
+        console.log('   2. Verify API key in .env file');
+        console.log('   3. Try a major city like "Mumbai" or "Delhi"');
+        console.log('   4. Check network connection');
+        console.log('   5. Wait 24 hours if quota exceeded');
+        
+        throw new Error(`HARD SEARCH: No salons found near "${location.address}". This means either (1) Google Places API quota exceeded, (2) No salons registered on Google Maps in this area, or (3) API configuration issues. Try a major city or check API quota in Google Console.`);
+      }
+      
+      // Sort results by distance and rating for better relevance
+      uniqueResults.sort((a, b) => {
+        const distanceA = calculateDistance(location.lat, location.lng, 
+          a.geometry.location.lat(), a.geometry.location.lng());
+        const distanceB = calculateDistance(location.lat, location.lng, 
+          b.geometry.location.lat(), b.geometry.location.lng());
+        
+        // Prioritize closer salons, then by rating
+        if (Math.abs(distanceA - distanceB) < 2) { // If within 2km, sort by rating
+          return (b.rating || 4.0) - (a.rating || 4.0);
+        }
+        return distanceA - distanceB;
+      });
+      
       // Process and format results
-      const processedSalons = uniqueResults.map(place => {
+      const processedSalons = uniqueResults.slice(0, 25).map(place => { // Limit to top 25 results
         const distance = calculateDistance(
           location.lat,
           location.lng,
@@ -348,8 +556,13 @@ function CustomerApp() {
       return processedSalons;
       
     } catch (error) {
-      console.error('❌ Places API search completely failed:', error);
-      throw new Error(`Failed to find salons: ${error.message}`);
+      console.error('❌ HARD SEARCH completely failed:', error);
+      console.error('❌ This could be due to:');
+      console.error('   • Google Places API quota exceeded');
+      console.error('   • API key restrictions or invalid key');
+      console.error('   • Network connectivity issues');
+      console.error('   • No salons registered in Google Maps for this area');
+      throw new Error(`HARD SEARCH failed: ${error.message}. Check console for details.`);
     }
   };
 
@@ -529,14 +742,44 @@ function CustomerApp() {
       console.log('📍 Location obtained:', location);
       
       setLoadingStatus('Finding address...');
-      const address = `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}`;
+      
+      // Reverse geocode to get proper address
+      let address = `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}`;
+      try {
+        // Load Google Maps if not loaded
+        await loadGoogleMaps();
+        while (!window.google || !window.google.maps) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        
+        const geocoder = new window.google.maps.Geocoder();
+        const reverseResult = await new Promise((resolve, reject) => {
+          geocoder.geocode({ location: { lat: location.lat, lng: location.lng } }, (results, status) => {
+            if (status === 'OK' && results[0]) {
+              resolve(results[0].formatted_address);
+            } else {
+              resolve(address); // fallback to coordinates
+            }
+          });
+        });
+        address = reverseResult;
+      } catch (error) {
+        console.log('Reverse geocoding failed, using coordinates');
+      }
       
       setUserLocation(location);
       setLocationName(address);
       
       setLoadingStatus('Searching for nearby salons...');
       
-      const results = await searchNearbyPlaces(location);
+      const locationData = {
+        lat: location.lat,
+        lng: location.lng,
+        address: address
+      };
+      
+      console.log('🎯 Calling HARD SEARCH with current location:', locationData);
+      const results = await searchNearbyPlaces(locationData);
       
       if (results && results.length > 0) {
         setSalons(results);
@@ -612,7 +855,19 @@ function CustomerApp() {
       
       setLoadingStatus('Searching for nearby salons...');
       
-      const results = await searchNearbyPlaces({ lat: result.lat, lng: result.lng });
+      const locationData = {
+        lat: result.lat,
+        lng: result.lng,
+        address: result.formatted_address || address
+      };
+      
+      console.log('🎯 Calling HARD SEARCH with:', locationData);
+      console.log('🎯 About to call searchNearbyPlaces function...');
+      
+      const results = await searchNearbyPlaces(locationData);
+      
+      console.log('🎯 HARD SEARCH returned:', results);
+      console.log('🎯 Number of results:', results ? results.length : 0);
       
       if (results && results.length > 0) {
         setSalons(results);
