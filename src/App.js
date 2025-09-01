@@ -477,7 +477,7 @@ function CustomerApp() {
       // Debug: Show what we found
       if (uniqueResults.length > 0) {
         console.log('🎯 HARD SEARCH RESULTS:');
-        uniqueResults.slice(0, 10).forEach((place, index) => {
+        uniqueResults.slice(0, 15).forEach((place, index) => {
           const distance = calculateDistance(location.lat, location.lng, 
             place.geometry.location.lat(), place.geometry.location.lng());
           console.log(`${index + 1}. ${place.name} - ${distance.toFixed(1)}km - Rating: ${place.rating || 'N/A'}`);
@@ -517,7 +517,7 @@ function CustomerApp() {
       });
       
       // Process and format results
-      const processedSalons = uniqueResults.slice(0, 25).map(place => { // Limit to top 25 results
+      const processedSalons = uniqueResults.slice(0, 50).map(place => { // Limit to top 50 results
         const distance = calculateDistance(
           location.lat,
           location.lng,
@@ -550,7 +550,7 @@ function CustomerApp() {
         };
       })
       .sort((a, b) => a.distance - b.distance) // Sort by distance
-      .slice(0, 15); // Limit to 15 results
+      .slice(0, 30); // Limit to 30 results for better coverage
       
       console.log(`✅ Returning ${processedSalons.length} processed REAL salons`);
       return processedSalons;
