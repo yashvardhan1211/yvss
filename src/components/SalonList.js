@@ -128,42 +128,92 @@ const SalonList = ({ salons, onSalonSelect, loading, error }) => {
                   </div>
                   
                   <div className="distance">
-                    📍 {salon.distance?.toFixed(1)}km away
+                    {salon.distance?.toFixed(1)}km away
                   </div>
                 </div>
               </div>
 
               <div className={`status ${salon.opening_hours?.open_now ? 'open' : 'closed'}`}>
-                {salon.opening_hours?.open_now === true ? '🟢 Open' : 
-                 salon.opening_hours?.open_now === false ? '🔴 Closed' : '🟡 Unknown'}
+                {salon.opening_hours?.open_now === true ? 'Open' : 
+                 salon.opening_hours?.open_now === false ? 'Closed' : 'Unknown'}
               </div>
             </div>
 
             <div className="salon-card-body">
               <div className="address">
-                📍 {salon.vicinity || salon.formatted_address}
+                {salon.vicinity || salon.formatted_address}
               </div>
 
               <div className="queue-info">
                 <div className="queue-stat">
-                  <span className="icon">👥</span>
-                  <span>{salon.queueLength} in queue</span>
+                  <span className="icon">Queue:</span>
+                  <span>{salon.queueLength}</span>
                 </div>
                 <div className="wait-stat">
-                  <span className="icon">⏱️</span>
-                  <span>~{salon.waitTime} min wait</span>
+                  <span className="icon">Wait:</span>
+                  <span>~{salon.waitTime} min</span>
                 </div>
               </div>
 
-              <div className="services">
-                <strong>Services:</strong>
-                <div className="service-tags">
-                  {salon.services?.slice(0, 3).map((service, index) => (
-                    <span key={index} className="service-tag">{service}</span>
-                  ))}
-                  {salon.services?.length > 3 && (
-                    <span className="service-tag more">+{salon.services.length - 3} more</span>
-                  )}
+              <div 
+                style={{
+                  backgroundColor: '#ffff00',
+                  border: '3px solid #ff0000',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  marginBottom: '16px',
+                  display: 'block',
+                  width: '100%',
+                  boxSizing: 'border-box'
+                }}
+              >
+                <div style={{
+                  color: '#000000',
+                  fontSize: '18px',
+                  fontWeight: '800',
+                  marginBottom: '8px'
+                }}>Services:</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                  <span style={{
+                    backgroundColor: '#ff4444',
+                    color: '#ffffff',
+                    padding: '8px 12px',
+                    fontSize: '14px',
+                    fontWeight: '700',
+                    textTransform: 'uppercase',
+                    borderRadius: '6px',
+                    display: 'inline-block'
+                  }}>HAIRCUT</span>
+                  <span style={{
+                    backgroundColor: '#ff4444',
+                    color: '#ffffff',
+                    padding: '8px 12px',
+                    fontSize: '14px',
+                    fontWeight: '700',
+                    textTransform: 'uppercase',
+                    borderRadius: '6px',
+                    display: 'inline-block'
+                  }}>STYLING</span>
+                  <span style={{
+                    backgroundColor: '#ff4444',
+                    color: '#ffffff',
+                    padding: '8px 12px',
+                    fontSize: '14px',
+                    fontWeight: '700',
+                    textTransform: 'uppercase',
+                    borderRadius: '6px',
+                    display: 'inline-block'
+                  }}>FACIAL</span>
+                  <span style={{
+                    backgroundColor: '#ff4444',
+                    color: '#ffffff',
+                    padding: '8px 12px',
+                    fontSize: '14px',
+                    fontWeight: '700',
+                    textTransform: 'uppercase',
+                    borderRadius: '6px',
+                    display: 'inline-block'
+                  }}>+2 MORE</span>
                 </div>
               </div>
 

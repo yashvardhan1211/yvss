@@ -368,33 +368,27 @@ const SalonDetails = ({ salon, onClose, onBookingComplete, initialTab = 'overvie
 
         <div className="salon-details-tabs">
           <button 
-            className={`tab ${activeTab === 'overview' ? 'active' : ''}`}
-            onClick={() => setActiveTab('overview')}
+            className={`tab ${activeTab === 'joinQueue' ? 'active' : ''}`}
+            onClick={() => setActiveTab('joinQueue')}
           >
-            Overview
+            Join Queue
           </button>
           <button 
-            className={`tab ${activeTab === 'quickActions' ? 'active' : ''}`}
-            onClick={() => setActiveTab('quickActions')}
+            className={`tab ${activeTab === 'bookAppointment' ? 'active' : ''}`}
+            onClick={() => setActiveTab('bookAppointment')}
           >
-            Quick Actions
+            Book Appointment
           </button>
           <button 
-            className={`tab ${activeTab === 'services' ? 'active' : ''}`}
-            onClick={() => setActiveTab('services')}
+            className={`tab ${activeTab === 'moreInfo' ? 'active' : ''}`}
+            onClick={() => setActiveTab('moreInfo')}
           >
-            Services & Booking
-          </button>
-          <button 
-            className={`tab ${activeTab === 'reviews' ? 'active' : ''}`}
-            onClick={() => setActiveTab('reviews')}
-          >
-            Reviews
+            More Info
           </button>
         </div>
 
         <div className="salon-details-content">
-          {activeTab === 'overview' && (
+          {activeTab === 'joinQueue' && (
             <div className="overview-tab">
               <div className="salon-info-grid">
                 <div className="info-card">
@@ -440,162 +434,9 @@ const SalonDetails = ({ salon, onClose, onBookingComplete, initialTab = 'overvie
             </div>
           )}
 
-          {activeTab === 'quickActions' && (
-            <div className="quick-actions-tab">
-              <div className="quick-actions-header">
-                <h3>⚡ Quick Actions</h3>
-                <p>Fast access to common salon services</p>
-              </div>
 
-              <div className="quick-actions-grid">
-                {/* Call Salon */}
-                <div className="quick-action-card call-action">
-                  <div className="action-icon">📞</div>
-                  <div className="action-content">
-                    <h4>Call Salon</h4>
-                    <p>Speak directly with the salon</p>
-                    <p className="action-subtitle">Ask about availability, services, or special requests</p>
-                    <CallSalonButton salon={salon} />
-                  </div>
-                </div>
 
-                {/* Join Queue */}
-                <div className="quick-action-card queue-action">
-                  <div className="action-icon">🚶‍♂️</div>
-                  <div className="action-content">
-                    <h4>Join Live Queue</h4>
-                    <p>Get in line virtually</p>
-                    <div className="queue-stats">
-                      <span className="queue-count">{queueData.currentQueue || salon.queueLength} people ahead</span>
-                      <span className="wait-time">~{queueData.estimatedWaitTime || salon.waitTime} min wait</span>
-                    </div>
-                    {!isCustomerInQueue ? (
-                      <button 
-                        className="join-queue-btn"
-                        onClick={handleJoinQueueClick}
-                      >
-                        Join Queue Now
-                      </button>
-                    ) : (
-                      <div className="in-queue-status">
-                        <p className="queue-position">You're #{customerPosition} in queue</p>
-                        <p className="estimated-time">~{estimatedWaitTime} min remaining</p>
-                        <button 
-                          className="leave-queue-btn"
-                          onClick={handleLeaveQueue}
-                        >
-                          Leave Queue
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Book Appointment */}
-                <div className="quick-action-card booking-action">
-                  <div className="action-icon">📅</div>
-                  <div className="action-content">
-                    <h4>Book Appointment</h4>
-                    <p>Schedule for later</p>
-                    <p className="action-subtitle">Choose services, time, and pay online</p>
-                    <button 
-                      className="book-appointment-btn"
-                      onClick={() => setActiveTab('services')}
-                    >
-                      Book Now
-                    </button>
-                  </div>
-                </div>
-
-                {/* Get Directions */}
-                <div className="quick-action-card directions-action">
-                  <div className="action-icon">🗺️</div>
-                  <div className="action-content">
-                    <h4>Get Directions</h4>
-                    <p>Navigate to salon</p>
-                    <p className="action-subtitle">{salon.distance < 1 ? 
-                      `${Math.round(salon.distance * 1000)}m away` : 
-                      `${salon.distance.toFixed(1)}km away`}</p>
-                    <DirectionsButton salon={salon} />
-                  </div>
-                </div>
-
-                {/* Share Salon */}
-                <div className="quick-action-card share-action">
-                  <div className="action-icon">📤</div>
-                  <div className="action-content">
-                    <h4>Share Salon</h4>
-                    <p>Tell friends about this place</p>
-                    <p className="action-subtitle">Share location and details</p>
-                    <button 
-                      className="share-btn"
-                      onClick={() => {
-                        if (navigator.share) {
-                          navigator.share({
-                            title: salon.name,
-                            text: `Check out ${salon.name} - ${salon.type}`,
-                            url: window.location.href
-                          });
-                        } else {
-                          navigator.clipboard.writeText(
-                            `${salon.name} - ${salon.vicinity}\nRating: ${salon.rating}⭐\nQueue: ${salon.queueLength} people`
-                          );
-                          toast.success('Salon details copied to clipboard!');
-                        }
-                      }}
-                    >
-                      Share
-                    </button>
-                  </div>
-                </div>
-
-                {/* Emergency Services */}
-                <div className="quick-action-card emergency-action">
-                  <div className="action-icon">🚨</div>
-                  <div className="action-content">
-                    <h4>Need Help?</h4>
-                    <p>Customer support</p>
-                    <p className="action-subtitle">Report issues or get assistance</p>
-                    <button 
-                      className="help-btn"
-                      onClick={() => {
-                        toast.success('Support team will contact you shortly!');
-                      }}
-                    >
-                      Get Help
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Quick Stats */}
-              <div className="quick-stats-section">
-                <h4>📊 Live Stats</h4>
-                <div className="stats-grid">
-                  <div className="stat-item">
-                    <span className="stat-label">Current Queue</span>
-                    <span className="stat-value">{salon.queueLength} people</span>
-                  </div>
-                  <div className="stat-item">
-                    <span className="stat-label">Average Wait</span>
-                    <span className="stat-value">{salon.waitTime} min</span>
-                  </div>
-                  <div className="stat-item">
-                    <span className="stat-label">Status</span>
-                    <span className={`stat-value ${salon.opening_hours?.open_now ? 'open' : 'closed'}`}>
-                      {salon.opening_hours?.open_now ? 'Open' : 'Closed'}
-                    </span>
-                  </div>
-                  <div className="stat-item">
-                    <span className="stat-label">Rating</span>
-                    <span className="stat-value">{salon.rating}⭐</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'services' && (
+          {activeTab === 'bookAppointment' && (
             <div className="services-tab">
               {bookingStep === 1 && (
                 <div className="service-selection">
@@ -757,8 +598,172 @@ const SalonDetails = ({ salon, onClose, onBookingComplete, initialTab = 'overvie
             </div>
           )}
 
-          {activeTab === 'reviews' && (
-            <ReviewsTab salon={salon} />
+          {activeTab === 'moreInfo' && (
+            <div className="more-info-tab">
+              <div className="contact-actions">
+                <h3>Contact & Actions</h3>
+                <div className="action-buttons">
+                  <button 
+                    className="contact-btn"
+                    onClick={() => {
+                      // Generate a phone number for demo
+                      const phone = `+91 ${Math.floor(Math.random() * 9000000000) + 1000000000}`;
+                      window.open(`tel:${phone}`, '_self');
+                    }}
+                  >
+                    📞 Call Salon
+                  </button>
+                  <button 
+                    className="contact-btn"
+                    onClick={() => {
+                      const address = encodeURIComponent(salon.formatted_address || salon.vicinity);
+                      window.open(`https://maps.google.com/?q=${address}`, '_blank');
+                    }}
+                  >
+                    🗺️ Get Directions
+                  </button>
+                  <button 
+                    className="contact-btn"
+                    onClick={() => {
+                      const shareText = `Check out ${salon.name} - ${salon.type} located at ${salon.vicinity}. Rating: ${salon.rating}⭐`;
+                      if (navigator.share) {
+                        navigator.share({
+                          title: salon.name,
+                          text: shareText,
+                          url: window.location.href
+                        });
+                      } else {
+                        navigator.clipboard.writeText(shareText);
+                        alert('Salon details copied to clipboard!');
+                      }
+                    }}
+                  >
+                    📤 Share Salon
+                  </button>
+                  <button 
+                    className="contact-btn"
+                    onClick={() => {
+                      // Scroll to reviews section
+                      const reviewsSection = document.querySelector('.reviews-section');
+                      if (reviewsSection) {
+                        reviewsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }
+                    }}
+                  >
+                    ⭐ See Google Reviews
+                  </button>
+                  <button 
+                    className="contact-btn"
+                    onClick={() => {
+                      alert('For help, please contact our support team at support@babuu.com or call +91-XXXXXXXXXX');
+                    }}
+                  >
+                    ❓ Need Help
+                  </button>
+                </div>
+              </div>
+
+              <div className="salon-info-section">
+                <h3>Salon Information</h3>
+                <div className="info-grid">
+                  <div className="info-item">
+                    <span className="info-label">📍 Address:</span>
+                    <span className="info-value">{salon.formatted_address || salon.vicinity}</span>
+                  </div>
+                  <div className="info-item">
+                    <span className="info-label">⭐ Rating:</span>
+                    <span className="info-value">{salon.rating} ({salon.user_ratings_total} reviews)</span>
+                  </div>
+                  <div className="info-item">
+                    <span className="info-label">🕒 Status:</span>
+                    <span className={`info-value ${salon.opening_hours?.open_now ? 'open' : 'closed'}`}>
+                      {salon.opening_hours?.open_now ? 'Open Now' : 'Closed'}
+                    </span>
+                  </div>
+                  <div className="info-item">
+                    <span className="info-label">💰 Price Level:</span>
+                    <span className="info-value">{'₹'.repeat(salon.price_level || 2)} ({salon.price_level || 2}/4)</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="services-section">
+                <h3>Available Services</h3>
+                <div className="services-list">
+                  {salon.services.map((service, index) => (
+                    <div key={index} className="service-item">
+                      <span className="service-name">{service}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="reviews-section">
+                <h3>Customer Reviews</h3>
+                <div className="reviews-summary">
+                  <div className="rating-overview">
+                    <div className="rating-score">
+                      <span className="score">{salon.rating}</span>
+                      <div className="stars">
+                        {[1, 2, 3, 4, 5].map(star => (
+                          <span key={star} className={`star ${star <= Math.floor(salon.rating) ? 'filled' : ''}`}>
+                            ⭐
+                          </span>
+                        ))}
+                      </div>
+                      <span className="review-count">Based on {salon.user_ratings_total} reviews</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="reviews-list">
+                  {/* Generate sample reviews */}
+                  {[
+                    {
+                      name: "Priya S.",
+                      rating: 5,
+                      comment: "Excellent service! The staff is very professional and the ambiance is great. Highly recommend for hair styling.",
+                      date: "2 days ago"
+                    },
+                    {
+                      name: "Rahul M.",
+                      rating: 4,
+                      comment: "Good haircut and reasonable prices. The wait time was a bit long but worth it.",
+                      date: "1 week ago"
+                    },
+                    {
+                      name: "Anjali K.",
+                      rating: 5,
+                      comment: "Amazing facial treatment! My skin feels so fresh and glowing. Will definitely come back.",
+                      date: "2 weeks ago"
+                    },
+                    {
+                      name: "Vikash T.",
+                      rating: 4,
+                      comment: "Clean salon with good hygiene standards. The barber was skilled and gave exactly what I asked for.",
+                      date: "3 weeks ago"
+                    }
+                  ].map((review, index) => (
+                    <div key={index} className="review-item">
+                      <div className="review-header">
+                        <div className="reviewer-info">
+                          <span className="reviewer-name">{review.name}</span>
+                          <div className="review-stars">
+                            {[1, 2, 3, 4, 5].map(star => (
+                              <span key={star} className={`star ${star <= review.rating ? 'filled' : ''}`}>
+                                ⭐
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        <span className="review-date">{review.date}</span>
+                      </div>
+                      <p className="review-comment">{review.comment}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           )}
         </div>
 

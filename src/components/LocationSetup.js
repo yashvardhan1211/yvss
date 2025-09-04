@@ -33,7 +33,7 @@ const LocationSetup = ({
     <div className="location-setup">
       <div className="location-setup-content">
         <div className="location-setup-header">
-          <h1>Wanna style?</h1>
+          <h1>Babuu — Groom kar de aapko?</h1>
           <p>Just tell us your location</p>
         </div>
 

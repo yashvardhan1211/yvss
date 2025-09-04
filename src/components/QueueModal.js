@@ -48,17 +48,45 @@ const QueueModal = ({ salon, onClose, onJoinQueue, services }) => {
       ...customerDetails,
       selectedServices,
       totalAmount: getTotalAmount(),
-      totalDuration: getTotalDuration()
+      totalDuration: getTotalDuration(),
+      salonName: salon.name,
+      salonId: salon.id
     };
 
-    await onJoinQueue(queueData);
+    try {
+      // Show loading toast
+      toast.loading('Initializing payment...');
+      
+      // Process payment with Razorpay
+      const paymentResult = await processRazorpayPayment(queueData);
+      
+      // If payment successful, join queue
+      if (paymentResult && paymentResult.success) {
+        // Add payment ID to queue data
+        const updatedQueueData = {
+          ...queueData,
+          paymentId: paymentResult.paymentData.razorpay_payment_id
+        };
+        
+        // Dismiss loading toast
+        toast.dismiss();
+        toast.success('Payment successful! Joining queue...');
+        
+        // Join queue with payment data
+        await onJoinQueue(updatedQueueData);
+      }
+    } catch (error) {
+      console.error('Payment or queue join failed:', error);
+      toast.dismiss();
+      toast.error(error.message || 'Payment failed. Please try again.');
+    }
   };
 
   return (
     <div className="queue-modal-overlay">
       <div className="queue-modal">
         <div className="queue-modal-header">
-          <h2>🚶‍♂️ Join Queue - {salon.name}</h2>
+          <h2>Join Queue - {salon.name}</h2>
           <button className="close-btn" onClick={onClose}>×</button>
         </div>
 
@@ -77,9 +105,9 @@ const QueueModal = ({ salon, onClose, onJoinQueue, services }) => {
         <div className="queue-modal-content">
           {step === 1 && (
             <div className="service-selection">
-              <h3>Select Services for Queue</h3>
+              <h3>🎯 Select Your Services</h3>
               <p className="queue-info">
-                💡 Select the services you want when it's your turn. Payment is required to secure your spot in the queue.
+                ✨ Choose the services you'd like when it's your turn. Secure payment ensures your guaranteed spot in the queue.
               </p>
               
               <div className="services-grid">
@@ -97,9 +125,7 @@ const QueueModal = ({ salon, onClose, onJoinQueue, services }) => {
                         <span className="price">₹{service.price}</span>
                       </div>
                     </div>
-                    <div className="service-checkbox">
-                      {selectedServices.find(s => s.id === service.id) ? '✅' : '⭕'}
-                    </div>
+                    <div className="service-checkbox"></div>
                   </div>
                 ))}
               </div>
@@ -124,9 +150,9 @@ const QueueModal = ({ salon, onClose, onJoinQueue, services }) => {
 
           {step === 2 && (
             <div className="customer-details">
-              <h3>Your Details</h3>
+              <h3>📝 Your Information</h3>
               <p className="queue-info">
-                📱 We'll send you real-time updates about your queue position and when it's your turn.
+                🔔 Stay updated with real-time notifications about your queue position and estimated arrival time.
               </p>
               
               <div className="form-grid">
@@ -221,13 +247,13 @@ const QueueModal = ({ salon, onClose, onJoinQueue, services }) => {
 
         <div className="queue-modal-footer">
           <div className="queue-benefits">
-            <h4>✨ Queue Benefits</h4>
+            <h4>Why Choose Our Queue System?</h4>
             <ul>
-              <li>🔔 Real-time position updates</li>
-              <li>📱 SMS & push notifications</li>
-              <li>⏰ Accurate wait time estimates</li>
-              <li>🚫 No physical waiting required</li>
-              <li>💳 Secure payment processing</li>
+              <li>• Instant position updates</li>
+              <li>• Smart notifications</li>
+              <li>• Precise timing estimates</li>
+              <li>• Skip the physical wait</li>
+              <li>• Bank-level security</li>
             </ul>
           </div>
         </div>

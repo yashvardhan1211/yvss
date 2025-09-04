@@ -60,7 +60,7 @@ const loadRazorpay = () => {
 // Create Razorpay order
 export const createRazorpayOrder = async (bookingData) => {
   try {
-    console.log('📋 Creating order for booking:', bookingData);
+    console.log('Creating order for booking:', bookingData);
     
     // Validate booking data
     if (!bookingData.totalAmount || bookingData.totalAmount <= 0) {
@@ -115,7 +115,7 @@ export const processRazorpayPayment = async (bookingData) => {
     }
 
     // Create order
-    console.log('📋 Creating Razorpay order...');
+    console.log('Creating Razorpay order...');
     const orderData = await createRazorpayOrder(bookingData);
     console.log('✅ Order created:', orderData);
 
@@ -163,7 +163,7 @@ export const processRazorpayPayment = async (bookingData) => {
         }
       };
 
-      console.log('🚀 Opening Razorpay checkout with options:', options);
+      console.log('Opening Razorpay checkout with options:', options);
 
       try {
         const rzp = new window.Razorpay(options);

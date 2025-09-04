@@ -6,6 +6,15 @@ import LocationSetup from './components/LocationSetup';
 import OwnerLogin from './components/OwnerLogin';
 import OwnerDashboard from './components/OwnerDashboard';
 import SalonDetails from './components/SalonDetails';
+import JoinQueuePage from './components/JoinQueuePage';
+import BookAppointmentPage from './components/BookAppointmentPage';
+import MoreInfoPage from './components/MoreInfoPage';
+import QueueModal from './components/QueueModal';
+import BookingUpdatesModal from './components/BookingUpdatesModal';
+import { useRealTimeQueue } from './hooks/useRealTimeQueue';
+import toast from 'react-hot-toast';
+import websocketService from './services/websocketService';
+import ConnectionStatus from './components/ConnectionStatus';
 
 // Customer App Component
 function CustomerApp() {
@@ -20,6 +29,10 @@ function CustomerApp() {
   const [showSalonDetails, setShowSalonDetails] = useState(false);
   const [salonDetailsInitialTab, setSalonDetailsInitialTab] = useState('overview');
   
+  // Queue Modal state
+  const [showQueueModal, setShowQueueModal] = useState(false);
+  const [queueSalon, setQueueSalon] = useState(null);
+  
   // New state for filtering and sorting
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('distance');
@@ -31,6 +44,16 @@ function CustomerApp() {
   // Bookings state
   const [userBookings, setUserBookings] = useState([]);
   const [showBookings, setShowBookings] = useState(false);
+  
+  // Real-time booking updates state
+  const [currentBooking, setCurrentBooking] = useState(null);
+  const [showBookingUpdates, setShowBookingUpdates] = useState(false);
+  
+  // Mobile salon view state
+  const [showJoinQueuePage, setShowJoinQueuePage] = useState(false);
+  const [showBookAppointmentPage, setShowBookAppointmentPage] = useState(false);
+  const [showMoreInfoPage, setShowMoreInfoPage] = useState(false);
+  const [selectedSalonForPage, setSelectedSalonForPage] = useState(null);
 
   // Map removed for cleaner design
 
@@ -102,7 +125,7 @@ function CustomerApp() {
         return;
       }
 
-      console.log('🔍 Requesting location access...');
+      console.log('Requesting location access...');
       
       const options = {
         enableHighAccuracy: true,
@@ -183,8 +206,8 @@ function CustomerApp() {
 
   // HARD SEARCH: Aggressive multi-strategy salon discovery
   const searchNearbyPlaces = async (location) => {
-    console.log('🔍 HARD SEARCH: Starting aggressive salon discovery near:', location);
-    console.log('🔍 Location data received:', {
+    console.log('HARD SEARCH: Starting aggressive salon discovery near:', location);
+    console.log('Location data received:', {
       lat: location.lat,
       lng: location.lng,
       address: location.address
@@ -246,13 +269,13 @@ function CustomerApp() {
       let allResults = [];
       
       // STRATEGY 1: Comprehensive Text Search with location-specific queries
-      console.log('🎯 STRATEGY 1: Comprehensive text search for salons...');
+      console.log('STRATEGY 1: Comprehensive text search for salons...');
       
       // Add location-specific famous salon searches
       const locationSpecificQueries = [];
       const locationLower = (location.address || '').toLowerCase();
       
-      console.log('🔍 Processing location:', locationLower);
+      console.log('Processing location:', locationLower);
       
       if (locationLower.includes('patia') || locationLower.includes('bhubaneswar')) {
         locationSpecificQueries.push(
@@ -332,7 +355,7 @@ function CustomerApp() {
       }
       
       // STRATEGY 2: Comprehensive Nearby Search (always run)
-      console.log('🎯 STRATEGY 2: Comprehensive nearby search...');
+      console.log('STRATEGY 2: Comprehensive nearby search...');
       const nearbySearches = [
         { type: 'beauty_salon', radius: 25000, keyword: null },
         { type: 'hair_care', radius: 25000, keyword: null },
@@ -346,7 +369,7 @@ function CustomerApp() {
       
       for (const search of nearbySearches) {
         try {
-          console.log(`🔍 Nearby search: ${search.type} (${search.radius/1000}km)${search.keyword ? ` - ${search.keyword}` : ''}`);
+          console.log(`Nearby search: ${search.type} (${search.radius/1000}km)${search.keyword ? ` - ${search.keyword}` : ''}`);
           const results = await new Promise((resolve, reject) => {
             const request = {
               location: new window.google.maps.LatLng(location.lat, location.lng),
@@ -386,7 +409,7 @@ function CustomerApp() {
       
       // STRATEGY 3: Broader area search if still limited results
       if (allResults.length < 10) {
-        console.log('🎯 STRATEGY 3: Broader area search...');
+        console.log('STRATEGY 3: Broader area search...');
         const cityName = (location.address || 'nearby area').split(',')[0].trim(); // Get city name
         const broadQueries = [
           `salon ${cityName}`,
@@ -399,7 +422,7 @@ function CustomerApp() {
         
         for (const query of broadQueries) {
           try {
-            console.log(`🔍 Broad search: "${query}"`);
+            console.log(`Broad search: "${query}"`);
             const results = await new Promise((resolve, reject) => {
               const request = {
                 query: query,
@@ -429,7 +452,7 @@ function CustomerApp() {
       }
       
       // Process and filter all results with enhanced filtering
-      console.log(`🔍 Processing ${allResults.length} total results...`);
+      console.log(`Processing ${allResults.length} total results...`);
       
       // Remove duplicates based on place_id and apply enhanced filtering
       const uniqueResults = [];
@@ -476,7 +499,7 @@ function CustomerApp() {
       
       // Debug: Show what we found
       if (uniqueResults.length > 0) {
-        console.log('🎯 HARD SEARCH RESULTS:');
+        console.log('HARD SEARCH RESULTS:');
         uniqueResults.slice(0, 15).forEach((place, index) => {
           const distance = calculateDistance(location.lat, location.lng, 
             place.geometry.location.lat(), place.geometry.location.lng());
@@ -492,7 +515,7 @@ function CustomerApp() {
         console.log('   • Network connectivity problems');
         console.log('   • Location coordinates invalid or not recognized');
         console.log('');
-        console.log('🔧 TROUBLESHOOTING STEPS:');
+        console.log('TROUBLESHOOTING STEPS:');
         console.log('   1. Check Google Console > APIs & Services > Quotas');
         console.log('   2. Verify API key in .env file');
         console.log('   3. Try a major city like "Mumbai" or "Delhi"');
@@ -612,6 +635,103 @@ function CustomerApp() {
       'Gents Salon': ['Haircut', 'Beard Styling', 'Hair Wash', 'Facial']
     };
     return servicesByType[salonType] || ['Haircut', 'Hair Styling'];
+  };
+
+  // Get detailed services for queue modal
+  const getServicesForSalon = (salon) => {
+    const baseServices = {
+      'Beauty Salon': [
+        { id: 1, name: 'Haircut & Styling', duration: 45, price: 500, description: 'Professional haircut with styling' },
+        { id: 2, name: 'Hair Wash & Blow Dry', duration: 30, price: 300, description: 'Deep cleansing and styling' },
+        { id: 3, name: 'Facial Treatment', duration: 60, price: 800, description: 'Deep cleansing facial with mask' },
+        { id: 4, name: 'Eyebrow Threading', duration: 15, price: 150, description: 'Precise eyebrow shaping' },
+        { id: 5, name: 'Manicure', duration: 45, price: 400, description: 'Complete nail care and polish' },
+        { id: 6, name: 'Pedicure', duration: 60, price: 600, description: 'Foot care and nail polish' }
+      ],
+      'Barber Shop': [
+        { id: 1, name: 'Classic Haircut', duration: 30, price: 300, description: 'Traditional men\'s haircut' },
+        { id: 2, name: 'Beard Trim & Style', duration: 20, price: 200, description: 'Professional beard grooming' },
+        { id: 3, name: 'Hot Towel Shave', duration: 30, price: 350, description: 'Traditional wet shave experience' },
+        { id: 4, name: 'Hair Wash & Style', duration: 25, price: 250, description: 'Shampoo and styling' },
+        { id: 5, name: 'Mustache Trim', duration: 10, price: 100, description: 'Precise mustache grooming' }
+      ],
+      'Spa & Salon': [
+        { id: 1, name: 'Luxury Haircut', duration: 60, price: 800, description: 'Premium haircut with consultation' },
+        { id: 2, name: 'Deep Tissue Massage', duration: 90, price: 1500, description: 'Therapeutic full body massage' },
+        { id: 3, name: 'Aromatherapy Facial', duration: 75, price: 1200, description: 'Relaxing facial with essential oils' },
+        { id: 4, name: 'Body Spa Package', duration: 120, price: 2500, description: 'Complete body treatment' },
+        { id: 5, name: 'Hair Spa Treatment', duration: 90, price: 1000, description: 'Deep conditioning hair treatment' }
+      ],
+      'Unisex Salon': [
+        { id: 1, name: 'Haircut (Men/Women)', duration: 45, price: 400, description: 'Professional unisex haircut' },
+        { id: 2, name: 'Hair Coloring', duration: 120, price: 1200, description: 'Professional hair coloring service' },
+        { id: 3, name: 'Facial Treatment', duration: 60, price: 700, description: 'Suitable for all skin types' },
+        { id: 4, name: 'Threading & Waxing', duration: 30, price: 300, description: 'Hair removal services' },
+        { id: 5, name: 'Bridal Package', duration: 180, price: 3000, description: 'Complete bridal makeover' }
+      ]
+    };
+
+    return baseServices[salon.type] || baseServices['Beauty Salon'];
+  };
+
+  // Handle salon selection for join queue
+  const handleJoinQueueSelect = (salon) => {
+    setSelectedSalonForPage(salon);
+    setShowJoinQueuePage(true);
+  };
+
+  // Handle salon selection for book appointment
+  const handleBookAppointmentSelect = (salon) => {
+    setSelectedSalonForPage(salon);
+    setShowBookAppointmentPage(true);
+  };
+
+  // Handle salon selection for more info
+  const handleMoreInfoSelect = (salon) => {
+    setSelectedSalonForPage(salon);
+    setShowMoreInfoPage(true);
+  };
+
+  // Handle direct queue joining
+  const handleDirectJoinQueue = (salon) => {
+    setQueueSalon(salon);
+    setShowQueueModal(true);
+  };
+
+  // Handle queue joining completion
+  const handleQueueJoinComplete = (queueData) => {
+    console.log('Queue joined:', queueData);
+    toast.success(`Successfully joined queue at ${queueSalon.name}!`);
+    
+    // Create a booking object with necessary details
+    const newBooking = {
+      id: `queue_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      salonId: queueSalon.id,
+      salonName: queueSalon.name,
+      customerName: queueData.name,
+      customerPhone: queueData.phone,
+      customerEmail: queueData.email,
+      selectedServices: queueData.selectedServices,
+      totalAmount: queueData.totalAmount,
+      totalDuration: queueData.totalDuration,
+      type: 'queue',
+      status: 'in_queue',
+      paymentId: queueData.paymentId,
+      createdAt: new Date().toISOString(),
+      queuePosition: queueSalon.queueLength + 1,
+      estimatedWaitTime: queueSalon.waitTime
+    };
+    
+    // Add to user bookings
+    setUserBookings(prev => [newBooking, ...prev]);
+    
+    // Set as current booking for real-time updates
+    setCurrentBooking(newBooking);
+    
+    // Close queue modal and show booking updates modal
+    setShowQueueModal(false);
+    setQueueSalon(null);
+    setShowBookingUpdates(true);
   };
 
   // Initialize map with salons
@@ -739,7 +859,7 @@ function CustomerApp() {
     try {
       setLoadingStatus('Getting your location...');
       const location = await getCurrentLocation();
-      console.log('📍 Location obtained:', location);
+      console.log('Location obtained:', location);
       
       setLoadingStatus('Finding address...');
       
@@ -778,7 +898,7 @@ function CustomerApp() {
         address: address
       };
       
-      console.log('🎯 Calling HARD SEARCH with current location:', locationData);
+      console.log('Calling HARD SEARCH with current location:', locationData);
       const results = await searchNearbyPlaces(locationData);
       
       if (results && results.length > 0) {
@@ -848,7 +968,7 @@ function CustomerApp() {
     try {
       setLoadingStatus('Finding location...');
       const result = await geocodeAddress(address);
-      console.log('📍 Geocoded location:', result);
+      console.log('Geocoded location:', result);
       
       setUserLocation({ lat: result.lat, lng: result.lng });
       setLocationName(result.formatted_address);
@@ -861,13 +981,13 @@ function CustomerApp() {
         address: result.formatted_address || address
       };
       
-      console.log('🎯 Calling HARD SEARCH with:', locationData);
-      console.log('🎯 About to call searchNearbyPlaces function...');
+      console.log('Calling HARD SEARCH with:', locationData);
+      console.log('About to call searchNearbyPlaces function...');
       
       const results = await searchNearbyPlaces(locationData);
       
-      console.log('🎯 HARD SEARCH returned:', results);
-      console.log('🎯 Number of results:', results ? results.length : 0);
+      console.log('HARD SEARCH returned:', results);
+      console.log('Number of results:', results ? results.length : 0);
       
       if (results && results.length > 0) {
         setSalons(results);
@@ -961,10 +1081,14 @@ function CustomerApp() {
   // Render location setup if no location
   if (!userLocation) {
     return (
-      <div>
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%)',
+        color: '#ffffff'
+      }}>
         <div className="app-nav">
           <Link to="/owner" className="owner-link">
-            💼 Salon Owner? Manage Your Queue →
+            Salon Owner? Manage Your Queue →
           </Link>
         </div>
         <LocationSetup 
@@ -980,25 +1104,35 @@ function CustomerApp() {
 
   // Main app view with salons
   return (
-    <div className="app">
+    <div className="app" style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%)',
+      color: '#ffffff'
+    }}>
       <header className="app-header">
-        <h1>✨ Salon Finder</h1>
-        <p>📍 {locationName}</p>
+        <div className="header-brand">
+          <h1>Babuu</h1>
+          <p className="tagline">Groom kar de aapko?</p>
+        </div>
+        <div className="location-info">
+          <span className="location-icon"></span>
+          <span className="location-text">{locationName}</span>
+        </div>
         <div className="header-actions">
           <button 
             onClick={() => setShowBookings(true)}
             className="bookings-btn"
           >
-            📋 My Bookings ({userBookings.length})
+            My Bookings ({userBookings.length})
           </button>
           <button 
             onClick={() => setUserLocation(null)}
             className="change-location-btn"
           >
-            📍 Change Location
+            Change Location
           </button>
           <Link to="/owner" className="owner-link-header">
-            💼 Owner Dashboard
+            Owner Dashboard
           </Link>
         </div>
       </header>
@@ -1009,12 +1143,11 @@ function CustomerApp() {
           <div className="search-input-container">
             <input
               type="text"
-              placeholder="Search salons, services, or areas..."
+              placeholder="🔎 Search salons, services, or areas..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="search-input"
             />
-            <span className="search-icon">🔍</span>
           </div>
         </div>
 
@@ -1023,7 +1156,7 @@ function CustomerApp() {
             onClick={() => setShowFilters(!showFilters)}
             className={`filter-toggle-btn ${showFilters ? 'active' : ''}`}
           >
-            🔧 Filters {(filterByService !== 'all' || filterByRating !== 'all' || filterByPrice !== 'all') && '●'}
+            Filters {(filterByService !== 'all' || filterByRating !== 'all' || filterByPrice !== 'all') && '●'}
           </button>
 
           <select
@@ -1031,12 +1164,12 @@ function CustomerApp() {
             onChange={(e) => setSortBy(e.target.value)}
             className="sort-select"
           >
-            <option value="distance">📍 Sort by Distance</option>
-            <option value="rating">⭐ Sort by Rating</option>
-            <option value="price_low">💰 Price: Low to High</option>
-            <option value="price_high">💰 Price: High to Low</option>
-            <option value="queue">👥 Shortest Queue</option>
-            <option value="name">🔤 Sort by Name</option>
+            <option value="distance">Sort by Distance</option>
+            <option value="rating">Sort by Rating</option>
+            <option value="price_low">Price: Low to High</option>
+            <option value="price_high">Price: High to Low</option>
+            <option value="queue">Shortest Queue</option>
+            <option value="name">Sort by Name</option>
           </select>
         </div>
       </div>
@@ -1082,15 +1215,15 @@ function CustomerApp() {
                 className="filter-select"
               >
                 <option value="all">Any Price</option>
-                <option value="1">💰 Budget</option>
-                <option value="2">💰💰 Moderate</option>
-                <option value="3">💰💰💰 Premium</option>
-                <option value="4">💰💰💰💰 Luxury</option>
+                <option value="1">Budget</option>
+                <option value="2">Moderate</option>
+                <option value="3">Premium</option>
+                <option value="4">Luxury</option>
               </select>
             </div>
 
             <button onClick={clearFilters} className="clear-filters-btn">
-              🗑️ Clear All
+              Clear All
             </button>
           </div>
         </div>
@@ -1119,53 +1252,75 @@ function CustomerApp() {
             </div>
             {(filteredSalons.length > 0 ? filteredSalons : salons).map(salon => (
               <div key={salon.place_id} className="salon-card">
-                <div className="salon-card-content">
-                  <div className="salon-main-info">
-                    <h3>{salon.name}</h3>
-                    <p className="salon-type">{salon.type}</p>
-                    <p className="salon-address">{salon.vicinity}</p>
-                    <div className="salon-rating">
-                      ⭐ {salon.rating} ({salon.user_ratings_total} reviews)
+                <div className="salon-card-header">
+                  <div className="salon-avatar">
+                    <div className="salon-logo">
+                      {salon.name.charAt(0)}
                     </div>
-                    <div className="salon-distance">
-                      📍 {salon.distance < 1 ? 
-                        `${Math.round(salon.distance * 1000)}m away` : 
-                        `${salon.distance.toFixed(1)}km away`
-                      }
+                  </div>
+                  <div className="salon-header-info">
+                    <h3 className="salon-name">{salon.name}</h3>
+                    <div className="salon-meta">
+                      <div className="salon-rating">
+                        <span className="star-icon">★</span>
+                        <span className="rating-value">{salon.rating}</span>
+                        <span className="distance-info">• {salon.distance < 1 ? 
+                          `${Math.round(salon.distance * 1000)}m` : 
+                          `${salon.distance.toFixed(1)}km`
+                        }</span>
+                      </div>
+                      <div className={`salon-status ${salon.opening_hours?.open_now ? 'open' : 'closed'}`}>
+                        <span className="status-dot"></span>
+                        <span>{salon.opening_hours?.open_now ? 'Open' : 'Closed'}</span>
+                      </div>
                     </div>
-                    <div className="salon-status">
-                      {salon.opening_hours?.open_now ? '🟢 Open' : '🔴 Closed'}
-                    </div>
-                    <div className="salon-services">
-                      Services: {salon.services.join(', ')}
-                    </div>
+                  </div>
+                  <div className={`wait-badge ${salon.queueLength <= 2 ? 'low' : salon.queueLength <= 5 ? 'medium' : 'high'}`}>
+                    {salon.queueLength <= 2 ? 'Low' : salon.queueLength <= 5 ? 'Med' : 'High'}
+                  </div>
+                </div>
+
+                <div className="salon-card-body">
+                  <div className="salon-address">
+                    <span className="address-icon"></span>
+                    <span className="address-text">{salon.vicinity}</span>
                   </div>
                   
-                  <div className="salon-actions">
-                    <div className={`queue-status ${salon.queueLength <= 3 ? 'low' : salon.queueLength >= 6 ? 'high' : ''}`}>
-                      {salon.queueLength} in queue
+                  <div className="live-queue-section">
+                    <div className="queue-header">
+                      <span className="queue-title">Live Queue</span>
+                      <span className="queue-position">#{salon.queueLength + 1} in queue</span>
                     </div>
-                    <button 
-                      className="book-now-btn"
-                      onClick={() => {
-                        setSelectedSalon(salon);
-                        setSalonDetailsInitialTab('quickActions');
-                        setShowSalonDetails(true);
-                      }}
-                    >
-                      Quick Actions
-                    </button>
-                    <button 
-                      className="more-details-btn"
-                      onClick={() => {
-                        setSelectedSalon(salon);
-                        setSalonDetailsInitialTab('overview');
-                        setShowSalonDetails(true);
-                      }}
-                    >
-                      More Details
-                    </button>
+                    <div className="queue-time">~{salon.queueLength * 15} min wait</div>
                   </div>
+
+                  <div className="salon-services-preview">
+                    <span className="services-label">Services:</span>
+                    <span className="services-list">{salon.services.slice(0, 3).join(', ')}</span>
+                    {salon.services.length > 3 && <span className="services-more">+{salon.services.length - 3} more</span>}
+                  </div>
+                </div>
+
+                <div className="salon-card-actions">
+                  <button 
+                    className="action-btn primary-action"
+                    onClick={() => handleJoinQueueSelect(salon)}
+                  >
+                    Join Queue
+                  </button>
+                  <button 
+                    className="action-btn secondary-action"
+                    onClick={() => handleBookAppointmentSelect(salon)}
+                  >
+                    Book Appointment
+                  </button>
+                  <button 
+                    className="action-btn secondary-action info-action"
+                    onClick={() => handleMoreInfoSelect(salon)}
+                  >
+                    <span className="info-icon">ℹ️</span>
+                    More Info
+                  </button>
                 </div>
               </div>
             ))}
@@ -1174,23 +1329,74 @@ function CustomerApp() {
           {/* Map removed for cleaner design */}
         </div>
 
+        {/* Join Queue Page */}
+        {showJoinQueuePage && selectedSalonForPage && (
+          <JoinQueuePage 
+            salon={selectedSalonForPage}
+            onClose={() => {
+              setShowJoinQueuePage(false);
+              setSelectedSalonForPage(null);
+            }}
+            onComplete={() => {
+              setShowJoinQueuePage(false);
+              setSelectedSalonForPage(null);
+            }}
+          />
+        )}
+
+        {/* Book Appointment Page */}
+        {showBookAppointmentPage && selectedSalonForPage && (
+          <BookAppointmentPage 
+            salon={selectedSalonForPage}
+            onClose={() => {
+              setShowBookAppointmentPage(false);
+              setSelectedSalonForPage(null);
+            }}
+            onComplete={() => {
+              setShowBookAppointmentPage(false);
+              setSelectedSalonForPage(null);
+            }}
+          />
+        )}
+
+        {/* More Info Page */}
+        {showMoreInfoPage && selectedSalonForPage && (
+          <MoreInfoPage 
+            salon={selectedSalonForPage}
+            onClose={() => {
+              setShowMoreInfoPage(false);
+              setSelectedSalonForPage(null);
+            }}
+          />
+        )}
+
         {/* Salon Details Modal */}
         {showSalonDetails && selectedSalon && (
-          <SalonDetails
+          <SalonDetails 
             salon={selectedSalon}
-            initialTab={salonDetailsInitialTab}
             onClose={() => {
               setShowSalonDetails(false);
               setSelectedSalon(null);
-              setSalonDetailsInitialTab('overview');
             }}
             onBookingComplete={(bookingData) => {
-              console.log('Booking completed:', bookingData);
-              // Save the booking
-              const savedBooking = saveBooking(bookingData);
-              if (savedBooking) {
-                console.log('Booking saved:', savedBooking);
-              }
+              // Add to user bookings
+              setUserBookings(prev => [bookingData, ...prev]);
+              setShowSalonDetails(false);
+              setSelectedSalon(null);
+            }}
+            initialTab={salonDetailsInitialTab}
+          />
+        )}
+
+        {/* Queue Modal */}
+        {showQueueModal && queueSalon && (
+          <QueueModal
+            salon={queueSalon}
+            services={getServicesForSalon(queueSalon)}
+            onJoinQueue={handleQueueJoinComplete}
+            onClose={() => {
+              setShowQueueModal(false);
+              setQueueSalon(null);
             }}
           />
         )}
@@ -1202,6 +1408,14 @@ function CustomerApp() {
             onClose={() => setShowBookings(false)}
             onUpdateBooking={updateBookingStatus}
             salons={salons}
+          />
+        )}
+        
+        {/* Real-time Booking Updates Modal */}
+        {showBookingUpdates && currentBooking && (
+          <BookingUpdatesModal
+            booking={currentBooking}
+            onClose={() => setShowBookingUpdates(false)}
           />
         )}
       </main>
@@ -1233,10 +1447,36 @@ function App() {
   // Only use basename for GitHub Pages, not for localhost or Vercel
   const basename = process.env.NODE_ENV === 'production' && window.location.hostname === 'yashvardhan1211.github.io' ? '/yvss' : '';
   
+  // Generate a persistent user ID for WebSocket connections
+  const [userId] = useState(() => {
+    const storedId = localStorage.getItem('userId');
+    if (storedId) return storedId;
+    
+    const newId = `user_${Math.random().toString(36).substr(2, 9)}`;
+    localStorage.setItem('userId', newId);
+    return newId;
+  });
+  
+  // Initialize WebSocket connection
+  useEffect(() => {
+    if (userId) {
+      websocketService.connect(userId, 'customer');
+    }
+    
+    return () => {
+      websocketService.disconnect();
+    };
+  }, [userId]);
+  
   return (
     <Router basename={basename}>
-      <div>
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%)',
+        color: '#ffffff'
+      }}>
         <Toaster position="top-right" />
+        <ConnectionStatus />
         <Routes>
           <Route path="/" element={<CustomerApp />} />
           <Route path="/owner" element={<OwnerPortal />} />
@@ -1280,10 +1520,10 @@ function MyBookingsModal({ bookings, onClose, onUpdateBooking, salons }) {
       case 'confirmed': return '✅';
       case 'in_progress': return '🔄';
       case 'waiting': return '⏳';
-      case 'in_queue': return '🚶‍♂️';
-      case 'completed': return '✨';
-      case 'cancelled': return '❌';
-      default: return '📋';
+      case 'in_queue': return 'In Queue';
+      case 'completed': return 'Completed';
+      case 'cancelled': return 'Cancelled';
+      default: return 'Booking';
     }
   };
 

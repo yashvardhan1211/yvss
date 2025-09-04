@@ -2035,3 +2035,256 @@ Actions Tab Styles */
     padding: 6px 10px;
   }
 }
+/* M
+ore Info Tab Styles */
+.more-info-tab {
+  padding: 24px;
+}
+
+.salon-info-section,
+.services-section,
+.contact-actions {
+  margin-bottom: 32px;
+}
+
+.salon-info-section h3,
+.services-section h3,
+.contact-actions h3 {
+  color: #1d1d1f;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #f5f5f7;
+}
+
+.info-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #495057;
+  min-width: 120px;
+}
+
+.info-value {
+  color: #212529;
+  flex: 1;
+}
+
+.info-value.open {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.info-value.closed {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+.services-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.service-item {
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #007aff 0%, #5856d6 100%);
+  color: white;
+  border-radius: 12px;
+  text-align: center;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.2);
+}
+
+.action-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.contact-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 20px;
+  background: white;
+  border: 2px solid #007aff;
+  color: #007aff;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.contact-btn:hover {
+  background: #007aff;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .action-buttons {
+    grid-template-columns: 1fr;
+  }
+  
+  .services-list {
+    grid-template-columns: 1fr;
+  }
+  
+  .info-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .info-label {
+    min-width: auto;
+  }
+}/* 
+Reviews Section Styles */
+.reviews-section {
+  margin-bottom: 32px;
+}
+
+.reviews-summary {
+  margin-bottom: 24px;
+}
+
+.rating-overview {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  border: 1px solid #dee2e6;
+}
+
+.rating-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.score {
+  font-size: 48px;
+  font-weight: 700;
+  color: #007aff;
+  line-height: 1;
+}
+
+.stars {
+  display: flex;
+  gap: 4px;
+}
+
+.star {
+  font-size: 20px;
+  opacity: 0.3;
+  transition: opacity 0.2s ease;
+}
+
+.star.filled {
+  opacity: 1;
+}
+
+.review-count {
+  color: #6c757d;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.review-item {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.review-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.reviewer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.reviewer-name {
+  font-weight: 600;
+  color: #212529;
+  font-size: 16px;
+}
+
+.review-stars {
+  display: flex;
+  gap: 2px;
+}
+
+.review-stars .star {
+  font-size: 14px;
+}
+
+.review-date {
+  color: #6c757d;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.review-comment {
+  color: #495057;
+  line-height: 1.6;
+  margin: 0;
+  font-size: 14px;
+}
+
+/* Responsive adjustments for reviews */
+@media (max-width: 768px) {
+  .review-header {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .score {
+    font-size: 36px;
+  }
+  
+  .rating-overview {
+    padding: 20px;
+  }
+}

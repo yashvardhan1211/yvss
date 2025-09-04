@@ -109,7 +109,7 @@ export const notificationTemplates = {
   }),
 
   yourTurn: (salonName) => ({
-    title: "It's Your Turn! 🚀",
+    title: "It's Your Turn!",
     body: `Please head to ${salonName} - your service is ready to begin`,
     icon: '/icons/turn-icon.png',
     badge: '/icons/badge-icon.png',
@@ -132,7 +132,7 @@ export const notificationTemplates = {
   }),
 
   paymentReceived: (amount, salonName) => ({
-    title: 'Payment Received 💰',
+    title: 'Payment Received',
     body: `Received $${amount} payment from customer at ${salonName}`,
     icon: '/icons/payment-icon.png',
     badge: '/icons/badge-icon.png',
