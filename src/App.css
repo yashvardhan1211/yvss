@@ -451,9 +451,9 @@ body, html, #root, .app {
 /* Live Queue Section */
 .live-queue-section {
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 12px;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -461,24 +461,60 @@ body, html, #root, .app {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
+}
+
+.queue-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.queue-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
 }
 
 .queue-title {
   color: #ffffff;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .queue-position {
-  color: #64b5f6;
-  font-size: 14px;
-  font-weight: 600;
+  color: #4fc3f7;
+  font-size: 18px;
+  font-weight: 700;
+  background: rgba(79, 195, 247, 0.1);
+  padding: 2px 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(79, 195, 247, 0.3);
 }
 
 .queue-time {
   color: rgba(255, 255, 255, 0.7);
-  font-size: 13px;
+  font-size: 11px;
+}
+
+.queue-join-btn {
+  padding: 10px 16px;
+  background: linear-gradient(135deg, rgba(79, 195, 247, 0.35), rgba(79, 195, 247, 0.2));
+  border: 1px solid rgba(79, 195, 247, 0.5);
+  color: #e8f7ff;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(79, 195, 247, 0.25);
+  letter-spacing: 0.2px;
+}
+
+.queue-join-btn:hover {
+  background: linear-gradient(135deg, rgba(79, 195, 247, 0.5), rgba(79, 195, 247, 0.3));
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(79, 195, 247, 0.35);
 }
 
 /* Services Preview */
@@ -516,40 +552,54 @@ body, html, #root, .app {
 
 .action-btn {
   flex: 1;
-  border: none;
   padding: 12px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 12px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: center;
-  font-family: 'Inter', sans-serif;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
 .primary-action {
-  background: #007AFF;
+  background: rgba(0, 122, 255, 0.2);
+  backdrop-filter: blur(15px);
   color: #ffffff;
   transition: all 0.3s ease;
   font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 6px 20px rgba(0, 122, 255, 0.2);
 }
 
 .primary-action:hover {
-  background: #0056b3;
+  background: rgba(0, 122, 255, 0.3);
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 122, 255, 0.4);
+  box-shadow: 0 8px 24px rgba(0, 122, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .secondary-action {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
   color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
 .secondary-action:hover {
   background: rgba(255, 255, 255, 0.15);
-  transform: translateY(-1px);
-  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 /* More Info button styling */
@@ -565,10 +615,30 @@ body, html, #root, .app {
   color: #64b5f6;
 }
 
-.info-action:hover {
-  background: rgba(100, 181, 246, 0.2);
-  border-color: rgba(100, 181, 246, 0.5);
+.info-action {
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 14px;
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
   color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  flex: 1;
+  min-height: 44px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.info-action:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 .info-icon {

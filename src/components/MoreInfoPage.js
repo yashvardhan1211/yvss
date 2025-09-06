@@ -21,19 +21,19 @@ const MoreInfoPage = ({ salon, onClose }) => {
           <div style={{ padding: '24px' }}>
             {/* Salon Header */}
             <div style={{ marginBottom: '32px', textAlign: 'center' }}>
-              <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#212529', marginBottom: '8px' }}>
+              <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#ffffff', marginBottom: '8px' }}>
                 {salon.name}
               </h2>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', marginBottom: '8px' }}>
                 <span style={{ color: '#ffc107', fontSize: '16px' }}>★</span>
-                <span style={{ fontSize: '16px', fontWeight: '500', color: '#212529' }}>
+                <span style={{ fontSize: '16px', fontWeight: '500', color: '#ffffff' }}>
                   {salon.rating || '4.5'}
                 </span>
-                <span style={{ fontSize: '14px', color: '#6c757d' }}>
+                <span style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.7)' }}>
                   ({salon.user_ratings_total || '150'} reviews)
                 </span>
               </div>
-              <p style={{ fontSize: '14px', color: '#6c757d', margin: 0 }}>
+              <p style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.7)', margin: 0 }}>
                 {salon.vicinity || salon.formatted_address}
               </p>
             </div>
@@ -44,7 +44,7 @@ const MoreInfoPage = ({ salon, onClose }) => {
                 onClick={() => handleCall(salon.formatted_phone_number)}
                 style={{
                   padding: '16px',
-                  backgroundColor: '#007bff',
+                  backgroundColor: '#4fc3f7',
                   border: 'none',
                   borderRadius: '8px',
                   color: '#ffffff',
@@ -82,33 +82,33 @@ const MoreInfoPage = ({ salon, onClose }) => {
 
             {/* Salon Details */}
             <div style={{ marginBottom: '24px' }}>
-              <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '16px', color: '#212529' }}>
+              <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '16px', color: '#ffffff' }}>
                 Salon Information
               </h3>
               
-              <div style={{ backgroundColor: '#f8f9fa', borderRadius: '8px', padding: '16px' }}>
+              <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: '8px', padding: '16px' }}>
                 <div style={{ marginBottom: '16px' }}>
-                  <div style={{ fontSize: '14px', fontWeight: '500', color: '#495057', marginBottom: '4px' }}>
+                  <div style={{ fontSize: '14px', fontWeight: '500', color: 'rgba(255, 255, 255, 0.8)', marginBottom: '4px' }}>
                     Address
                   </div>
-                  <div style={{ fontSize: '14px', color: '#212529' }}>
+                  <div style={{ fontSize: '14px', color: '#ffffff' }}>
                     {salon.formatted_address || salon.vicinity}
                   </div>
                 </div>
 
                 {salon.formatted_phone_number && (
                   <div style={{ marginBottom: '16px' }}>
-                    <div style={{ fontSize: '14px', fontWeight: '500', color: '#495057', marginBottom: '4px' }}>
+                    <div style={{ fontSize: '14px', fontWeight: '500', color: 'rgba(255, 255, 255, 0.8)', marginBottom: '4px' }}>
                       Phone
                     </div>
-                    <div style={{ fontSize: '14px', color: '#212529' }}>
+                    <div style={{ fontSize: '14px', color: '#ffffff' }}>
                       {salon.formatted_phone_number}
                     </div>
                   </div>
                 )}
 
                 <div style={{ marginBottom: '16px' }}>
-                  <div style={{ fontSize: '14px', fontWeight: '500', color: '#495057', marginBottom: '4px' }}>
+                  <div style={{ fontSize: '14px', fontWeight: '500', color: 'rgba(255, 255, 255, 0.8)', marginBottom: '4px' }}>
                     Hours
                   </div>
                   <div style={{ fontSize: '14px', color: '#28a745' }}>
@@ -117,10 +117,10 @@ const MoreInfoPage = ({ salon, onClose }) => {
                 </div>
 
                 <div>
-                  <div style={{ fontSize: '14px', fontWeight: '500', color: '#495057', marginBottom: '4px' }}>
+                  <div style={{ fontSize: '14px', fontWeight: '500', color: 'rgba(255, 255, 255, 0.8)', marginBottom: '4px' }}>
                     Price Level
                   </div>
-                  <div style={{ fontSize: '14px', color: '#212529' }}>
+                  <div style={{ fontSize: '14px', color: '#ffffff' }}>
                     {'₹'.repeat(salon.price_level || 2)} • Moderate
                   </div>
                 </div>
@@ -129,7 +129,7 @@ const MoreInfoPage = ({ salon, onClose }) => {
 
             {/* Services */}
             <div style={{ marginBottom: '24px' }}>
-              <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '16px', color: '#212529' }}>
+              <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '16px', color: '#ffffff' }}>
                 Services Offered
               </h3>
               
@@ -140,13 +140,13 @@ const MoreInfoPage = ({ salon, onClose }) => {
                   <div
                     key={index}
                     style={{
-                      backgroundColor: '#e3f2fd',
-                      border: '1px solid #bbdefb',
+                      backgroundColor: 'rgba(79, 195, 247, 0.2)',
+                      border: '1px solid rgba(79, 195, 247, 0.3)',
                       borderRadius: '6px',
                       padding: '8px 12px',
                       fontSize: '13px',
                       fontWeight: '500',
-                      color: '#1976d2',
+                      color: '#4fc3f7',
                       textAlign: 'center'
                     }}
                   >
@@ -158,7 +158,7 @@ const MoreInfoPage = ({ salon, onClose }) => {
 
             {/* Amenities */}
             <div>
-              <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '16px', color: '#212529' }}>
+              <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '16px', color: '#ffffff' }}>
                 Amenities
               </h3>
               
@@ -178,7 +178,7 @@ const MoreInfoPage = ({ salon, onClose }) => {
                       alignItems: 'center',
                       gap: '8px',
                       fontSize: '14px',
-                      color: '#495057'
+                      color: 'rgba(255, 255, 255, 0.8)'
                     }}
                   >
                     {amenity}
@@ -192,19 +192,19 @@ const MoreInfoPage = ({ salon, onClose }) => {
       case 'reviews':
         return (
           <div style={{ padding: '24px' }}>
-            <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '24px', color: '#212529' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '24px', color: '#ffffff' }}>
               Customer Reviews
             </h3>
 
             {/* Overall Rating */}
             <div style={{
-              backgroundColor: '#f8f9fa',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
               borderRadius: '8px',
               padding: '20px',
               marginBottom: '24px',
               textAlign: 'center'
             }}>
-              <div style={{ fontSize: '36px', fontWeight: '700', color: '#007bff', marginBottom: '8px' }}>
+              <div style={{ fontSize: '36px', fontWeight: '700', color: '#4fc3f7', marginBottom: '8px' }}>
                 {salon.rating || '4.5'}
               </div>
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
@@ -220,7 +220,7 @@ const MoreInfoPage = ({ salon, onClose }) => {
                   </span>
                 ))}
               </div>
-              <div style={{ fontSize: '14px', color: '#6c757d' }}>
+              <div style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.7)' }}>
                 Based on {salon.user_ratings_total || '150'} reviews
               </div>
             </div>
@@ -250,18 +250,18 @@ const MoreInfoPage = ({ salon, onClose }) => {
                 <div
                   key={index}
                   style={{
-                    backgroundColor: '#ffffff',
-                    border: '1px solid #e9ecef',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
                     borderRadius: '8px',
                     padding: '16px',
                     marginBottom: '12px'
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <div style={{ fontSize: '16px', fontWeight: '600', color: '#212529' }}>
+                    <div style={{ fontSize: '16px', fontWeight: '600', color: '#ffffff' }}>
                       {review.name}
                     </div>
-                    <div style={{ fontSize: '12px', color: '#6c757d' }}>
+                    <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.7)' }}>
                       {review.time}
                     </div>
                   </div>
@@ -278,7 +278,7 @@ const MoreInfoPage = ({ salon, onClose }) => {
                       </span>
                     ))}
                   </div>
-                  <p style={{ fontSize: '14px', color: '#495057', margin: 0, lineHeight: '1.4' }}>
+                  <p style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.8)', margin: 0, lineHeight: '1.4' }}>
                     {review.review}
                   </p>
                 </div>
@@ -290,13 +290,13 @@ const MoreInfoPage = ({ salon, onClose }) => {
       case 'help':
         return (
           <div style={{ padding: '24px' }}>
-            <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '24px', color: '#212529' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '24px', color: '#ffffff' }}>
               Help & Support
             </h3>
 
             {/* FAQ */}
             <div style={{ marginBottom: '32px' }}>
-              <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px', color: '#212529' }}>
+              <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px', color: '#ffffff' }}>
                 Frequently Asked Questions
               </h4>
               
@@ -321,17 +321,17 @@ const MoreInfoPage = ({ salon, onClose }) => {
                 <div
                   key={index}
                   style={{
-                    backgroundColor: '#f8f9fa',
-                    border: '1px solid #e9ecef',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
                     borderRadius: '8px',
                     padding: '16px',
                     marginBottom: '12px'
                   }}
                 >
-                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#212529', marginBottom: '8px' }}>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#ffffff', marginBottom: '8px' }}>
                     {faq.question}
                   </div>
-                  <div style={{ fontSize: '14px', color: '#495057', lineHeight: '1.4' }}>
+                  <div style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.8)', lineHeight: '1.4' }}>
                     {faq.answer}
                   </div>
                 </div>
@@ -340,7 +340,7 @@ const MoreInfoPage = ({ salon, onClose }) => {
 
             {/* Contact Support */}
             <div>
-              <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px', color: '#212529' }}>
+              <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px', color: '#ffffff' }}>
                 Need More Help?
               </h4>
               
@@ -349,7 +349,7 @@ const MoreInfoPage = ({ salon, onClose }) => {
                   onClick={() => handleCall(salon.formatted_phone_number)}
                   style={{
                     padding: '16px',
-                    backgroundColor: '#007bff',
+                    backgroundColor: '#4fc3f7',
                     border: 'none',
                     borderRadius: '8px',
                     color: '#ffffff',
@@ -421,7 +421,7 @@ const MoreInfoPage = ({ salon, onClose }) => {
       left: 0,
       right: 0,
       bottom: 0,
-      background: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+      background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
       zIndex: 99999,
       overflowY: 'auto'
     }}>
@@ -429,16 +429,17 @@ const MoreInfoPage = ({ salon, onClose }) => {
         maxWidth: '500px',
         margin: '0 auto',
         minHeight: '100vh',
-        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
         backdropFilter: 'blur(20px)',
-        border: '1px solid rgba(255, 255, 255, 0.2)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
       }}>
         {/* Header */}
         <div style={{
           padding: '16px 20px',
-          borderBottom: '1px solid #e9ecef',
-          backgroundColor: '#ffffff',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          backgroundColor: 'rgba(255, 255, 255, 0.08)',
+          backdropFilter: 'blur(20px)',
           position: 'sticky',
           top: 0,
           zIndex: 100
@@ -452,7 +453,7 @@ const MoreInfoPage = ({ salon, onClose }) => {
                 fontSize: '16px',
                 cursor: 'pointer',
                 padding: '4px',
-                color: '#007bff'
+                color: '#4fc3f7'
               }}
             >
               ← Back
@@ -461,7 +462,7 @@ const MoreInfoPage = ({ salon, onClose }) => {
               margin: 0,
               fontSize: '18px',
               fontWeight: '600',
-              color: '#212529',
+              color: '#ffffff',
               textAlign: 'center',
               flex: 1
             }}>
@@ -474,8 +475,8 @@ const MoreInfoPage = ({ salon, onClose }) => {
         {/* Tab Navigation */}
         <div style={{
           display: 'flex',
-          backgroundColor: '#f8f9fa',
-          borderBottom: '1px solid #e9ecef'
+          backgroundColor: 'rgba(255, 255, 255, 0.03)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
         }}>
           {[
             { id: 'info', label: 'Info', icon: 'ℹ️' },
@@ -488,10 +489,10 @@ const MoreInfoPage = ({ salon, onClose }) => {
               style={{
                 flex: 1,
                 padding: '16px 8px',
-                backgroundColor: activeTab === tab.id ? '#ffffff' : 'transparent',
+                backgroundColor: activeTab === tab.id ? 'rgba(79, 195, 247, 0.2)' : 'transparent',
                 border: 'none',
-                borderBottom: activeTab === tab.id ? '2px solid #007bff' : '2px solid transparent',
-                color: activeTab === tab.id ? '#007bff' : '#6c757d',
+                borderBottom: activeTab === tab.id ? '2px solid #4fc3f7' : '2px solid transparent',
+                color: activeTab === tab.id ? '#4fc3f7' : 'rgba(255, 255, 255, 0.7)',
                 fontSize: '14px',
                 fontWeight: '600',
                 cursor: 'pointer',

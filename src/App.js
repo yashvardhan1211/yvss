@@ -1288,10 +1288,20 @@ function CustomerApp() {
                   
                   <div className="live-queue-section">
                     <div className="queue-header">
-                      <span className="queue-title">Live Queue</span>
-                      <span className="queue-position">#{salon.queueLength + 1} in queue</span>
+                      <div className="queue-left">
+                        <span className="queue-title">Live Queue</span>
+                        <div className="queue-time">~{salon.queueLength * 15} min wait</div>
+                      </div>
+                      <div className="queue-right">
+                        <span className="queue-position">#{salon.queueLength + 1} in queue</span>
+                        <button 
+                          className="queue-join-btn"
+                          onClick={() => handleJoinQueueSelect(salon)}
+                        >
+                          Join Queue
+                        </button>
+                      </div>
                     </div>
-                    <div className="queue-time">~{salon.queueLength * 15} min wait</div>
                   </div>
 
                   <div className="salon-services-preview">
@@ -1304,21 +1314,14 @@ function CustomerApp() {
                 <div className="salon-card-actions">
                   <button 
                     className="action-btn primary-action"
-                    onClick={() => handleJoinQueueSelect(salon)}
-                  >
-                    Join Queue
-                  </button>
-                  <button 
-                    className="action-btn secondary-action"
                     onClick={() => handleBookAppointmentSelect(salon)}
                   >
                     Book Appointment
                   </button>
                   <button 
-                    className="action-btn secondary-action info-action"
+                    className="info-action"
                     onClick={() => handleMoreInfoSelect(salon)}
                   >
-                    <span className="info-icon">ℹ️</span>
                     More Info
                   </button>
                 </div>

@@ -83,7 +83,7 @@ const JoinQueuePage = ({ salon, onClose, onComplete }) => {
         contact: customerDetails.phone
       },
       theme: {
-        color: '#4facfe'
+        color: '#5dade2'
       },
       modal: {
         ondismiss: function() {
@@ -180,7 +180,7 @@ const JoinQueuePage = ({ salon, onClose, onComplete }) => {
                       boxShadow: selectedServices.includes(service.id) ? '0 0 15px rgba(255, 255, 255, 0.5)' : 'none'
                     }}>
                       {selectedServices.includes(service.id) && (
-                        <span style={{ color: '#4facfe', fontSize: '12px', fontWeight: 'bold' }}>✓</span>
+                        <span style={{ color: '#5dade2', fontSize: '12px', fontWeight: 'bold' }}>✓</span>
                       )}
                     </div>
                   </div>
@@ -457,7 +457,7 @@ const JoinQueuePage = ({ salon, onClose, onComplete }) => {
       left: 0,
       right: 0,
       bottom: 0,
-      background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+      background: 'linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #2c3e50 100%)',
       zIndex: 99999,
       overflowY: 'auto'
     }}>
@@ -526,7 +526,7 @@ const JoinQueuePage = ({ salon, onClose, onComplete }) => {
                   height: '32px',
                   borderRadius: '50%',
                   backgroundColor: step <= currentStep ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.3)',
-                  color: step <= currentStep ? '#4facfe' : 'rgba(255, 255, 255, 0.7)',
+                  color: step <= currentStep ? '#5dade2' : 'rgba(255, 255, 255, 0.7)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -557,10 +557,12 @@ const JoinQueuePage = ({ salon, onClose, onComplete }) => {
         {currentStep < 4 && (
           <div style={{
             padding: '20px',
-            borderTop: '1px solid #e9ecef',
-            backgroundColor: '#ffffff',
+            borderTop: '1px solid rgba(255, 255, 255, 0.2)',
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(15px)',
             position: 'sticky',
-            bottom: 0
+            bottom: 0,
+            marginTop: '24px'
           }}>
             <button
               onClick={handleNext}
@@ -574,16 +576,19 @@ const JoinQueuePage = ({ salon, onClose, onComplete }) => {
                 backgroundColor: 
                   (currentStep === 1 && selectedServices.length === 0) ||
                   (currentStep === 2 && (!customerDetails.name || !customerDetails.phone))
-                    ? '#e9ecef' : '#007bff',
-                border: 'none',
-                borderRadius: '8px',
+                    ? 'rgba(255, 255, 255, 0.2)' : 'rgba(93, 173, 226, 0.3)',
+                backdropFilter: 'blur(15px)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                borderRadius: '12px',
                 color: '#ffffff',
                 fontSize: '16px',
                 fontWeight: '600',
                 cursor: 
                   (currentStep === 1 && selectedServices.length === 0) ||
                   (currentStep === 2 && (!customerDetails.name || !customerDetails.phone))
-                    ? 'not-allowed' : 'pointer'
+                    ? 'not-allowed' : 'pointer',
+                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+                transition: 'all 0.3s ease'
               }}
             >
               {currentStep === 1 && 'Continue'}

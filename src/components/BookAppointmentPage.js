@@ -71,9 +71,48 @@ const BookAppointmentPage = ({ salon, onClose, onComplete }) => {
   };
 
   const handleBooking = () => {
-    setTimeout(() => {
-      setCurrentStep(4);
-    }, 1500);
+    // Calculate total amount
+    const totalAmount = selectedServices.reduce((total, serviceId) => {
+      const service = services.find(s => s.id === serviceId);
+      return total + service.price;
+    }, 0);
+
+    // Load Razorpay script
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => {
+      const options = {
+        key: process.env.REACT_APP_RAZORPAY_KEY_ID || 'rzp_test_9WaALb7AGtN5BB',
+        amount: totalAmount * 100, // Convert to paise
+        currency: 'INR',
+        name: salon.name,
+        description: 'Appointment Booking',
+        handler: function(response) {
+          // Payment successful
+          console.log('Payment successful:', response);
+          setCurrentStep(4);
+        },
+        prefill: {
+          name: customerDetails.name,
+          email: customerDetails.email,
+          contact: customerDetails.phone
+        },
+        theme: {
+          color: '#ff9a9e'
+        },
+        modal: {
+          ondismiss: function() {
+            console.log('Payment cancelled');
+          }
+        }
+      };
+
+      if (window.Razorpay) {
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+      }
+    };
+    document.head.appendChild(script);
   };
 
   const renderStepContent = () => {
@@ -81,13 +120,13 @@ const BookAppointmentPage = ({ salon, onClose, onComplete }) => {
       case 1:
         return (
           <div style={{ padding: '24px' }}>
-            <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '24px', color: '#212529' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '24px', color: '#ffffff' }}>
               Select Date & Time
             </h3>
             
             {/* Date Selection */}
             <div style={{ marginBottom: '24px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '12px', color: '#495057' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '12px', color: 'rgba(255, 255, 255, 0.8)' }}>
                 Choose Date
               </label>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '8px' }}>
@@ -97,10 +136,10 @@ const BookAppointmentPage = ({ salon, onClose, onComplete }) => {
                     onClick={() => setSelectedDate(day.date)}
                     style={{
                       padding: '12px 8px',
-                      border: selectedDate === day.date ? '2px solid #007bff' : '1px solid #e9ecef',
+                      border: selectedDate === day.date ? '2px solid #4fc3f7' : '1px solid rgba(255, 255, 255, 0.2)',
                       borderRadius: '8px',
-                      backgroundColor: selectedDate === day.date ? '#e3f2fd' : '#ffffff',
-                      color: selectedDate === day.date ? '#007bff' : '#495057',
+                      backgroundColor: selectedDate === day.date ? 'rgba(79, 195, 247, 0.2)' : 'rgba(255, 255, 255, 0.1)',
+                      color: selectedDate === day.date ? '#4fc3f7' : '#ffffff',
                       fontSize: '12px',
                       fontWeight: '500',
                       cursor: 'pointer',
@@ -116,7 +155,7 @@ const BookAppointmentPage = ({ salon, onClose, onComplete }) => {
             {/* Time Selection */}
             {selectedDate && (
               <div style={{ marginBottom: '24px' }}>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '12px', color: '#495057' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '12px', color: 'rgba(255, 255, 255, 0.8)' }}>
                   Choose Time
                 </label>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
@@ -126,10 +165,10 @@ const BookAppointmentPage = ({ salon, onClose, onComplete }) => {
                       onClick={() => setSelectedTime(time)}
                       style={{
                         padding: '10px',
-                        border: selectedTime === time ? '2px solid #007bff' : '1px solid #e9ecef',
+                        border: selectedTime === time ? '2px solid #4fc3f7' : '1px solid rgba(255, 255, 255, 0.2)',
                         borderRadius: '6px',
-                        backgroundColor: selectedTime === time ? '#e3f2fd' : '#ffffff',
-                        color: selectedTime === time ? '#007bff' : '#495057',
+                        backgroundColor: selectedTime === time ? 'rgba(79, 195, 247, 0.2)' : 'rgba(255, 255, 255, 0.1)',
+                        color: selectedTime === time ? '#4fc3f7' : '#ffffff',
                         fontSize: '13px',
                         fontWeight: '500',
                         cursor: 'pointer'
@@ -144,15 +183,15 @@ const BookAppointmentPage = ({ salon, onClose, onComplete }) => {
 
             {selectedDate && selectedTime && (
               <div style={{
-                backgroundColor: '#f8f9fa',
-                border: '1px solid #e9ecef',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
                 borderRadius: '8px',
                 padding: '16px'
               }}>
-                <div style={{ fontSize: '14px', color: '#6c757d', marginBottom: '4px' }}>
+                <div style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.7)', marginBottom: '4px' }}>
                   Selected Appointment
                 </div>
-                <div style={{ fontSize: '16px', fontWeight: '600', color: '#212529' }}>
+                <div style={{ fontSize: '16px', fontWeight: '600', color: '#ffffff' }}>
                   {new Date(selectedDate).toLocaleDateString('en-US', { 
                     weekday: 'long', 
                     year: 'numeric', 
@@ -168,7 +207,7 @@ const BookAppointmentPage = ({ salon, onClose, onComplete }) => {
       case 2:
         return (
           <div style={{ padding: '24px' }}>
-            <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '24px', color: '#212529' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '24px', color: '#ffffff' }}>
               Select Services
             </h3>
             
@@ -178,8 +217,8 @@ const BookAppointmentPage = ({ salon, onClose, onComplete }) => {
                   key={service.id}
                   onClick={() => toggleService(service.id)}
                   style={{
-                    backgroundColor: selectedServices.includes(service.id) ? '#e3f2fd' : '#ffffff',
-                    border: selectedServices.includes(service.id) ? '2px solid #007bff' : '1px solid #e9ecef',
+                    backgroundColor: selectedServices.includes(service.id) ? 'rgba(79, 195, 247, 0.2)' : 'rgba(255, 255, 255, 0.1)',
+                    border: selectedServices.includes(service.id) ? '2px solid #4fc3f7' : '1px solid rgba(255, 255, 255, 0.2)',
                     borderRadius: '8px',
                     padding: '16px',
                     marginBottom: '12px',
@@ -191,23 +230,23 @@ const BookAppointmentPage = ({ salon, onClose, onComplete }) => {
                   }}
                 >
                   <div>
-                    <div style={{ fontSize: '16px', fontWeight: '500', color: '#212529', marginBottom: '4px' }}>
+                    <div style={{ fontSize: '16px', fontWeight: '500', color: '#ffffff', marginBottom: '4px' }}>
                       {service.name}
                     </div>
-                    <div style={{ fontSize: '14px', color: '#6c757d' }}>
+                    <div style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.7)' }}>
                       {service.duration}
                     </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{ fontSize: '16px', fontWeight: '600', color: '#212529' }}>
+                    <span style={{ fontSize: '16px', fontWeight: '600', color: '#ffffff' }}>
                       ₹{service.price}
                     </span>
                     <div style={{
                       width: '20px',
                       height: '20px',
                       borderRadius: '50%',
-                      border: '2px solid #007bff',
-                      backgroundColor: selectedServices.includes(service.id) ? '#007bff' : 'transparent',
+                      border: '2px solid #4fc3f7',
+                      backgroundColor: selectedServices.includes(service.id) ? '#4fc3f7' : 'transparent',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center'
@@ -223,14 +262,14 @@ const BookAppointmentPage = ({ salon, onClose, onComplete }) => {
 
             {selectedServices.length > 0 && (
               <div style={{
-                backgroundColor: '#f8f9fa',
-                border: '1px solid #e9ecef',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
                 borderRadius: '8px',
                 padding: '16px'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '16px', fontWeight: '600' }}>Total Amount:</span>
-                  <span style={{ fontSize: '16px', fontWeight: '600', color: '#007bff' }}>₹{getSelectedServicesTotal()}</span>
+                  <span style={{ fontSize: '16px', fontWeight: '600', color: '#ffffff' }}>Total Amount:</span>
+                  <span style={{ fontSize: '16px', fontWeight: '600', color: '#4fc3f7' }}>₹{getSelectedServicesTotal()}</span>
                 </div>
               </div>
             )}
@@ -240,12 +279,12 @@ const BookAppointmentPage = ({ salon, onClose, onComplete }) => {
       case 3:
         return (
           <div style={{ padding: '24px' }}>
-            <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '24px', color: '#212529' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '24px', color: '#ffffff' }}>
               Your Details
             </h3>
             
             <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '8px', color: '#495057' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '8px', color: 'rgba(255, 255, 255, 0.8)' }}>
                 Full Name *
               </label>
               <input
@@ -255,17 +294,19 @@ const BookAppointmentPage = ({ salon, onClose, onComplete }) => {
                 style={{
                   width: '100%',
                   padding: '12px',
-                  border: '1px solid #ced4da',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
                   borderRadius: '6px',
                   fontSize: '16px',
-                  outline: 'none'
+                  outline: 'none',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  color: '#ffffff'
                 }}
                 placeholder="Enter your full name"
               />
             </div>
 
             <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '8px', color: '#495057' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '8px', color: 'rgba(255, 255, 255, 0.8)' }}>
                 Phone Number *
               </label>
               <input
@@ -275,17 +316,19 @@ const BookAppointmentPage = ({ salon, onClose, onComplete }) => {
                 style={{
                   width: '100%',
                   padding: '12px',
-                  border: '1px solid #ced4da',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
                   borderRadius: '6px',
                   fontSize: '16px',
-                  outline: 'none'
+                  outline: 'none',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  color: '#ffffff'
                 }}
                 placeholder="Enter your phone number"
               />
             </div>
 
             <div style={{ marginBottom: '24px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '8px', color: '#495057' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '8px', color: 'rgba(255, 255, 255, 0.8)' }}>
                 Email (Optional)
               </label>
               <input
@@ -295,10 +338,12 @@ const BookAppointmentPage = ({ salon, onClose, onComplete }) => {
                 style={{
                   width: '100%',
                   padding: '12px',
-                  border: '1px solid #ced4da',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
                   borderRadius: '6px',
                   fontSize: '16px',
-                  outline: 'none'
+                  outline: 'none',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  color: '#ffffff'
                 }}
                 placeholder="Enter your email"
               />
@@ -306,28 +351,28 @@ const BookAppointmentPage = ({ salon, onClose, onComplete }) => {
 
             {/* Booking Summary */}
             <div style={{
-              backgroundColor: '#f8f9fa',
-              border: '1px solid #e9ecef',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
               borderRadius: '8px',
               padding: '16px'
             }}>
-              <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>Booking Summary</h4>
-              <div style={{ marginBottom: '8px' }}>
+              <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px', color: '#ffffff' }}>Booking Summary</h4>
+              <div style={{ marginBottom: '8px', color: '#ffffff' }}>
                 <strong>Date & Time:</strong> {new Date(selectedDate).toLocaleDateString()} at {selectedTime}
               </div>
-              <div style={{ marginBottom: '12px' }}>
+              <div style={{ marginBottom: '12px', color: '#ffffff' }}>
                 <strong>Services:</strong>
               </div>
               {selectedServices.map(serviceId => {
                 const service = services.find(s => s.id === serviceId);
                 return (
-                  <div key={serviceId} style={{ marginLeft: '16px', marginBottom: '4px', fontSize: '14px' }}>
+                  <div key={serviceId} style={{ marginLeft: '16px', marginBottom: '4px', fontSize: '14px', color: 'rgba(255, 255, 255, 0.8)' }}>
                     • {service.name} - ₹{service.price}
                   </div>
                 );
               })}
-              <hr style={{ margin: '12px 0', border: 'none', borderTop: '1px solid #dee2e6' }} />
-              <div style={{ fontWeight: '600' }}>
+              <hr style={{ margin: '12px 0', border: 'none', borderTop: '1px solid rgba(255, 255, 255, 0.2)' }} />
+              <div style={{ fontWeight: '600', color: '#ffffff' }}>
                 <strong>Total:</strong> ₹{getSelectedServicesTotal()}
               </div>
             </div>
@@ -342,19 +387,19 @@ const BookAppointmentPage = ({ salon, onClose, onComplete }) => {
               <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px', color: '#28a745' }}>
                 Appointment Booked!
               </h3>
-              <p style={{ fontSize: '14px', color: '#6c757d' }}>
+              <p style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.7)' }}>
                 Your appointment has been successfully scheduled.
               </p>
             </div>
 
             <div style={{
-              backgroundColor: '#d4edda',
-              border: '1px solid #c3e6cb',
+              backgroundColor: 'rgba(76, 175, 80, 0.2)',
+              border: '1px solid rgba(76, 175, 80, 0.3)',
               borderRadius: '12px',
               padding: '24px',
               marginBottom: '24px'
             }}>
-              <div style={{ fontSize: '18px', fontWeight: '600', color: '#155724', marginBottom: '8px' }}>
+              <div style={{ fontSize: '18px', fontWeight: '600', color: '#4caf50', marginBottom: '8px' }}>
                 {new Date(selectedDate).toLocaleDateString('en-US', { 
                   weekday: 'long', 
                   year: 'numeric', 
@@ -362,52 +407,52 @@ const BookAppointmentPage = ({ salon, onClose, onComplete }) => {
                   day: 'numeric' 
                 })}
               </div>
-              <div style={{ fontSize: '24px', fontWeight: '700', color: '#155724' }}>
+              <div style={{ fontSize: '24px', fontWeight: '700', color: '#4caf50' }}>
                 {selectedTime}
               </div>
             </div>
 
             <div style={{
-              backgroundColor: '#f8f9fa',
-              border: '1px solid #e9ecef',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
               borderRadius: '8px',
               padding: '16px',
               marginBottom: '24px',
               textAlign: 'left'
             }}>
-              <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>Appointment Details</h4>
-              <div style={{ marginBottom: '8px' }}>
+              <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px', color: '#ffffff' }}>Appointment Details</h4>
+              <div style={{ marginBottom: '8px', color: '#ffffff' }}>
                 <strong>Salon:</strong> {salon.name}
               </div>
-              <div style={{ marginBottom: '8px' }}>
+              <div style={{ marginBottom: '8px', color: '#ffffff' }}>
                 <strong>Customer:</strong> {customerDetails.name}
               </div>
-              <div style={{ marginBottom: '8px' }}>
+              <div style={{ marginBottom: '8px', color: '#ffffff' }}>
                 <strong>Phone:</strong> {customerDetails.phone}
               </div>
-              <div style={{ marginBottom: '12px' }}>
+              <div style={{ marginBottom: '12px', color: '#ffffff' }}>
                 <strong>Services:</strong>
               </div>
               {selectedServices.map(serviceId => {
                 const service = services.find(s => s.id === serviceId);
                 return (
-                  <div key={serviceId} style={{ marginLeft: '16px', marginBottom: '4px', fontSize: '14px' }}>
+                  <div key={serviceId} style={{ marginLeft: '16px', marginBottom: '4px', fontSize: '14px', color: 'rgba(255, 255, 255, 0.8)' }}>
                     • {service.name} - ₹{service.price}
                   </div>
                 );
               })}
-              <hr style={{ margin: '12px 0', border: 'none', borderTop: '1px solid #dee2e6' }} />
-              <div style={{ fontWeight: '600' }}>
+              <hr style={{ margin: '12px 0', border: 'none', borderTop: '1px solid rgba(255, 255, 255, 0.2)' }} />
+              <div style={{ fontWeight: '600', color: '#ffffff' }}>
                 <strong>Total:</strong> ₹{getSelectedServicesTotal()}
               </div>
             </div>
 
-            <button
+                          <button
               onClick={() => onComplete()}
               style={{
                 width: '100%',
                 padding: '16px',
-                backgroundColor: '#28a745',
+                backgroundColor: '#4caf50',
                 border: 'none',
                 borderRadius: '8px',
                 color: '#ffffff',
@@ -433,24 +478,38 @@ const BookAppointmentPage = ({ salon, onClose, onComplete }) => {
       left: 0,
       right: 0,
       bottom: 0,
-      background: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%)',
+      background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
       zIndex: 99999,
       overflowY: 'auto'
     }}>
+      <style>
+        {`
+          input::placeholder {
+            color: rgba(255, 255, 255, 0.5) !important;
+          }
+          input {
+            color: #ffffff !important;
+          }
+          input:focus {
+            color: #ffffff !important;
+          }
+        `}
+      </style>
       <div style={{
         maxWidth: '500px',
         margin: '0 auto',
         minHeight: '100vh',
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
         backdropFilter: 'blur(20px)',
-        border: '1px solid rgba(255, 255, 255, 0.2)',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
       }}>
         {/* Header */}
         <div style={{
           padding: '16px 20px',
-          borderBottom: '1px solid #e9ecef',
-          backgroundColor: '#ffffff',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          backgroundColor: 'rgba(255, 255, 255, 0.08)',
+          backdropFilter: 'blur(20px)',
           position: 'sticky',
           top: 0,
           zIndex: 100
@@ -464,7 +523,7 @@ const BookAppointmentPage = ({ salon, onClose, onComplete }) => {
                 fontSize: '16px',
                 cursor: 'pointer',
                 padding: '4px',
-                color: '#007bff'
+                color: '#4fc3f7'
               }}
             >
               ← Back
@@ -473,7 +532,7 @@ const BookAppointmentPage = ({ salon, onClose, onComplete }) => {
               margin: 0,
               fontSize: '18px',
               fontWeight: '600',
-              color: '#212529',
+              color: '#ffffff',
               textAlign: 'center',
               flex: 1
             }}>
@@ -489,8 +548,8 @@ const BookAppointmentPage = ({ salon, onClose, onComplete }) => {
         {/* Progress Bar */}
         <div style={{
           padding: '20px',
-          backgroundColor: '#f8f9fa',
-          borderBottom: '1px solid #e9ecef'
+          backgroundColor: 'rgba(255, 255, 255, 0.03)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
             {[1, 2, 3, 4].map(step => (
@@ -499,8 +558,8 @@ const BookAppointmentPage = ({ salon, onClose, onComplete }) => {
                   width: '32px',
                   height: '32px',
                   borderRadius: '50%',
-                  backgroundColor: step <= currentStep ? '#007bff' : '#e9ecef',
-                  color: step <= currentStep ? '#ffffff' : '#6c757d',
+                  backgroundColor: step <= currentStep ? '#4fc3f7' : 'rgba(255, 255, 255, 0.2)',
+                  color: step <= currentStep ? '#ffffff' : 'rgba(255, 255, 255, 0.6)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -513,7 +572,7 @@ const BookAppointmentPage = ({ salon, onClose, onComplete }) => {
                   <div style={{
                     width: '24px',
                     height: '2px',
-                    backgroundColor: step < currentStep ? '#007bff' : '#e9ecef',
+                    backgroundColor: step < currentStep ? '#4fc3f7' : 'rgba(255, 255, 255, 0.2)',
                     margin: '0 4px'
                   }} />
                 )}
@@ -529,10 +588,12 @@ const BookAppointmentPage = ({ salon, onClose, onComplete }) => {
         {currentStep < 4 && (
           <div style={{
             padding: '20px',
-            borderTop: '1px solid #e9ecef',
-            backgroundColor: '#ffffff',
+            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(15px)',
             position: 'sticky',
-            bottom: 0
+            bottom: 0,
+            marginTop: '24px'
           }}>
             <button
               onClick={currentStep === 3 ? handleBooking : handleNext}
@@ -548,9 +609,10 @@ const BookAppointmentPage = ({ salon, onClose, onComplete }) => {
                   (currentStep === 1 && (!selectedDate || !selectedTime)) ||
                   (currentStep === 2 && selectedServices.length === 0) ||
                   (currentStep === 3 && (!customerDetails.name || !customerDetails.phone))
-                    ? '#e9ecef' : '#007bff',
-                border: 'none',
-                borderRadius: '8px',
+                    ? 'rgba(255, 255, 255, 0.1)' : 'rgba(79, 195, 247, 0.3)',
+                backdropFilter: 'blur(15px)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '12px',
                 color: '#ffffff',
                 fontSize: '16px',
                 fontWeight: '600',
@@ -558,7 +620,9 @@ const BookAppointmentPage = ({ salon, onClose, onComplete }) => {
                   (currentStep === 1 && (!selectedDate || !selectedTime)) ||
                   (currentStep === 2 && selectedServices.length === 0) ||
                   (currentStep === 3 && (!customerDetails.name || !customerDetails.phone))
-                    ? 'not-allowed' : 'pointer'
+                    ? 'not-allowed' : 'pointer',
+                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
+                transition: 'all 0.3s ease'
               }}
             >
               {currentStep === 1 && 'Continue'}
