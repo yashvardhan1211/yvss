@@ -228,12 +228,15 @@ const JoinQueuePage = ({ salon, onClose, onComplete }) => {
                 onChange={(e) => setCustomerDetails({...customerDetails, name: e.target.value})}
                 style={{
                   width: '100%',
-                  padding: '12px',
-                  border: '1px solid #ced4da',
-                  borderRadius: '6px',
+                  padding: '16px',
+                  border: '2px solid #e9ecef',
+                  borderRadius: '12px',
                   fontSize: '16px',
                   outline: 'none',
-                  transition: 'border-color 0.2s ease'
+                  transition: 'all 0.2s ease',
+                  backgroundColor: '#ffffff',
+                  boxSizing: 'border-box',
+                  minHeight: '56px'
                 }}
                 placeholder="Enter your full name"
               />
@@ -249,12 +252,15 @@ const JoinQueuePage = ({ salon, onClose, onComplete }) => {
                 onChange={(e) => setCustomerDetails({...customerDetails, phone: e.target.value})}
                 style={{
                   width: '100%',
-                  padding: '12px',
-                  border: '1px solid #ced4da',
-                  borderRadius: '6px',
+                  padding: '16px',
+                  border: '2px solid #e9ecef',
+                  borderRadius: '12px',
                   fontSize: '16px',
                   outline: 'none',
-                  transition: 'border-color 0.2s ease'
+                  transition: 'all 0.2s ease',
+                  backgroundColor: '#ffffff',
+                  boxSizing: 'border-box',
+                  minHeight: '56px'
                 }}
                 placeholder="Enter your phone number"
               />
@@ -270,12 +276,15 @@ const JoinQueuePage = ({ salon, onClose, onComplete }) => {
                 onChange={(e) => setCustomerDetails({...customerDetails, email: e.target.value})}
                 style={{
                   width: '100%',
-                  padding: '12px',
-                  border: '1px solid #ced4da',
-                  borderRadius: '6px',
+                  padding: '16px',
+                  border: '2px solid #e9ecef',
+                  borderRadius: '12px',
                   fontSize: '16px',
                   outline: 'none',
-                  transition: 'border-color 0.2s ease'
+                  transition: 'all 0.2s ease',
+                  backgroundColor: '#ffffff',
+                  boxSizing: 'border-box',
+                  minHeight: '56px'
                 }}
                 placeholder="Enter your email"
               />
@@ -459,20 +468,25 @@ const JoinQueuePage = ({ salon, onClose, onComplete }) => {
       bottom: 0,
       background: 'linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #2c3e50 100%)',
       zIndex: 99999,
-      overflowY: 'auto'
+      overflowY: 'auto',
+      padding: '0',
+      display: 'flex',
+      flexDirection: 'column'
     }}>
       <div style={{
+        width: '100%',
         maxWidth: '500px',
         margin: '0 auto',
         minHeight: '100vh',
         backgroundColor: 'rgba(255, 255, 255, 0.1)',
         backdropFilter: 'blur(20px)',
         border: '1px solid rgba(255, 255, 255, 0.2)',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+        borderRadius: '0'
       }}>
-        {/* Header */}
+        {/* Mobile-optimized Header */}
         <div style={{
-          padding: '16px 20px',
+          padding: '20px 20px 16px 20px',
           borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
           backgroundColor: 'rgba(255, 255, 255, 0.15)',
           backdropFilter: 'blur(10px)',
@@ -484,67 +498,102 @@ const JoinQueuePage = ({ salon, onClose, onComplete }) => {
             <button
               onClick={handleBack}
               style={{
-                backgroundColor: 'transparent',
+                backgroundColor: 'rgba(255, 255, 255, 0.2)',
                 border: 'none',
                 fontSize: '16px',
+                fontWeight: '600',
                 cursor: 'pointer',
-                padding: '4px',
-                color: '#ffffff'
+                padding: '12px 16px',
+                color: '#ffffff',
+                borderRadius: '12px',
+                minWidth: '60px',
+                minHeight: '44px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s ease'
               }}
             >
               ← Back
             </button>
             <h1 style={{
               margin: 0,
-              fontSize: '18px',
-              fontWeight: '600',
+              fontSize: '20px',
+              fontWeight: '700',
               color: '#ffffff',
               textAlign: 'center',
-              flex: 1
+              flex: 1,
+              padding: '0 16px'
             }}>
               {currentStep === 1 && 'Join Queue'}
               {currentStep === 2 && 'Your Details'}
               {currentStep === 3 && 'Payment'}
               {currentStep === 4 && 'Confirmed'}
             </h1>
-            <div style={{ width: '60px' }}></div>
+            <button
+              onClick={onClose}
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                border: 'none',
+                fontSize: '20px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                padding: '12px',
+                color: '#ffffff',
+                borderRadius: '12px',
+                minWidth: '44px',
+                minHeight: '44px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              ×
+            </button>
           </div>
         </div>
 
-        {/* Progress Bar */}
+        {/* Mobile-optimized Progress Bar */}
         <div style={{
-          padding: '20px',
+          padding: '16px 20px',
           backgroundColor: 'rgba(255, 255, 255, 0.1)',
           backdropFilter: 'blur(10px)',
           borderBottom: '1px solid rgba(255, 255, 255, 0.2)'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             {[1, 2, 3, 4].map(step => (
-              <div key={step} style={{ display: 'flex', alignItems: 'center' }}>
+              <div key={step} style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center',
+                flex: 1
+              }}>
                 <div style={{
-                  width: '32px',
-                  height: '32px',
+                  width: '36px',
+                  height: '36px',
                   borderRadius: '50%',
                   backgroundColor: step <= currentStep ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.3)',
-                  color: step <= currentStep ? '#5dade2' : 'rgba(255, 255, 255, 0.7)',
+                  color: step <= currentStep ? '#007bff' : 'rgba(255, 255, 255, 0.7)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  border: '1px solid rgba(255, 255, 255, 0.3)',
-                  boxShadow: step <= currentStep ? '0 4px 15px rgba(255, 255, 255, 0.2)' : 'none'
+                  fontSize: '16px',
+                  fontWeight: '700',
+                  border: '2px solid rgba(255, 255, 255, 0.3)',
+                  boxShadow: step <= currentStep ? '0 4px 15px rgba(255, 255, 255, 0.2)' : 'none',
+                  marginBottom: '4px'
                 }}>
                   {step < currentStep ? '✓' : step}
                 </div>
-                {step < 4 && (
-                  <div style={{
-                    width: '24px',
-                    height: '2px',
-                    backgroundColor: step < currentStep ? 'rgba(255, 255, 255, 0.8)' : 'rgba(255, 255, 255, 0.3)',
-                    margin: '0 4px'
-                  }} />
-                )}
+                <span style={{
+                  fontSize: '10px',
+                  color: step <= currentStep ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                  fontWeight: '500',
+                  textAlign: 'center'
+                }}>
+                  {step === 1 ? 'Services' : step === 2 ? 'Details' : step === 3 ? 'Payment' : 'Complete'}
+                </span>
               </div>
             ))}
           </div>
@@ -553,7 +602,7 @@ const JoinQueuePage = ({ salon, onClose, onComplete }) => {
         {/* Content */}
         {renderStepContent()}
 
-        {/* Footer */}
+        {/* Mobile-optimized Footer */}
         {currentStep < 4 && (
           <div style={{
             padding: '20px',
@@ -562,7 +611,7 @@ const JoinQueuePage = ({ salon, onClose, onComplete }) => {
             backdropFilter: 'blur(15px)',
             position: 'sticky',
             bottom: 0,
-            marginTop: '24px'
+            marginTop: 'auto'
           }}>
             <button
               onClick={handleNext}
@@ -572,23 +621,28 @@ const JoinQueuePage = ({ salon, onClose, onComplete }) => {
               }
               style={{
                 width: '100%',
-                padding: '16px',
+                padding: '20px',
                 backgroundColor: 
                   (currentStep === 1 && selectedServices.length === 0) ||
                   (currentStep === 2 && (!customerDetails.name || !customerDetails.phone))
-                    ? 'rgba(255, 255, 255, 0.2)' : 'rgba(93, 173, 226, 0.3)',
+                    ? 'rgba(255, 255, 255, 0.2)' : 'linear-gradient(135deg, #007bff, #0056cc)',
                 backdropFilter: 'blur(15px)',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                borderRadius: '12px',
+                border: 'none',
+                borderRadius: '16px',
                 color: '#ffffff',
-                fontSize: '16px',
-                fontWeight: '600',
+                fontSize: '18px',
+                fontWeight: '700',
                 cursor: 
                   (currentStep === 1 && selectedServices.length === 0) ||
                   (currentStep === 2 && (!customerDetails.name || !customerDetails.phone))
                     ? 'not-allowed' : 'pointer',
-                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
-                transition: 'all 0.3s ease'
+                boxShadow: '0 8px 24px rgba(0, 123, 255, 0.3)',
+                transition: 'all 0.3s ease',
+                minHeight: '56px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)'
               }}
             >
               {currentStep === 1 && 'Continue'}

@@ -1,13 +1,56 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import googleReviewsService from '../services/googleReviewsService';
 
 const MoreInfoPage = ({ salon, onClose }) => {
   const [activeTab, setActiveTab] = useState('info');
+  const [reviews, setReviews] = useState([]);
+  const [reviewStats, setReviewStats] = useState({
+    averageRating: 0,
+    totalReviews: 0,
+    ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+  });
+  const [reviewsLoading, setReviewsLoading] = useState(false);
 
   const handleCall = (phoneNumber) => {
     if (phoneNumber) {
       window.open(`tel:${phoneNumber}`);
     }
   };
+
+  const loadReviews = async () => {
+    if (!salon.place_id) return;
+    
+    try {
+      setReviewsLoading(true);
+      console.log('🔄 Loading reviews for salon:', salon.name);
+      
+      const reviewData = await googleReviewsService.getAllReviews(salon.place_id);
+      setReviews(reviewData.reviews);
+      
+      // Calculate review statistics
+      const stats = googleReviewsService.getReviewStats(reviewData.reviews);
+      setReviewStats(stats);
+      
+      console.log('✅ Loaded reviews:', {
+        total: reviewData.totalCount,
+        google: reviewData.googleCount,
+        inApp: reviewData.inAppCount,
+        averageRating: stats.averageRating
+      });
+      
+    } catch (error) {
+      console.error('❌ Failed to load reviews:', error);
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
+  // Load reviews when reviews tab is active
+  useEffect(() => {
+    if (activeTab === 'reviews') {
+      loadReviews();
+    }
+  }, [activeTab, salon.place_id]);
 
   const handleDirection = () => {
     const address = encodeURIComponent(salon.vicinity || salon.formatted_address);
@@ -205,14 +248,14 @@ const MoreInfoPage = ({ salon, onClose }) => {
               textAlign: 'center'
             }}>
               <div style={{ fontSize: '36px', fontWeight: '700', color: '#4fc3f7', marginBottom: '8px' }}>
-                {salon.rating || '4.5'}
+                {reviewStats.averageRating || salon.rating || '4.5'}
               </div>
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
                 {[1, 2, 3, 4, 5].map(star => (
                   <span
                     key={star}
                     style={{
-                      color: star <= Math.floor(salon.rating || 4.5) ? '#ffc107' : '#e9ecef',
+                      color: star <= Math.floor(reviewStats.averageRating || salon.rating || 4.5) ? '#ffc107' : '#e9ecef',
                       fontSize: '20px'
                     }}
                   >
@@ -221,69 +264,89 @@ const MoreInfoPage = ({ salon, onClose }) => {
                 ))}
               </div>
               <div style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.7)' }}>
-                Based on {salon.user_ratings_total || '150'} reviews
+                Based on {reviewStats.totalReviews || salon.user_ratings_total || '0'} reviews
               </div>
             </div>
 
+            {/* Loading State */}
+            {reviewsLoading && (
+              <div style={{ textAlign: 'center', padding: '40px' }}>
+                <div style={{ 
+                  display: 'inline-block',
+                  width: '40px',
+                  height: '40px',
+                  border: '4px solid rgba(255, 255, 255, 0.3)',
+                  borderTop: '4px solid #4fc3f7',
+                  borderRadius: '50%',
+                  animation: 'spin 1s linear infinite'
+                }}></div>
+                <p style={{ color: 'rgba(255, 255, 255, 0.7)', marginTop: '16px' }}>
+                  Loading reviews...
+                </p>
+              </div>
+            )}
+
             {/* Individual Reviews */}
-            <div>
-              {[
-                {
-                  name: 'Rajesh Kumar',
-                  rating: 5,
-                  time: '2 days ago',
-                  review: 'Excellent service! The staff is very professional and the haircut was exactly what I wanted. Clean environment and reasonable prices.'
-                },
-                {
-                  name: 'Amit Sharma',
-                  rating: 4,
-                  time: '1 week ago',
-                  review: 'Good salon with skilled barbers. The waiting time was a bit long but the service quality made up for it. Will visit again.'
-                },
-                {
-                  name: 'Priya Singh',
-                  rating: 5,
-                  time: '2 weeks ago',
-                  review: 'Amazing experience! The stylist understood exactly what I wanted. Very hygienic place and friendly staff. Highly recommended!'
-                }
-              ].map((review, index) => (
-                <div
-                  key={index}
-                  style={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    borderRadius: '8px',
-                    padding: '16px',
-                    marginBottom: '12px'
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <div style={{ fontSize: '16px', fontWeight: '600', color: '#ffffff' }}>
-                      {review.name}
-                    </div>
-                    <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.7)' }}>
-                      {review.time}
-                    </div>
+            {!reviewsLoading && (
+              <div>
+                {reviews.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '40px' }}>
+                    <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontStyle: 'italic' }}>
+                      No reviews available yet. Be the first to review this salon!
+                    </p>
                   </div>
-                  <div style={{ display: 'flex', marginBottom: '8px' }}>
-                    {[1, 2, 3, 4, 5].map(star => (
-                      <span
-                        key={star}
-                        style={{
-                          color: star <= review.rating ? '#ffc107' : '#e9ecef',
-                          fontSize: '14px'
-                        }}
-                      >
-                        ★
-                      </span>
-                    ))}
-                  </div>
-                  <p style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.8)', margin: 0, lineHeight: '1.4' }}>
-                    {review.review}
-                  </p>
-                </div>
-              ))}
-            </div>
+                ) : (
+                  reviews.slice(0, 5).map((review, index) => (
+                    <div
+                      key={review.id || index}
+                      style={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        borderRadius: '8px',
+                        padding: '16px',
+                        marginBottom: '12px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <div style={{ fontSize: '16px', fontWeight: '600', color: '#ffffff' }}>
+                            {review.author_name}
+                          </div>
+                          <span style={{
+                            fontSize: '10px',
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            backgroundColor: review.source === 'google' ? 'rgba(66, 133, 244, 0.2)' : 'rgba(76, 175, 80, 0.2)',
+                            color: review.source === 'google' ? '#4285f4' : '#4caf50'
+                          }}>
+                            {review.source === 'google' ? 'Google' : 'In-App'}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.7)' }}>
+                          {googleReviewsService.formatReviewDate(review.time)}
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', marginBottom: '8px' }}>
+                        {[1, 2, 3, 4, 5].map(star => (
+                          <span
+                            key={star}
+                            style={{
+                              color: star <= review.rating ? '#ffc107' : '#e9ecef',
+                              fontSize: '14px'
+                            }}
+                          >
+                            ★
+                          </span>
+                        ))}
+                      </div>
+                      <p style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.8)', margin: 0, lineHeight: '1.4' }}>
+                        {review.text}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
           </div>
         );
 
@@ -516,3 +579,4 @@ const MoreInfoPage = ({ salon, onClose }) => {
 };
 
 export default MoreInfoPage;
+

@@ -65,12 +65,21 @@
   margin-bottom: 20px;
 }
 
-.form-group label {
-  display: block;
-  margin-bottom: 8px;
-  color: #ffffff;
-  font-weight: 500;
-  font-size: 15px;
+.owner-login .form-group label,
+.registration-form .form-group label,
+.login-form .form-group label,
+.owner-login label,
+.registration-form label,
+.login-form label,
+.owner-login .form-group label[for],
+.registration-form .form-group label[for],
+.login-form .form-group label[for] {
+  display: block !important;
+  margin-bottom: 8px !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  font-size: 16px !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 255, 255, 0.2) !important;
 }
 
 .form-group input {
@@ -202,16 +211,19 @@
 }
 
 .registration-options h2 {
-  color: #1d1d1f;
-  font-size: 24px;
-  font-weight: 600;
+  color: #ffffff;
+  font-size: 26px;
+  font-weight: 800;
   margin: 0 0 8px 0;
+  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 255, 255, 0.3);
 }
 
 .registration-options p {
-  color: #86868b;
-  font-size: 17px;
+  color: #ffffff;
+  font-size: 18px;
   margin: 0 0 32px 0;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
 .option-cards {
@@ -243,16 +255,19 @@
 }
 
 .option-card h3 {
-  color: #1d1d1f;
+  color: #ffffff;
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 800;
   margin: 0 0 8px 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .option-card p {
-  color: #86868b;
+  color: #ffffff;
   font-size: 14px;
   margin: 0 0 16px 0;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 
 .option-card ul {
@@ -263,21 +278,24 @@
 }
 
 .option-card li {
-  color: #495057;
+  color: #ffffff;
   font-size: 13px;
   margin: 6px 0;
   padding-left: 4px;
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .option-btn {
   width: 100%;
   padding: 12px 16px;
-  border: none;
+  border: 2px solid transparent;
   border-radius: 12px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .option-btn.primary {
@@ -287,6 +305,8 @@
 
 .option-btn.primary:hover {
   background: #0056cc;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 122, 255, 0.3);
 }
 
 .option-btn.secondary {
@@ -296,6 +316,8 @@
 
 .option-btn.secondary:hover {
   background: #218838;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(40, 167, 69, 0.3);
 }
 
 /* Registration Forms */
@@ -313,16 +335,19 @@
 }
 
 .form-header h2 {
-  color: #1d1d1f;
-  font-size: 22px;
-  font-weight: 600;
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: 800;
   margin: 0 0 8px 0;
+  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 255, 255, 0.3);
 }
 
 .form-header p {
-  color: #86868b;
-  font-size: 15px;
+  color: #ffffff;
+  font-size: 16px;
   margin: 0;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
 .form-group textarea {
@@ -453,24 +478,28 @@
 
 .payment-btn {
   width: 100%;
-  background: #28a745;
+  background: linear-gradient(135deg, #28a745, #20c997);
   color: white;
-  border: none;
+  border: 2px solid #28a745;
   padding: 16px;
   border-radius: 12px;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .payment-btn:hover:not(:disabled) {
-  background: #218838;
-  transform: translateY(-1px);
+  background: linear-gradient(135deg, #218838, #1e7e34);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+  border-color: #1e7e34;
 }
 
 .payment-btn:disabled {
@@ -641,6 +670,13 @@
   0% { transform: scale(1); }
   50% { transform: scale(1.02); }
   100% { transform: scale(1); }
+}
+
+/* Force all labels to be white in owner login */
+.owner-login label {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) !important;
 }
 
 /* Mobile Responsive */

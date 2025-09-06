@@ -2288,3 +2288,101 @@ Reviews Section Styles */
     padding: 20px;
   }
 }
+
+/* Rating Distribution Styles */
+.rating-breakdown {
+  margin: 20px 0;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.rating-breakdown h4 {
+  margin: 0 0 16px 0;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.rating-distribution {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rating-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.rating-label {
+  min-width: 30px;
+  font-size: 14px;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.rating-progress {
+  flex: 1;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.rating-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ffc107, #ff9800);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.rating-count {
+  min-width: 20px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: right;
+}
+
+/* Review Source Styles */
+.reviewer-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.review-source {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.review-source.google {
+  background: rgba(66, 133, 244, 0.2);
+  color: #4285f4;
+}
+
+.review-source.in_app {
+  background: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+}
+
+/* Mobile responsive for rating distribution */
+@media (max-width: 768px) {
+  .rating-breakdown {
+    margin: 16px 0;
+    padding: 16px;
+  }
+
+  .rating-bar {
+    gap: 8px;
+  }
+
+  .rating-label {
+    min-width: 25px;
+    font-size: 12px;
+  }
+}

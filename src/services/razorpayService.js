@@ -4,14 +4,14 @@
 class RazorpayService {
   constructor() {
     this.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
-    this.keyId = process.env.REACT_APP_RAZORPAY_KEY_ID || 'rzp_test_demo_key';
+    this.keyId = process.env.REACT_APP_RAZORPAY_KEY_ID || 'rzp_test_1DP5mmOlF5G5ag';
   }
 
   // Create order for salon registration
   async createOrder(orderData) {
     try {
       // In demo mode, return a mock order
-      if (this.keyId === 'rzp_test_demo_key') {
+      if (this.keyId === 'rzp_test_1DP5mmOlF5G5ag') {
         return {
           id: `order_${Date.now()}`,
           entity: 'order',
@@ -51,7 +51,7 @@ class RazorpayService {
   async verifyPayment(paymentData) {
     try {
       // In demo mode, return success
-      if (this.keyId === 'rzp_test_demo_key') {
+      if (this.keyId === 'rzp_test_1DP5mmOlF5G5ag') {
         return {
           success: true,
           message: 'Payment verified successfully (Demo Mode)',

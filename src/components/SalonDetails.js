@@ -3,6 +3,7 @@ import { processRazorpayPayment } from '../services/paymentService';
 import { createBooking } from '../services/salonService';
 import { useRealTimeQueue } from '../hooks/useRealTimeQueue';
 import websocketService from '../services/websocketService';
+import googleReviewsService from '../services/googleReviewsService';
 import QueueModal from './QueueModal';
 import toast from 'react-hot-toast';
 import './SalonDetails.css';
@@ -805,133 +806,60 @@ const SalonDetails = ({ salon, onClose, onBookingComplete, initialTab = 'overvie
 // Reviews Tab Component
 const ReviewsTab = ({ salon }) => {
   const [showAddReview, setShowAddReview] = useState(false);
-  const [googleReviews, setGoogleReviews] = useState([]);
-  const [userReviews, setUserReviews] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [reviewStats, setReviewStats] = useState({
+    averageRating: 0,
+    totalReviews: 0,
+    ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+  });
 
   // Load reviews on component mount
   useEffect(() => {
-    loadReviews();
-    loadUserReviews();
+    loadAllReviews();
   }, [salon.place_id]);
 
-  const loadReviews = async () => {
+  const loadAllReviews = async () => {
     try {
       setLoading(true);
+      console.log('🔄 Loading reviews for salon:', salon.name);
       
-      // Try to get real Google reviews using Places API
-      if (window.google && window.google.maps && window.google.maps.places) {
-        const service = new window.google.maps.places.PlacesService(document.createElement('div'));
-        
-        const request = {
-          placeId: salon.place_id,
-          fields: ['reviews', 'rating', 'user_ratings_total']
-        };
-        
-        service.getDetails(request, (place, status) => {
-          if (status === window.google.maps.places.PlacesServiceStatus.OK && place.reviews) {
-            console.log('✅ Loaded Google reviews:', place.reviews);
-            setGoogleReviews(place.reviews);
-          } else {
-            console.log('⚠️ No Google reviews available, using fallback');
-            setGoogleReviews(getFallbackReviews());
-          }
-          setLoading(false);
-        });
-      } else {
-        // Fallback reviews if Google Places API is not available
-        setGoogleReviews(getFallbackReviews());
-        setLoading(false);
-      }
+      const reviewData = await googleReviewsService.getAllReviews(salon.place_id);
+      setReviews(reviewData.reviews);
+      
+      // Calculate review statistics
+      const stats = googleReviewsService.getReviewStats(reviewData.reviews);
+      setReviewStats(stats);
+      
+      console.log('✅ Loaded reviews:', {
+        total: reviewData.totalCount,
+        google: reviewData.googleCount,
+        inApp: reviewData.inAppCount,
+        averageRating: stats.averageRating
+      });
+      
     } catch (error) {
-      console.error('Failed to load reviews:', error);
-      setGoogleReviews(getFallbackReviews());
+      console.error('❌ Failed to load reviews:', error);
+      toast.error('Failed to load reviews. Please try again.');
+    } finally {
       setLoading(false);
     }
   };
 
-  const getFallbackReviews = () => {
-    // Generate realistic fallback reviews based on salon type
-    const reviewTemplates = {
-      'Beauty Salon': [
-        {
-          author_name: 'Priya Sharma',
-          rating: 5,
-          text: 'Excellent service! The staff was very professional and the haircut was exactly what I wanted. The salon is clean and well-maintained.',
-          time: Date.now() - (2 * 24 * 60 * 60 * 1000), // 2 days ago
-          profile_photo_url: null
-        },
-        {
-          author_name: 'Anjali Gupta',
-          rating: 4,
-          text: 'Amazing facial treatment. My skin feels so refreshed and glowing! Will definitely come back for more treatments.',
-          time: Date.now() - (7 * 24 * 60 * 60 * 1000), // 1 week ago
-          profile_photo_url: null
-        },
-        {
-          author_name: 'Meera Patel',
-          rating: 5,
-          text: 'Great experience with threading and waxing services. Very hygienic and professional staff. Highly recommended!',
-          time: Date.now() - (14 * 24 * 60 * 60 * 1000), // 2 weeks ago
-          profile_photo_url: null
-        }
-      ],
-      'Barber Shop': [
-        {
-          author_name: 'Rahul Mehta',
-          rating: 5,
-          text: 'Great atmosphere and skilled barbers. Perfect haircut every time. Will definitely come back!',
-          time: Date.now() - (3 * 24 * 60 * 60 * 1000),
-          profile_photo_url: null
-        },
-        {
-          author_name: 'Arjun Singh',
-          rating: 4,
-          text: 'Excellent beard trimming service. The barber really knows his craft. Clean and professional setup.',
-          time: Date.now() - (5 * 24 * 60 * 60 * 1000),
-          profile_photo_url: null
-        },
-        {
-          author_name: 'Vikram Kumar',
-          rating: 5,
-          text: 'Best hot towel shave in the area! Traditional techniques with modern hygiene standards.',
-          time: Date.now() - (10 * 24 * 60 * 60 * 1000),
-          profile_photo_url: null
-        }
-      ],
-      'Spa & Salon': [
-        {
-          author_name: 'Kavya Reddy',
-          rating: 5,
-          text: 'Luxurious spa experience! The massage was incredibly relaxing and the staff was very attentive.',
-          time: Date.now() - (1 * 24 * 60 * 60 * 1000),
-          profile_photo_url: null
-        },
-        {
-          author_name: 'Shreya Joshi',
-          rating: 5,
-          text: 'Amazing aromatherapy facial! The ambiance is so peaceful and the treatments are top-notch.',
-          time: Date.now() - (6 * 24 * 60 * 60 * 1000),
-          profile_photo_url: null
-        }
-      ]
-    };
-
-    return reviewTemplates[salon.type] || reviewTemplates['Beauty Salon'];
-  };
-
-  const loadUserReviews = () => {
-    // Load user reviews from localStorage
-    const savedReviews = localStorage.getItem(`reviews_${salon.place_id}`);
-    if (savedReviews) {
-      setUserReviews(JSON.parse(savedReviews));
+  const handleSaveReview = async (reviewData) => {
+    try {
+      const newReview = googleReviewsService.saveInAppReview(salon.place_id, reviewData);
+      
+      // Refresh reviews list
+      await loadAllReviews();
+      
+      toast.success('Review added successfully! 🌟');
+      console.log('✅ New review saved:', newReview);
+      
+    } catch (error) {
+      console.error('❌ Failed to save review:', error);
+      toast.error('Failed to save review. Please try again.');
     }
-  };
-
-  const saveUserReview = (review) => {
-    const newReviews = [...userReviews, review];
-    setUserReviews(newReviews);
-    localStorage.setItem(`reviews_${salon.place_id}`, JSON.stringify(newReviews));
   };
 
   const formatReviewDate = (timestamp) => {
@@ -950,16 +878,40 @@ const ReviewsTab = ({ salon }) => {
     return '⭐'.repeat(Math.floor(rating)) + (rating % 1 >= 0.5 ? '⭐' : '');
   };
 
-  const allReviews = [...userReviews, ...googleReviews].sort((a, b) => b.time - a.time);
+  const renderRatingDistribution = () => {
+    const { ratingDistribution, totalReviews } = reviewStats;
+    
+    return (
+      <div className="rating-distribution">
+        {[5, 4, 3, 2, 1].map(rating => {
+          const count = ratingDistribution[rating] || 0;
+          const percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
+          
+          return (
+            <div key={rating} className="rating-bar">
+              <span className="rating-label">{rating}★</span>
+              <div className="rating-progress">
+                <div 
+                  className="rating-fill" 
+                  style={{ width: `${percentage}%` }}
+                ></div>
+              </div>
+              <span className="rating-count">{count}</span>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
 
   return (
     <div className="reviews-tab">
       <div className="reviews-summary">
         <div className="rating-overview">
           <div className="rating-score">
-            <span className="score">{salon.rating}</span>
-            <div className="stars">{renderStars(salon.rating)}</div>
-            <p>{salon.user_ratings_total + userReviews.length} reviews</p>
+            <span className="score">{reviewStats.averageRating || salon.rating}</span>
+            <div className="stars">{renderStars(reviewStats.averageRating || salon.rating)}</div>
+            <p>{reviewStats.totalReviews || salon.user_ratings_total} reviews</p>
           </div>
           <button 
             className="add-review-btn"
@@ -969,6 +921,14 @@ const ReviewsTab = ({ salon }) => {
           </button>
         </div>
       </div>
+
+      {/* Rating Distribution */}
+      {reviewStats.totalReviews > 0 && (
+        <div className="rating-breakdown">
+          <h4>Rating Breakdown</h4>
+          {renderRatingDistribution()}
+        </div>
+      )}
       
       {loading ? (
         <div className="reviews-loading">
@@ -977,13 +937,13 @@ const ReviewsTab = ({ salon }) => {
         </div>
       ) : (
         <div className="reviews-list">
-          {allReviews.length === 0 ? (
+          {reviews.length === 0 ? (
             <div className="no-reviews">
               <p>No reviews yet. Be the first to review this salon!</p>
             </div>
           ) : (
-            allReviews.map((review, index) => (
-              <div key={index} className="review-item">
+            reviews.map((review, index) => (
+              <div key={review.id || index} className="review-item">
                 <div className="review-header">
                   <div className="reviewer-info">
                     {review.profile_photo_url ? (
@@ -997,20 +957,22 @@ const ReviewsTab = ({ salon }) => {
                         {review.author_name.charAt(0).toUpperCase()}
                       </div>
                     )}
-                    <div>
+                    <div className="reviewer-details">
                       <strong>{review.author_name}</strong>
-                      {userReviews.includes(review) && (
-                        <span className="verified-customer">✅ Verified Customer</span>
-                      )}
+                      <span className={`review-source ${review.source}`}>
+                        {review.source === 'google' ? 'Google Review' : 'In-App Review'}
+                      </span>
                     </div>
                   </div>
                   <div className="review-meta">
                     <span className="review-rating">{renderStars(review.rating)}</span>
-                    <span className="review-date">{formatReviewDate(review.time)}</span>
+                    <span className="review-date">
+                      {googleReviewsService.formatReviewDate(review.time)}
+                    </span>
                   </div>
                 </div>
                 <p className="review-text">{review.text}</p>
-                {review.services && (
+                {review.services && review.services.length > 0 && (
                   <div className="review-services">
                     <span>Services: {review.services.join(', ')}</span>
                   </div>
@@ -1025,7 +987,7 @@ const ReviewsTab = ({ salon }) => {
       {showAddReview && (
         <AddReviewModal
           salon={salon}
-          onSave={saveUserReview}
+          onSave={handleSaveReview}
           onClose={() => setShowAddReview(false)}
         />
       )}
