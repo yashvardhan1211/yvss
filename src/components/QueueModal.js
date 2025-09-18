@@ -54,9 +54,6 @@ const QueueModal = ({ salon, onClose, onJoinQueue, services }) => {
     };
 
     try {
-      // Show loading toast
-      toast.loading('Initializing payment...');
-      
       // Process payment with Razorpay
       const paymentResult = await processRazorpayPayment(queueData);
       
@@ -68,16 +65,13 @@ const QueueModal = ({ salon, onClose, onJoinQueue, services }) => {
           paymentId: paymentResult.paymentData.razorpay_payment_id
         };
         
-        // Dismiss loading toast
-        toast.dismiss();
-        toast.success('Payment successful! Joining queue...');
+        toast.success('Payment successful! Welcome to the queue!');
         
         // Join queue with payment data
         await onJoinQueue(updatedQueueData);
       }
     } catch (error) {
       console.error('Payment or queue join failed:', error);
-      toast.dismiss();
       toast.error(error.message || 'Payment failed. Please try again.');
     }
   };
@@ -227,35 +221,29 @@ const QueueModal = ({ salon, onClose, onJoinQueue, services }) => {
                 </div>
               </div>
 
-              <div className="queue-actions">
-                <button 
-                  className="back-btn"
-                  onClick={() => setStep(1)}
-                >
-                  ← Back to Services
-                </button>
-                <button 
-                  className="pay-join-btn"
-                  onClick={handleJoinQueueWithPayment}
-                >
-                  Pay ₹{getTotalAmount()} & Join Queue
-                </button>
-              </div>
+
             </div>
           )}
         </div>
 
-        <div className="queue-modal-footer">
-          <div className="queue-benefits">
-            <h4>Why Choose Our Queue System?</h4>
-            <ul>
-              <li>• Instant position updates</li>
-              <li>• Smart notifications</li>
-              <li>• Precise timing estimates</li>
-              <li>• Skip the physical wait</li>
-              <li>• Bank-level security</li>
-            </ul>
-          </div>
+        {/* Fixed Action Buttons */}
+        <div className="queue-modal-actions">
+          {step === 2 && (
+            <>
+              <button 
+                className="back-btn"
+                onClick={() => setStep(1)}
+              >
+                ← Back to Services
+              </button>
+              <button 
+                className="pay-join-btn glass-morphism"
+                onClick={handleJoinQueueWithPayment}
+              >
+                Pay ₹{getTotalAmount()}
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>
