@@ -131,12 +131,6 @@ const QueueModal = ({ salon, onClose, onJoinQueue, services }) => {
                     <p><strong>Total Duration:</strong> {getTotalDuration()} minutes</p>
                     <p><strong>Total Amount:</strong> ₹{getTotalAmount()}</p>
                   </div>
-                  <button 
-                    className="continue-btn"
-                    onClick={handleContinueToDetails}
-                  >
-                    Continue to Details
-                  </button>
                 </div>
               )}
             </div>
@@ -228,6 +222,14 @@ const QueueModal = ({ salon, onClose, onJoinQueue, services }) => {
 
         {/* Fixed Action Buttons */}
         <div className="queue-modal-actions">
+          {step === 1 && selectedServices.length > 0 && (
+            <button 
+              className="continue-btn"
+              onClick={handleContinueToDetails}
+            >
+              Continue to Details
+            </button>
+          )}
           {step === 2 && (
             <>
               <button 

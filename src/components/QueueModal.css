@@ -241,10 +241,6 @@
   padding: 16px;
   margin-top: 20px;
   border: 1px solid #e5e7eb;
-  position: sticky;
-  bottom: 20px;
-  z-index: 10;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .summary-info {
@@ -262,40 +258,40 @@
   background: #6366f1;
   color: white;
   border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
+  padding: 14px 24px;
+  border-radius: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   width: 100%;
   font-size: 16px;
-  position: sticky;
-  bottom: 0;
-  z-index: 10;
 }
 
 .continue-btn:hover {
   background: #4f46e5;
+  transform: translateY(-1px);
 }
 
 /* Glass Morphism Pay Button */
 .pay-join-btn.glass-morphism {
-  background: rgba(99, 102, 241, 0.1);
+  background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(99, 102, 241, 0.3);
-  color: #6366f1;
-  padding: 16px 24px;
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #1e293b;
+  padding: 18px 24px;
   border-radius: 16px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
   flex: 2;
-  font-size: 16px;
+  font-size: 18px;
   box-shadow: 
-    0 8px 32px rgba(99, 102, 241, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
   position: relative;
   overflow: hidden;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 
 .pay-join-btn.glass-morphism::before {
@@ -305,18 +301,20 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.1) 0%, 
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(0, 0, 0, 0.02) 100%);
   pointer-events: none;
 }
 
 .pay-join-btn.glass-morphism:hover {
-  background: rgba(99, 102, 241, 0.2);
-  border-color: rgba(99, 102, 241, 0.5);
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.4);
   transform: translateY(-2px);
   box-shadow: 
-    0 12px 40px rgba(99, 102, 241, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  color: #4f46e5;
+    0 12px 40px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .form-grid {
