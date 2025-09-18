@@ -355,6 +355,7 @@ const SalonDetails = ({ salon, onClose, onBookingComplete, initialTab = 'overvie
             <h2>{salon.name}</h2>
             <p className="salon-type">{salon.type}</p>
             <p className="salon-address">{salon.vicinity}</p>
+            <div className="ac-tag">❄️ In-Shop AC</div>
             <div className="salon-meta">
               <span className="rating">⭐ {salon.rating}</span>
               <span className="distance">📍 {salon.distance < 1 ? 
