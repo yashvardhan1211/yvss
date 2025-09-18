@@ -552,21 +552,21 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
-/* REAL Glass Morphism Pay Button Container - FORCE UPDATE */
+/* REAL Glass Morphism Pay Button Container - CACHE BUST v2 */
 .pay-button-container {
-  flex: 2;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
-  border: 2px solid rgba(255, 255, 255, 0.25);
-  border-radius: 20px;
-  padding: 8px;
+  flex: 2 !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(30px) !important;
+  -webkit-backdrop-filter: blur(30px) !important;
+  border: 2px solid rgba(255, 255, 255, 0.25) !important;
+  border-radius: 20px !important;
+  padding: 8px !important;
   box-shadow: 
     0 15px 50px rgba(0, 0, 0, 0.2),
     inset 0 2px 0 rgba(255, 255, 255, 0.4),
-    inset 0 -2px 0 rgba(0, 0, 0, 0.05);
-  position: relative;
-  overflow: hidden;
+    inset 0 -2px 0 rgba(0, 0, 0, 0.05) !important;
+  position: relative !important;
+  overflow: hidden !important;
 }
 
 .pay-button-container::before {
@@ -585,23 +585,23 @@
 }
 
 .pay-now-btn {
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-  color: white;
-  border: none;
-  padding: 18px 28px;
-  border-radius: 16px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  width: 100%;
-  font-size: 20px;
-  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
+  color: white !important;
+  border: none !important;
+  padding: 18px 28px !important;
+  border-radius: 16px !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  width: 100% !important;
+  font-size: 20px !important;
+  letter-spacing: 0.5px !important;
   box-shadow: 
     0 6px 20px rgba(99, 102, 241, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  position: relative;
-  z-index: 1;
+    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+  position: relative !important;
+  z-index: 1 !important;
 }
 
 .pay-now-btn:hover {
