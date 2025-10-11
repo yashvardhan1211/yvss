@@ -49,11 +49,11 @@ body {
   overflow-x: hidden;
 }
 
-/* Clean Header */
+/* Ultra Clean Header */
 .app-header {
-  background: var(--primary-bg);
+  background: var(--white);
   border-bottom: 1px solid var(--border-color);
-  padding: 32px 24px;
+  padding: 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -159,12 +159,10 @@ body {
   gap: 24px;
 }
 
-/* Search Bar */
+/* Ultra Clean Search Bar */
 .search-filter-bar {
   background: var(--white);
-  padding: 20px 24px;
-  border: 1px solid var(--border-color);
-  border-radius: 16px;
+  padding: 16px 0;
   margin-bottom: 24px;
 }
 
@@ -207,12 +205,9 @@ body {
   color: var(--text-secondary);
 }
 
-/* Salon List */
+/* Ultra Clean Salon List */
 .salon-list {
   background: var(--white);
-  border: 1px solid var(--border-color);
-  border-radius: 16px;
-  padding: 32px;
 }
 
 .salon-list h2 {
@@ -223,27 +218,26 @@ body {
   letter-spacing: -0.02em;
 }
 
-/* Clean Salon Cards */
+/* Ultra Clean Salon Cards */
 .salon-card {
   background: var(--white);
   border: 1px solid var(--border-color);
-  border-radius: 16px;
-  padding: 24px;
-  margin-bottom: 16px;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 12px;
   transition: all 0.2s ease;
 }
 
 .salon-card:hover {
   border-color: var(--accent-color);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
 }
 
 .salon-card-header {
   display: flex;
   align-items: center;
-  padding: 0 0 16px 0;
-  gap: 16px;
+  padding: 0 0 12px 0;
+  gap: 12px;
 }
 
 .salon-avatar {
@@ -251,18 +245,17 @@ body {
 }
 
 .salon-logo {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
   background: var(--primary-bg);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--accent-color);
   font-weight: 600;
-  font-size: 18px;
+  font-size: 16px;
   text-transform: uppercase;
-  border: 1px solid var(--border-color);
 }
 
 .salon-header-info {
@@ -271,11 +264,10 @@ body {
 }
 
 .salon-name {
-  margin: 0 0 4px 0;
+  margin: 0 0 2px 0;
   color: var(--text-primary);
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
-  letter-spacing: -0.01em;
 }
 
 .salon-rating {
@@ -297,8 +289,7 @@ body {
 }
 
 .salon-card-body {
-  padding: 16px 0;
-  border-top: 1px solid var(--border-color);
+  padding: 12px 0;
 }
 
 .salon-address {
@@ -312,9 +303,9 @@ body {
 
 .salon-meta {
   display: flex;
-  gap: 24px;
-  margin-bottom: 16px;
-  font-size: 14px;
+  gap: 16px;
+  margin-bottom: 12px;
+  font-size: 13px;
   color: var(--text-secondary);
 }
 
@@ -352,16 +343,16 @@ body {
 .salon-card-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 16px 0 0 0;
+  gap: 8px;
+  padding: 12px 0 0 0;
   border-top: 1px solid var(--border-color);
 }
 
 .action-btn {
   flex: 1;
-  padding: 12px 20px;
-  border-radius: 10px;
-  font-size: 14px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -406,10 +397,9 @@ body {
 /* Queue Section */
 .live-queue-section {
   background: var(--primary-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 12px;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
 }
 
 .queue-header {
