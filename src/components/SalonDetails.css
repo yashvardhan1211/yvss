@@ -1,12 +1,12 @@
-/* Apple-inspired Salon Details Modal */
+/* Clean Minimal Lavender Salon Details */
 .salon-details-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(20px);
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -21,20 +21,21 @@
 }
 
 .salon-details-modal {
-  background: white;
-  border-radius: 18px;
+  background: var(--white);
+  border-radius: 16px;
   width: 100%;
   max-width: 900px;
   max-height: 90vh;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-color);
   animation: slideUp 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 @keyframes slideUp {
   from { 
     opacity: 0;
-    transform: translateY(20px) scale(0.95);
+    transform: translateY(20px) scale(0.98);
   }
   to { 
     opacity: 1;
@@ -42,12 +43,13 @@
   }
 }
 
-/* Header */
+/* Clean Header */
 .salon-details-header {
   position: relative;
   padding: 32px;
-  background: #007aff;
-  color: white;
+  background: var(--primary-bg);
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .close-btn {

@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pastel Color Schemes - Salon App Examples</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+            padding: 20px;
+        }
+
+        .main-title {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #2d3748;
+        }
+
+        .schemes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .scheme-card {
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .scheme-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Scheme 1: Soft Purple + Mint Green */
+        .scheme-1 {
+            background: linear-gradient(135deg, #FFF8F0 0%, #F5F0FF 100%);
+        }
+
+        .scheme-1 .header {
+            background: linear-gradient(135deg, #B8A9FF 0%, #A8E6CF 100%);
+        }
+
+        .scheme-1 .salon-card {
+            background: linear-gradient(135deg, rgba(168, 230, 207, 0.1) 0%, rgba(184, 169, 255, 0.1) 100%);
+            border: 2px solid rgba(168, 230, 207, 0.3);
+        }
+
+        .scheme-1 .btn-primary {
+            background: linear-gradient(135deg, #B8A9FF 0%, #9F7AEA 100%);
+        }
+
+        .scheme-1 .btn-secondary {
+            background: linear-gradient(135deg, #A8E6CF 0%, #68D391 100%);
+        }
+
+        /* Scheme 2: Soft Pink + Sage Green */
+        .scheme-2 {
+            background: linear-gradient(135deg, #FDF2F8 0%, #F0FDF4 100%);
+        }
+
+        .scheme-2 .header {
+            background: linear-gradient(135deg, #F8BBD9 0%, #A7C957 100%);
+        }
+
+        .scheme-2 .salon-card {
+            background: linear-gradient(135deg, rgba(167, 201, 87, 0.1) 0%, rgba(248, 187, 217, 0.1) 100%);
+            border: 2px solid rgba(167, 201, 87, 0.3);
+        }
+
+        .scheme-2 .btn-primary {
+            background: linear-gradient(135deg, #F8BBD9 0%, #EC4899 100%);
+        }
+
+        .scheme-2 .btn-secondary {
+            background: linear-gradient(135deg, #A7C957 0%, #65A30D 100%);
+        }
+
+        /* Scheme 3: Peach + Soft Blue */
+        .scheme-3 {
+            background: linear-gradient(135deg, #FEF3E2 0%, #EBF8FF 100%);
+        }
+
+        .scheme-3 .header {
+            background: linear-gradient(135deg, #FBBF24 0%, #93C5FD 100%);
+        }
+
+        .scheme-3 .salon-card {
+            background: linear-gradient(135deg, rgba(147, 197, 253, 0.1) 0%, rgba(251, 191, 36, 0.1) 100%);
+            border: 2px solid rgba(147, 197, 253, 0.3);
+        }
+
+        .scheme-3 .btn-primary {
+            background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%);
+        }
+
+        .scheme-3 .btn-secondary {
+            background: linear-gradient(135deg, #93C5FD 0%, #3B82F6 100%);
+        }
+
+        /* Scheme 4: Lavender + Soft Yellow */
+        .scheme-4 {
+            background: linear-gradient(135deg, #FAF5FF 0%, #FFFBEB 100%);
+        }
+
+        .scheme-4 .header {
+            background: linear-gradient(135deg, #C084FC 0%, #FDE047 100%);
+        }
+
+        .scheme-4 .salon-card {
+            background: linear-gradient(135deg, rgba(253, 224, 71, 0.1) 0%, rgba(192, 132, 252, 0.1) 100%);
+            border: 2px solid rgba(253, 224, 71, 0.3);
+        }
+
+        .scheme-4 .btn-primary {
+            background: linear-gradient(135deg, #C084FC 0%, #A855F7 100%);
+        }
+
+        .scheme-4 .btn-secondary {
+            background: linear-gradient(135deg, #FDE047 0%, #EAB308 100%);
+        }
+
+        /* Scheme 5: Coral + Teal */
+        .scheme-5 {
+            background: linear-gradient(135deg, #FEF2F2 0%, #F0FDFA 100%);
+        }
+
+        .scheme-5 .header {
+            background: linear-gradient(135deg, #FB7185 0%, #5EEAD4 100%);
+        }
+
+        .scheme-5 .salon-card {
+            background: linear-gradient(135deg, rgba(94, 234, 212, 0.1) 0%, rgba(251, 113, 133, 0.1) 100%);
+            border: 2px solid rgba(94, 234, 212, 0.3);
+        }
+
+        .scheme-5 .btn-primary {
+            background: linear-gradient(135deg, #FB7185 0%, #E11D48 100%);
+        }
+
+        .scheme-5 .btn-secondary {
+            background: linear-gradient(135deg, #5EEAD4 0%, #14B8A6 100%);
+        }
+
+        /* Scheme 6: Rose + Mint */
+        .scheme-6 {
+            background: linear-gradient(135deg, #FFF1F2 0%, #ECFDF5 100%);
+        }
+
+        .scheme-6 .header {
+            background: linear-gradient(135deg, #FDA4AF 0%, #86EFAC 100%);
+        }
+
+        .scheme-6 .salon-card {
+            background: linear-gradient(135deg, rgba(134, 239, 172, 0.1) 0%, rgba(253, 164, 175, 0.1) 100%);
+            border: 2px solid rgba(134, 239, 172, 0.3);
+        }
+
+        .scheme-6 .btn-primary {
+            background: linear-gradient(135deg, #FDA4AF 0%, #F43F5E 100%);
+        }
+
+        .scheme-6 .btn-secondary {
+            background: linear-gradient(135deg, #86EFAC 0%, #22C55E 100%);
+        }
+
+        /* Common styles */
+        .header {
+            padding: 25px 20px;
+            text-align: center;
+            color: white;
+        }
+
+        .scheme-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .scheme-subtitle {
+            opacity: 0.9;
+            font-size: 12px;
+        }
+
+        .content {
+            padding: 25px 20px;
+        }
+
+        .salon-card {
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .salon-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+
+        .salon-details {
+            font-size: 12px;
+            margin-bottom: 15px;
+            color: #6B7280;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-primary, .btn-secondary {
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            flex: 1;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover, .btn-secondary:hover {
+            transform: translateY(-1px);
+        }
+
+        .color-info {
+            background: rgba(255,255,255,0.8);
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .color-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #374151;
+            margin-bottom: 5px;
+        }
+
+        .color-codes {
+            font-size: 11px;
+            color: #6B7280;
+            line-height: 1.4;
+        }
+
+        .mood-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: center;
+            margin-top: 8px;
+        }
+
+        .mood-tag {
+            background: rgba(255,255,255,0.7);
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            color: #374151;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="main-title">🎨 Pastel Complementary Color Schemes for Salon App</h1>
+    
+    <div class="schemes-grid">
+        <!-- Scheme 1: Soft Purple + Mint Green -->
+        <div class="scheme-card scheme-1">
+            <div class="header">
+                <div class="scheme-title">🌸 Soft Purple + Mint Green</div>
+                <div class="scheme-subtitle">Calming • Spa-like • Modern</div>
+            </div>
+            <div class="content">
+                <div class="salon-card">
+                    <div class="salon-name">✨ Bella Beauty Salon</div>
+                    <div class="salon-details">📍 2.1 km • ⭐ 4.8 • ⏱️ 15 min</div>
+                    <div class="buttons">
+                        <button class="btn-primary">Book Now</button>
+                        <button class="btn-secondary">Join Queue</button>
+                    </div>
+                </div>
+                <div class="color-info">
+                    <div class="color-name">Purple + Green (Opposite on color wheel)</div>
+                    <div class="color-codes">#B8A9FF + #A8E6CF</div>
+                    <div class="mood-tags">
+                        <span class="mood-tag">Relaxing</span>
+                        <span class="mood-tag">Premium</span>
+                        <span class="mood-tag">Fresh</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scheme 2: Soft Pink + Sage Green -->
+        <div class="scheme-card scheme-2">
+            <div class="header">
+                <div class="scheme-title">🌺 Soft Pink + Sage Green</div>
+                <div class="scheme-subtitle">Feminine • Natural • Elegant</div>
+            </div>
+            <div class="content">
+                <div class="salon-card">
+                    <div class="salon-name">🌿 Rose Garden Spa</div>
+                    <div class="salon-details">📍 1.8 km • ⭐ 4.9 • ⏱️ 10 min</div>
+                    <div class="buttons">
+                        <button class="btn-primary">Book Now</button>
+                        <button class="btn-secondary">Join Queue</button>
+                    </div>
+                </div>
+                <div class="color-info">
+                    <div class="color-name">Pink + Green (Classic complementary)</div>
+                    <div class="color-codes">#F8BBD9 + #A7C957</div>
+                    <div class="mood-tags">
+                        <span class="mood-tag">Romantic</span>
+                        <span class="mood-tag">Natural</span>
+                        <span class="mood-tag">Soft</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scheme 3: Peach + Soft Blue -->
+        <div class="scheme-card scheme-3">
+            <div class="header">
+                <div class="scheme-title">🍑 Peach + Soft Blue</div>
+                <div class="scheme-subtitle">Warm • Friendly • Approachable</div>
+            </div>
+            <div class="content">
+                <div class="salon-card">
+                    <div class="salon-name">☀️ Sunny Side Salon</div>
+                    <div class="salon-details">📍 3.2 km • ⭐ 4.7 • ⏱️ 20 min</div>
+                    <div class="buttons">
+                        <button class="btn-primary">Book Now</button>
+                        <button class="btn-secondary">Join Queue</button>
+                    </div>
+                </div>
+                <div class="color-info">
+                    <div class="color-name">Orange + Blue (High contrast pair)</div>
+                    <div class="color-codes">#FBBF24 + #93C5FD</div>
+                    <div class="mood-tags">
+                        <span class="mood-tag">Energetic</span>
+                        <span class="mood-tag">Cheerful</span>
+                        <span class="mood-tag">Trustworthy</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scheme 4: Lavender + Soft Yellow -->
+        <div class="scheme-card scheme-4">
+            <div class="header">
+                <div class="scheme-title">💜 Lavender + Soft Yellow</div>
+                <div class="scheme-subtitle">Creative • Uplifting • Unique</div>
+            </div>
+            <div class="content">
+                <div class="salon-card">
+                    <div class="salon-name">🌻 Sunshine Studio</div>
+                    <div class="salon-details">📍 2.5 km • ⭐ 4.6 • ⏱️ 12 min</div>
+                    <div class="buttons">
+                        <button class="btn-primary">Book Now</button>
+                        <button class="btn-secondary">Join Queue</button>
+                    </div>
+                </div>
+                <div class="color-info">
+                    <div class="color-name">Purple + Yellow (Bold complementary)</div>
+                    <div class="color-codes">#C084FC + #FDE047</div>
+                    <div class="mood-tags">
+                        <span class="mood-tag">Artistic</span>
+                        <span class="mood-tag">Happy</span>
+                        <span class="mood-tag">Bold</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scheme 5: Coral + Teal -->
+        <div class="scheme-card scheme-5">
+            <div class="header">
+                <div class="scheme-title">🪸 Coral + Teal</div>
+                <div class="scheme-subtitle">Tropical • Vibrant • Modern</div>
+            </div>
+            <div class="content">
+                <div class="salon-card">
+                    <div class="salon-name">🏝️ Ocean Breeze Spa</div>
+                    <div class="salon-details">📍 1.9 km • ⭐ 4.8 • ⏱️ 8 min</div>
+                    <div class="buttons">
+                        <button class="btn-primary">Book Now</button>
+                        <button class="btn-secondary">Join Queue</button>
+                    </div>
+                </div>
+                <div class="color-info">
+                    <div class="color-name">Red + Cyan (Perfect opposites)</div>
+                    <div class="color-codes">#FB7185 + #5EEAD4</div>
+                    <div class="mood-tags">
+                        <span class="mood-tag">Tropical</span>
+                        <span class="mood-tag">Fresh</span>
+                        <span class="mood-tag">Luxurious</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scheme 6: Rose + Mint -->
+        <div class="scheme-card scheme-6">
+            <div class="header">
+                <div class="scheme-title">🌹 Rose + Mint</div>
+                <div class="scheme-subtitle">Classic • Refreshing • Timeless</div>
+            </div>
+            <div class="content">
+                <div class="salon-card">
+                    <div class="salon-name">🌿 Mint Rose Beauty</div>
+                    <div class="salon-details">📍 2.8 km • ⭐ 4.9 • ⏱️ 18 min</div>
+                    <div class="buttons">
+                        <button class="btn-primary">Book Now</button>
+                        <button class="btn-secondary">Join Queue</button>
+                    </div>
+                </div>
+                <div class="color-info">
+                    <div class="color-name">Pink + Green (Vintage inspired)</div>
+                    <div class="color-codes">#FDA4AF + #86EFAC</div>
+                    <div class="mood-tags">
+                        <span class="mood-tag">Vintage</span>
+                        <span class="mood-tag">Clean</span>
+                        <span class="mood-tag">Elegant</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin: 40px 0; color: #6B7280;">
+        <h3>🎯 Which color scheme appeals to you most?</h3>
+        <p style="margin-top: 10px; font-size: 14px;">Each uses complementary colors (opposites on the color wheel) for maximum visual impact</p>
+    </div>
+</body>
+</html>

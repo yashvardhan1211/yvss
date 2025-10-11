@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subtle Pastel Color Schemes - Detailed Salon App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #fafafa;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .main-title {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #2d3748;
+            font-weight: 300;
+        }
+
+        .schemes-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            gap: 40px;
+        }
+
+        .scheme-example {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid #f1f5f9;
+        }
+
+        /* Scheme 1: Subtle Lavender + Sage */
+        .scheme-1 {
+            --primary: #e8e5ff;
+            --primary-text: #6b46c1;
+            --secondary: #e8f5e8;
+            --secondary-text: #059669;
+            --accent: #f8fafc;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+        }
+
+        /* Scheme 2: Soft Peach + Powder Blue */
+        .scheme-2 {
+            --primary: #fef3e2;
+            --primary-text: #ea580c;
+            --secondary: #eff6ff;
+            --secondary-text: #2563eb;
+            --accent: #fefefe;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+        }
+
+        /* Scheme 3: Dusty Rose + Mint */
+        .scheme-3 {
+            --primary: #fdf2f8;
+            --primary-text: #be185d;
+            --secondary: #f0fdf4;
+            --secondary-text: #16a34a;
+            --accent: #fefefe;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+        }
+
+        .scheme-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            padding: 30px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .scheme-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .scheme-description {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .color-palette {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .color-swatch {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 2px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .swatch-primary { background: var(--primary); }
+        .swatch-secondary { background: var(--secondary); }
+        .swatch-accent { background: var(--accent); border-color: var(--border); }
+
+        .color-info {
+            display: flex;
+            gap: 20px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .app-mockup {
+            padding: 30px;
+            background: var(--accent);
+        }
+
+        .phone-container {
+            max-width: 380px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            border: 1px solid var(--border);
+        }
+
+        .app-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .app-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .app-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .app-content {
+            padding: 25px;
+        }
+
+        .search-bar {
+            background: var(--accent);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            width: 100%;
+        }
+
+        .salon-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.2s ease;
+        }
+
+        .salon-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .salon-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .salon-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .salon-rating {
+            background: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--primary-text);
+            border: 1px solid var(--border);
+        }
+
+        .salon-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .services-preview {
+            margin-bottom: 15px;
+        }
+
+        .services-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .services-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .service-tag {
+            background: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .salon-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            flex: 1;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: var(--primary-text);
+            color: white;
+            border-color: var(--primary-text);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--secondary-text);
+            border-color: var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--secondary);
+        }
+
+        .queue-modal {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .modal-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .service-selection {
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .service-item {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .service-item:hover {
+            transform: translateX(2px);
+        }
+
+        .service-item.selected {
+            border-color: var(--primary-text);
+            background: white;
+        }
+
+        .service-info {
+            flex: 1;
+        }
+
+        .service-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .service-duration {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .service-price {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary-text);
+        }
+
+        .booking-summary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .summary-row:last-child {
+            margin-bottom: 0;
+            padding-top: 8px;
+            border-top: 1px solid var(--border);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .pay-button-container {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 6px;
+        }
+
+        .pay-button {
+            background: linear-gradient(135deg, var(--primary-text) 0%, var(--secondary-text) 100%);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 16px;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .pay-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .scheme-notes {
+            padding: 25px;
+            background: #f8fafc;
+            border-top: 1px solid var(--border);
+        }
+
+        .notes-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .notes-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .note-section h4 {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .note-section ul {
+            list-style: none;
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .note-section li {
+            margin-bottom: 3px;
+        }
+
+        .note-section li:before {
+            content: "•";
+            color: var(--primary-text);
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="main-title">Subtle Pastel Color Schemes - Detailed Salon App Examples</h1>
+    
+    <div class="schemes-container">
+        <!-- Scheme 1: Subtle Lavender + Sage -->
+        <div class="scheme-example scheme-1">
+            <div class="scheme-header">
+                <div class="scheme-title">Subtle Lavender + Sage Green</div>
+                <div class="scheme-description">A calming, professional palette perfect for premium beauty services</div>
+                
+                <div class="color-palette">
+                    <div class="color-swatch swatch-primary"></div>
+                    <div class="color-swatch swatch-secondary"></div>
+                    <div class="color-swatch swatch-accent"></div>
+                </div>
+                
+                <div class="color-info">
+                    <span>Primary: #e8e5ff (Soft Lavender)</span>
+                    <span>Secondary: #e8f5e8 (Sage Green)</span>
+                    <span>Accent: #f8fafc (Clean White)</span>
+                </div>
+            </div>
+
+            <div class="app-mockup">
+                <div class="phone-container">
+                    <div class="app-header">
+                        <div class="app-title">Salon Finder</div>
+                        <div class="app-subtitle">Find your perfect beauty experience</div>
+                    </div>
+                    
+                    <div class="app-content">
+                        <input type="text" class="search-bar" placeholder="Search salons near you..." />
+                        
+                        <div class="salon-card">
+                            <div class="salon-header">
+                                <div>
+                                    <div class="salon-name">Serenity Beauty Lounge</div>
+                                </div>
+                                <div class="salon-rating">4.9 ⭐</div>
+                            </div>
+                            
+                            <div class="salon-details">
+                                <div class="detail-item">📍 1.2 km away</div>
+                                <div class="detail-item">⏱️ 15 min wait</div>
+                                <div class="detail-item">💰 ₹₹₹ Premium</div>
+                                <div class="detail-item">👥 12 in queue</div>
+                            </div>
+                            
+                            <div class="services-preview">
+                                <div class="services-title">Popular Services</div>
+                                <div class="services-list">
+                                    <span class="service-tag">Hair Cut</span>
+                                    <span class="service-tag">Facial</span>
+                                    <span class="service-tag">Manicure</span>
+                                    <span class="service-tag">+5 more</span>
+                                </div>
+                            </div>
+                            
+                            <div class="salon-actions">
+                                <button class="btn btn-primary">Book Appointment</button>
+                                <button class="btn btn-secondary">Join Queue</button>
+                            </div>
+                        </div>
+
+                        <div class="queue-modal">
+                            <div class="modal-header">
+                                <div class="modal-title">Join Queue</div>
+                                <div class="modal-subtitle">Serenity Beauty Lounge</div>
+                            </div>
+                            
+                            <div class="service-selection">
+                                <div class="section-title">Select Services</div>
+                                
+                                <div class="service-item selected">
+                                    <div class="service-info">
+                                        <div class="service-name">Premium Hair Cut & Style</div>
+                                        <div class="service-duration">45 minutes</div>
+                                    </div>
+                                    <div class="service-price">₹1,200</div>
+                                </div>
+                                
+                                <div class="service-item">
+                                    <div class="service-info">
+                                        <div class="service-name">Deep Cleansing Facial</div>
+                                        <div class="service-duration">60 minutes</div>
+                                    </div>
+                                    <div class="service-price">₹2,500</div>
+                                </div>
+                                
+                                <div class="service-item">
+                                    <div class="service-info">
+                                        <div class="service-name">Gel Manicure</div>
+                                        <div class="service-duration">30 minutes</div>
+                                    </div>
+                                    <div class="service-price">₹800</div>
+                                </div>
+                            </div>
+                            
+                            <div class="booking-summary">
+                                <div class="summary-row">
+                                    <span>Premium Hair Cut & Style</span>
+                                    <span>₹1,200</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span>Service Fee</span>
+                                    <span>₹50</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span>Total Amount</span>
+                                    <span>₹1,250</span>
+                                </div>
+                            </div>
+                            
+                            <div class="pay-button-container">
+                                <button class="pay-button">Pay ₹1,250 & Join Queue</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="scheme-notes">
+                <div class="notes-title">Design Analysis</div>
+                <div class="notes-grid">
+                    <div class="note-section">
+                        <h4>Why This Works</h4>
+                        <ul>
+                            <li>Lavender conveys luxury and relaxation</li>
+                            <li>Sage green adds natural, calming balance</li>
+                            <li>High contrast for excellent readability</li>
+                            <li>Appeals to premium beauty market</li>
+                            <li>Gender-neutral yet elegant</li>
+                        </ul>
+                    </div>
+                    <div class="note-section">
+                        <h4>Best For</h4>
+                        <ul>
+                            <li>High-end salons and spas</li>
+                            <li>Wellness-focused businesses</li>
+                            <li>Professional beauty services</li>
+                            <li>Apps targeting 25-45 age group</li>
+                            <li>Premium positioning strategy</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scheme 2: Soft Peach + Powder Blue -->
+        <div class="scheme-example scheme-2">
+            <div class="scheme-header">
+                <div class="scheme-title">Soft Peach + Powder Blue</div>
+                <div class="scheme-description">Warm and trustworthy, perfect for friendly neighborhood salons</div>
+                
+                <div class="color-palette">
+                    <div class="color-swatch swatch-primary"></div>
+                    <div class="color-swatch swatch-secondary"></div>
+                    <div class="color-swatch swatch-accent"></div>
+                </div>
+                
+                <div class="color-info">
+                    <span>Primary: #fef3e2 (Soft Peach)</span>
+                    <span>Secondary: #eff6ff (Powder Blue)</span>
+                    <span>Accent: #fefefe (Pure White)</span>
+                </div>
+            </div>
+
+            <div class="app-mockup">
+                <div class="phone-container">
+                    <div class="app-header">
+                        <div class="app-title">Neighborhood Beauty</div>
+                        <div class="app-subtitle">Your local beauty destination</div>
+                    </div>
+                    
+                    <div class="app-content">
+                        <input type="text" class="search-bar" placeholder="Find salons in your area..." />
+                        
+                        <div class="salon-card">
+                            <div class="salon-header">
+                                <div>
+                                    <div class="salon-name">Sunny Side Hair Studio</div>
+                                </div>
+                                <div class="salon-rating">4.7 ⭐</div>
+                            </div>
+                            
+                            <div class="salon-details">
+                                <div class="detail-item">📍 0.8 km away</div>
+                                <div class="detail-item">⏱️ 10 min wait</div>
+                                <div class="detail-item">💰 ₹₹ Moderate</div>
+                                <div class="detail-item">👥 6 in queue</div>
+                            </div>
+                            
+                            <div class="services-preview">
+                                <div class="services-title">Available Today</div>
+                                <div class="services-list">
+                                    <span class="service-tag">Quick Trim</span>
+                                    <span class="service-tag">Blow Dry</span>
+                                    <span class="service-tag">Color Touch-up</span>
+                                    <span class="service-tag">+3 more</span>
+                                </div>
+                            </div>
+                            
+                            <div class="salon-actions">
+                                <button class="btn btn-primary">Book Now</button>
+                                <button class="btn btn-secondary">Join Queue</button>
+                            </div>
+                        </div>
+
+                        <div class="queue-modal">
+                            <div class="modal-header">
+                                <div class="modal-title">Quick Booking</div>
+                                <div class="modal-subtitle">Sunny Side Hair Studio</div>
+                            </div>
+                            
+                            <div class="service-selection">
+                                <div class="section-title">Choose Your Service</div>
+                                
+                                <div class="service-item selected">
+                                    <div class="service-info">
+                                        <div class="service-name">Hair Cut & Blow Dry</div>
+                                        <div class="service-duration">30 minutes</div>
+                                    </div>
+                                    <div class="service-price">₹600</div>
+                                </div>
+                                
+                                <div class="service-item">
+                                    <div class="service-info">
+                                        <div class="service-name">Hair Wash & Style</div>
+                                        <div class="service-duration">20 minutes</div>
+                                    </div>
+                                    <div class="service-price">₹400</div>
+                                </div>
+                            </div>
+                            
+                            <div class="booking-summary">
+                                <div class="summary-row">
+                                    <span>Hair Cut & Blow Dry</span>
+                                    <span>₹600</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span>Total Amount</span>
+                                    <span>₹600</span>
+                                </div>
+                            </div>
+                            
+                            <div class="pay-button-container">
+                                <button class="pay-button">Pay ₹600 & Book Slot</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="scheme-notes">
+                <div class="notes-title">Design Analysis</div>
+                <div class="notes-grid">
+                    <div class="note-section">
+                        <h4>Why This Works</h4>
+                        <ul>
+                            <li>Peach creates warmth and friendliness</li>
+                            <li>Blue adds trust and reliability</li>
+                            <li>Perfect for neighborhood businesses</li>
+                            <li>Approachable and welcoming feel</li>
+                            <li>Great for family-oriented salons</li>
+                        </ul>
+                    </div>
+                    <div class="note-section">
+                        <h4>Best For</h4>
+                        <ul>
+                            <li>Local neighborhood salons</li>
+                            <li>Family-friendly businesses</li>
+                            <li>Quick service providers</li>
+                            <li>Budget-conscious customers</li>
+                            <li>Community-focused brands</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scheme 3: Dusty Rose + Mint -->
+        <div class="scheme-example scheme-3">
+            <div class="scheme-header">
+                <div class="scheme-title">Dusty Rose + Fresh Mint</div>
+                <div class="scheme-description">Elegant and refreshing, ideal for modern beauty experiences</div>
+                
+                <div class="color-palette">
+                    <div class="color-swatch swatch-primary"></div>
+                    <div class="color-swatch swatch-secondary"></div>
+                    <div class="color-swatch swatch-accent"></div>
+                </div>
+                
+                <div class="color-info">
+                    <span>Primary: #fdf2f8 (Dusty Rose)</span>
+                    <span>Secondary: #f0fdf4 (Fresh Mint)</span>
+                    <span>Accent: #fefefe (Clean White)</span>
+                </div>
+            </div>
+
+            <div class="app-mockup">
+                <div class="phone-container">
+                    <div class="app-header">
+                        <div class="app-title">Modern Beauty Co.</div>
+                        <div class="app-subtitle">Contemporary beauty experiences</div>
+                    </div>
+                    
+                    <div class="app-content">
+                        <input type="text" class="search-bar" placeholder="Discover beauty services..." />
+                        
+                        <div class="salon-card">
+                            <div class="salon-header">
+                                <div>
+                                    <div class="salon-name">Rose & Mint Beauty Bar</div>
+                                </div>
+                                <div class="salon-rating">4.8 ⭐</div>
+                            </div>
+                            
+                            <div class="salon-details">
+                                <div class="detail-item">📍 2.1 km away</div>
+                                <div class="detail-item">⏱️ 20 min wait</div>
+                                <div class="detail-item">💰 ₹₹₹ Premium</div>
+                                <div class="detail-item">👥 8 in queue</div>
+                            </div>
+                            
+                            <div class="services-preview">
+                                <div class="services-title">Signature Services</div>
+                                <div class="services-list">
+                                    <span class="service-tag">Balayage</span>
+                                    <span class="service-tag">Hydra Facial</span>
+                                    <span class="service-tag">Lash Extensions</span>
+                                    <span class="service-tag">+6 more</span>
+                                </div>
+                            </div>
+                            
+                            <div class="salon-actions">
+                                <button class="btn btn-primary">Book Experience</button>
+                                <button class="btn btn-secondary">Join Waitlist</button>
+                            </div>
+                        </div>
+
+                        <div class="queue-modal">
+                            <div class="modal-header">
+                                <div class="modal-title">Beauty Experience</div>
+                                <div class="modal-subtitle">Rose & Mint Beauty Bar</div>
+                            </div>
+                            
+                            <div class="service-selection">
+                                <div class="section-title">Select Your Experience</div>
+                                
+                                <div class="service-item selected">
+                                    <div class="service-info">
+                                        <div class="service-name">Signature Balayage</div>
+                                        <div class="service-duration">2.5 hours</div>
+                                    </div>
+                                    <div class="service-price">₹4,500</div>
+                                </div>
+                                
+                                <div class="service-item">
+                                    <div class="service-info">
+                                        <div class="service-name">Hydrating Facial Treatment</div>
+                                        <div class="service-duration">75 minutes</div>
+                                    </div>
+                                    <div class="service-price">₹3,200</div>
+                                </div>
+                            </div>
+                            
+                            <div class="booking-summary">
+                                <div class="summary-row">
+                                    <span>Signature Balayage</span>
+                                    <span>₹4,500</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span>Premium Service Fee</span>
+                                    <span>₹200</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span>Total Investment</span>
+                                    <span>₹4,700</span>
+                                </div>
+                            </div>
+                            
+                            <div class="pay-button-container">
+                                <button class="pay-button">Secure My Experience - ₹4,700</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="scheme-notes">
+                <div class="notes-title">Design Analysis</div>
+                <div class="notes-grid">
+                    <div class="note-section">
+                        <h4>Why This Works</h4>
+                        <ul>
+                            <li>Rose suggests femininity and elegance</li>
+                            <li>Mint provides fresh, clean contrast</li>
+                            <li>Perfect for Instagram-worthy brands</li>
+                            <li>Appeals to millennial/Gen Z audience</li>
+                            <li>Sophisticated yet approachable</li>
+                        </ul>
+                    </div>
+                    <div class="note-section">
+                        <h4>Best For</h4>
+                        <ul>
+                            <li>Trendy beauty bars</li>
+                            <li>Instagram-focused salons</li>
+                            <li>Millennial target market</li>
+                            <li>Modern beauty experiences</li>
+                            <li>Social media marketing</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin: 40px 0; color: #64748b;">
+        <h3 style="color: #1e293b; margin-bottom: 10px;">🎨 Subtle Complementary Pastels</h3>
+        <p style="font-size: 14px; line-height: 1.6; max-width: 600px; margin: 0 auto;">
+            These schemes use very subtle complementary colors with lots of white space and detailed content. 
+            The colors are muted enough to be professional while still providing the visual interest of complementary pairs.
+            Each scheme targets different market segments and brand personalities.
+        </p>
+    </div>
+</body>
+</html>
