@@ -37,16 +37,18 @@
   box-sizing: border-box;
 }
 
-/* H&M EXACT TYPOGRAPHY SYSTEM */
+/* H&M EXACT TYPOGRAPHY SYSTEM - MOBILE OPTIMIZED */
 * {
-  font-family: "HMSans", "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: "HMSans", "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif !important;
-  font-weight: 400;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+  font-weight: 300;
   line-height: 1.2;
-  letter-spacing: 0;
+  letter-spacing: -0.01em;
 }
 
 h1 {
@@ -82,39 +84,41 @@ h6 {
 
 /* Body text and paragraphs */
 p, span, div {
-  font-family: "HMSans", "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif !important;
   font-weight: 400;
   line-height: 1.4;
 }
 
 /* Buttons */
 button {
-  font-family: "HMSans", "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif !important;
-  font-weight: 400;
-  letter-spacing: 0.5px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+  font-weight: 500;
+  letter-spacing: 0.3px;
 }
 
 /* Inputs */
 input, textarea, select {
-  font-family: "HMSans", "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif !important;
   font-weight: 400;
+  font-size: 16px; /* Prevent zoom on iOS */
 }
 
 /* Links */
 a {
-  font-family: "HMSans", "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif !important;
-  font-weight: 400;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+  font-weight: 500;
   text-decoration: none;
 }
 
 body {
-  font-family: "HMSans", "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
   background: var(--bg-white);
   color: var(--text-primary);
   line-height: 1.4;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-weight: 400;
+  font-size: 16px; /* Prevent zoom on iOS */
 }
 
 .app {
@@ -2109,5 +2113,63 @@ D-STYLE COLOR SHIFTING ANIMATIONS */
   100% { 
     background: rgba(255, 255, 255, 0.03);
     border-color: rgba(255, 255, 255, 0.08);
+  }
+}/* MOBILE-SP
+ECIFIC OPTIMIZATIONS */
+@media screen and (max-width: 768px) {
+  /* Force system fonts on mobile */
+  * {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+  }
+  
+  /* Prevent zoom on form inputs */
+  input, textarea, select {
+    font-size: 16px !important;
+    transform: scale(1) !important;
+  }
+  
+  /* Optimize text rendering */
+  body {
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  
+  /* Better touch targets */
+  button, a, .location-option {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Smoother animations on mobile */
+  * {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+}
+
+/* iOS SPECIFIC OPTIMIZATIONS */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari specific styles */
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  input, textarea {
+    -webkit-appearance: none;
+    border-radius: 0;
+  }
+}
+
+/* ANDROID SPECIFIC OPTIMIZATIONS */
+@media screen and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: .001dpcm) {
+  /* Android Chrome specific styles */
+  body {
+    font-weight: 400;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 500;
   }
 }
