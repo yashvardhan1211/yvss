@@ -50,7 +50,7 @@ const QueueModal = ({ salon, onClose, onJoinQueue, services }) => {
       totalAmount: getTotalAmount(),
       totalDuration: getTotalDuration(),
       salonName: salon.name,
-      salonId: salon.id
+      salonId: salon.place_id || salon.id || 'salon_iitp_hair' // Use place_id first, fallback to id
     };
 
     try {

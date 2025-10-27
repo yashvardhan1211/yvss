@@ -61,7 +61,29 @@ const OwnerLogin = ({ onLogin }) => {
       }
     }
     
-    // Simulate login/register
+    // Test login for IITP Hair Salon
+    if (!isRegister) {
+      if (formData.email === 'owner@iitp-salon.com' && formData.password === 'test123') {
+        setTimeout(() => {
+          const ownerData = {
+            id: 'owner_iitp_hair_salon',
+            name: 'Rajesh Kumar',
+            email: formData.email,
+            salonId: 'salon_iitp_hair',
+            salonName: 'Elite Hair Studio IITP'
+          };
+          onLogin(ownerData);
+          setLoading(false);
+        }, 1000);
+        return;
+      } else {
+        setLoading(false);
+        alert('❌ Invalid credentials!\n\n🧪 For testing, use:\nEmail: owner@iitp-salon.com\nPassword: test123');
+        return;
+      }
+    }
+    
+    // Simulate register
     setTimeout(() => {
       const ownerData = {
         id: 'owner_123',
@@ -570,42 +592,66 @@ const OwnerLogin = ({ onLogin }) => {
 
         {!isRegister ? (
           // Login Form
-          <form onSubmit={handleSubmit} className="login-form">
-            <div className="form-group">
-              <label>Email</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="Enter your email"
-                required
-              />
+          <>
+            <div style={{
+              background: '#e3f2fd',
+              border: '1px solid #2196f3',
+              borderRadius: '12px',
+              padding: '16px',
+              marginBottom: '24px',
+              textAlign: 'center'
+            }}>
+              <h3 style={{color: '#1976d2', margin: '0 0 8px 0', fontSize: '16px'}}>
+                🧪 Test Login Credentials
+              </h3>
+              <p style={{color: '#1976d2', margin: '4px 0', fontSize: '14px'}}>
+                <strong>Email:</strong> owner@iitp-salon.com
+              </p>
+              <p style={{color: '#1976d2', margin: '4px 0', fontSize: '14px'}}>
+                <strong>Password:</strong> test123
+              </p>
+              <p style={{color: '#666', margin: '8px 0 0 0', fontSize: '12px'}}>
+                Elite Hair Studio IITP - Near Main Gate, IIT Patna
+              </p>
             </div>
+            
+            <form onSubmit={handleSubmit} className="login-form">
+              <div className="form-group">
+                <label>Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Enter your email"
+                  required
+                />
+              </div>
 
-            <div className="form-group">
-              <label>Password</label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Enter your password"
-                required
-              />
-            </div>
+              <div className="form-group">
+                <label>Password</label>
+                <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Enter your password"
+                  required
+                />
+              </div>
 
-            <button type="submit" disabled={loading} className="login-btn">
-              {loading ? (
-                <>
-                  <div className="spinner small"></div>
-                  Logging in...
-                </>
-              ) : (
-                'Login to Dashboard'
-              )}
-            </button>
-          </form>
+              <button type="submit" disabled={loading} className="login-btn">
+                {loading ? (
+                  <>
+                    <div className="spinner small"></div>
+                    Logging in...
+                  </>
+                ) : (
+                  'Login to Dashboard'
+                )}
+              </button>
+            </form>
+          </>
         ) : (
           // Registration Forms
           <div className="registration-container">

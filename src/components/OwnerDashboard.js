@@ -2,101 +2,132 @@ import React, { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
 import { useRealTimeQueue } from '../hooks/useRealTimeQueue';
 import websocketService from '../services/websocketService';
+import { TEST_OWNER_DATA, getMockQueueData } from '../services/salonService';
 import toast from 'react-hot-toast';
 import './OwnerDashboard.css';
 
 const OwnerDashboard = ({ ownerData, onLogout }) => {
   const [socket, setSocket] = useState(null);
+  // Use test salon data
+  const [salonData, setSalonData] = useState(TEST_OWNER_DATA.salon);
   const [queueData, setQueueData] = useState({
-    currentQueue: 5,
-    estimatedWaitTime: 25,
-    isOpen: true,
-    services: [
-      { id: 1, name: 'Haircut', duration: 30, price: 500, category: 'Hair' },
-      { id: 2, name: 'Hair Styling', duration: 45, price: 700, category: 'Hair' },
-      { id: 3, name: 'Facial Treatment', duration: 60, price: 800, category: 'Skincare' },
-      { id: 4, name: 'Beard Trim', duration: 15, price: 300, category: 'Hair' },
-      { id: 5, name: 'Manicure', duration: 45, price: 400, category: 'Nails' },
-      { id: 6, name: 'Pedicure', duration: 60, price: 600, category: 'Nails' }
-    ]
+    currentQueue: TEST_OWNER_DATA.salon.currentQueue,
+    estimatedWaitTime: TEST_OWNER_DATA.salon.estimatedWaitTime,
+    isOpen: TEST_OWNER_DATA.salon.isOpen,
+    services: TEST_OWNER_DATA.salon.services
   });
 
   const [todayStats, setTodayStats] = useState({
-    totalCustomers: 23,
-    revenue: 4200,
+    totalCustomers: TEST_OWNER_DATA.salon.totalCustomersToday,
+    revenue: TEST_OWNER_DATA.salon.revenueToday,
     avgWaitTime: 18,
     customersSatisfied: 21,
     totalBookings: 28,
     cancelledBookings: 2
   });
 
-  const [recentCustomers, setRecentCustomers] = useState([
-    { 
-      id: 1, 
-      name: 'Priya Sharma', 
-      service: 'Haircut + Styling', 
-      time: '2:30 PM', 
-      status: 'In Progress',
-      phone: '+91 98765 43210',
-      amount: 1200,
-      duration: 75,
-      isPrepaid: true,
-      workStatus: 'ongoing',
-      operatorId: 1
-    },
-    { 
-      id: 2, 
-      name: 'Rahul Gupta', 
-      service: 'Beard Trim', 
-      time: '2:45 PM', 
-      status: 'Waiting',
-      phone: '+91 87654 32109',
-      amount: 300,
-      duration: 15,
-      isPrepaid: false,
-      workStatus: 'waiting',
-      operatorId: null
-    },
-    { 
-      id: 3, 
-      name: 'Anita Patel', 
-      service: 'Facial Treatment', 
-      time: '3:00 PM', 
-      status: 'Waiting',
-      phone: '+91 76543 21098',
-      amount: 800,
-      duration: 60,
-      isPrepaid: true,
-      workStatus: 'waiting',
-      operatorId: null
-    },
-    { 
-      id: 4, 
-      name: 'Vikram Singh', 
-      service: 'Haircut', 
-      time: '3:15 PM', 
-      status: 'Waiting',
-      phone: '+91 65432 10987',
-      amount: 500,
-      duration: 30,
-      isPrepaid: false,
-      workStatus: 'waiting',
-      operatorId: null
-    },
-    { 
-      id: 5, 
-      name: 'Meera Joshi', 
-      service: 'Manicure + Pedicure', 
-      time: '3:30 PM', 
-      status: 'Waiting',
-      phone: '+91 54321 09876',
-      amount: 1000,
-      duration: 105,
-      isPrepaid: true,
-      workStatus: 'waiting',
-      operatorId: null
-    }
-  ]);
+  // Use mock queue data
+  const [recentCustomers, setRecentCustomers] = useState(getMockQueueData());
+
+  // Real-time queue updates listener
+  useEffect(() => {
+    const handleQueueUpdates = (event) => {
+      console.log('🔔 Storage event received:', event);
+      if (event.key === 'salon_queue_data') {
+        try {
+          const queueData = JSON.parse(event.newValue || '{}');
+          const salonId = ownerData.salonId || 'salon_iitp_hair';
+          
+          console.log('🏪 Owner salon ID:', salonId);
+          console.log('📊 Queue data received:', queueData);
+          
+          if (queueData[salonId]) {
+            const newCustomers = queueData[salonId].map((booking, index) => ({
+              id: booking.id,
+              name: booking.customerName,
+              service: booking.selectedServices.map(s => s.name).join(' + '),
+              time: new Date(booking.createdAt).toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+              }),
+              status: booking.status === 'waiting' ? 'Waiting' : 'In Progress',
+              phone: booking.customerPhone,
+              amount: booking.totalAmount,
+              duration: booking.totalDuration,
+              isPrepaid: booking.isPrepaid || false,
+              workStatus: booking.status,
+              operatorId: null,
+              position: index + 1,
+              paymentId: booking.paymentId
+            }));
+            
+            // Add new customers to existing queue
+            setRecentCustomers(prev => {
+              const existingIds = prev.map(c => c.id);
+              const uniqueNewCustomers = newCustomers.filter(c => !existingIds.includes(c.id));
+              return [...prev, ...uniqueNewCustomers];
+            });
+            
+            // Update queue stats
+            setQueueData(prev => ({
+              ...prev,
+              currentQueue: prev.currentQueue + newCustomers.length,
+              estimatedWaitTime: prev.estimatedWaitTime + (newCustomers.length * 15)
+            }));
+            
+            // Update today's stats
+            setTodayStats(prev => ({
+              ...prev,
+              totalCustomers: prev.totalCustomers + newCustomers.length,
+              revenue: prev.revenue + newCustomers.reduce((sum, c) => sum + c.amount, 0)
+            }));
+            
+            // Show notification
+            if (newCustomers.length > 0) {
+              toast.success(`🎉 ${newCustomers.length} new customer(s) joined the queue!`);
+              
+              // Add to notifications
+              setNotifications(prev => [
+                ...prev,
+                ...newCustomers.map(customer => ({
+                  id: Date.now() + Math.random(),
+                  type: 'new_customer',
+                  message: `${customer.name} joined the queue for ${customer.service}`,
+                  timestamp: new Date(),
+                  read: false
+                }))
+              ]);
+            }
+            
+            console.log('✅ Owner dashboard updated with new queue data');
+          }
+        } catch (error) {
+          console.error('Failed to process queue updates:', error);
+        }
+      }
+    };
+
+    // Listen for storage events (real-time updates)
+    window.addEventListener('storage', handleQueueUpdates);
+    
+    // Also check for existing queue data on mount
+    const checkExistingQueue = () => {
+      try {
+        const existingData = localStorage.getItem('salon_queue_data');
+        if (existingData) {
+          handleQueueUpdates({ key: 'salon_queue_data', newValue: existingData });
+        }
+      } catch (error) {
+        console.error('Failed to load existing queue data:', error);
+      }
+    };
+    
+    checkExistingQueue();
+
+    return () => {
+      window.removeEventListener('storage', handleQueueUpdates);
+    };
+  }, [ownerData.salonId]);
 
   const [notifications, setNotifications] = useState([]);
   const [activeTab, setActiveTab] = useState('dashboard');

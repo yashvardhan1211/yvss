@@ -11,7 +11,8 @@ import BookAppointmentPage from './components/BookAppointmentPage';
 import MoreInfoPage from './components/MoreInfoPage';
 import QueueModal from './components/QueueModal';
 import BookingUpdatesModal from './components/BookingUpdatesModal';
-import { useRealTimeQueue } from './hooks/useRealTimeQueue';
+import ShoppingBagInterface from './components/ShoppingBagInterface';
+import { TEST_OWNER_DATA } from './services/salonService';
 import toast from 'react-hot-toast';
 import websocketService from './services/websocketService';
 import ConnectionStatus from './components/ConnectionStatus';
@@ -27,7 +28,7 @@ function CustomerApp() {
   const [loadingStatus, setLoadingStatus] = useState('');
   const [selectedSalon, setSelectedSalon] = useState(null);
   const [showSalonDetails, setShowSalonDetails] = useState(false);
-  const [salonDetailsInitialTab, setSalonDetailsInitialTab] = useState('overview');
+  const [salonDetailsInitialTab] = useState('overview');
   
   // Queue Modal state
   const [showQueueModal, setShowQueueModal] = useState(false);
@@ -54,6 +55,15 @@ function CustomerApp() {
   const [showBookAppointmentPage, setShowBookAppointmentPage] = useState(false);
   const [showMoreInfoPage, setShowMoreInfoPage] = useState(false);
   const [selectedSalonForPage, setSelectedSalonForPage] = useState(null);
+
+  // H&M Style Navigation state
+  const [activeCategory, setActiveCategory] = useState(null);
+  const [selectedServiceCategory, setSelectedServiceCategory] = useState(null);
+
+  // Shopping Bag state (H&M style)
+  const [shoppingBag, setShoppingBag] = useState([]);
+  const [showBagInterface, setShowBagInterface] = useState(false);
+  const [selectedSalonForBag, setSelectedSalonForBag] = useState(null);
 
   // Map removed for cleaner design
 
@@ -575,7 +585,53 @@ function CustomerApp() {
       .sort((a, b) => a.distance - b.distance) // Sort by distance
       .slice(0, 30); // Limit to 30 results for better coverage
       
-      console.log(`✅ Returning ${processedSalons.length} processed REAL salons`);
+      // Add our test salon for IIT Patna area
+      const testSalonData = TEST_OWNER_DATA.salon;
+      const testSalon = {
+        place_id: testSalonData.id,
+        name: testSalonData.name,
+        type: 'Unisex Salon',
+        vicinity: testSalonData.address,
+        formatted_address: testSalonData.address + ', Bihar, India',
+        geometry: {
+          location: {
+            lat: testSalonData.location.lat,
+            lng: testSalonData.location.lng
+          }
+        },
+        rating: testSalonData.rating,
+        user_ratings_total: testSalonData.reviewCount,
+        price_level: 2,
+        opening_hours: {
+          open_now: testSalonData.isOpen,
+          weekday_text: [
+            'Monday: 9:00 AM – 8:00 PM',
+            'Tuesday: 9:00 AM – 8:00 PM',
+            'Wednesday: 9:00 AM – 8:00 PM',
+            'Thursday: 9:00 AM – 8:00 PM',
+            'Friday: 9:00 AM – 8:00 PM',
+            'Saturday: 9:00 AM – 9:00 PM',
+            'Sunday: 10:00 AM – 7:00 PM'
+          ]
+        },
+        photos: null,
+        types: ['beauty_salon', 'hair_care', 'establishment'],
+        distance: calculateDistance(location.lat, location.lng, testSalonData.location.lat, testSalonData.location.lng),
+        queueLength: testSalonData.currentQueue,
+        waitTime: testSalonData.estimatedWaitTime,
+        services: testSalonData.services.map(s => s.name),
+        amenities: testSalonData.amenities,
+        isTestSalon: true,
+        testSalonData: testSalonData // Include full test data for owner dashboard integration
+      };
+
+      // Add test salon to results if we're near IIT Patna (within 50km)
+      if (testSalon.distance <= 50) {
+        processedSalons.unshift(testSalon); // Add at the beginning
+        console.log('✅ Added Elite Hair Studio IITP to results');
+      }
+
+      console.log(`✅ Returning ${processedSalons.length} processed salons (including test salon)`);
       return processedSalons;
       
     } catch (error) {
@@ -680,11 +736,7 @@ function CustomerApp() {
     setShowJoinQueuePage(true);
   };
 
-  // Handle salon selection for book appointment
-  const handleBookAppointmentSelect = (salon) => {
-    setSelectedSalonForPage(salon);
-    setShowBookAppointmentPage(true);
-  };
+
 
   // Handle salon selection for more info
   const handleMoreInfoSelect = (salon) => {
@@ -692,21 +744,18 @@ function CustomerApp() {
     setShowMoreInfoPage(true);
   };
 
-  // Handle direct queue joining
-  const handleDirectJoinQueue = (salon) => {
-    setQueueSalon(salon);
-    setShowQueueModal(true);
-  };
+
 
   // Handle queue joining completion
   const handleQueueJoinComplete = (queueData) => {
-    console.log('Queue joined:', queueData);
+    console.log('🎯 Queue joined with data:', queueData);
+    console.log('🏪 Salon data:', queueSalon);
     toast.success(`Successfully joined queue at ${queueSalon.name}!`);
     
     // Create a booking object with necessary details
     const newBooking = {
       id: `queue_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      salonId: queueSalon.id,
+      salonId: queueSalon.place_id || queueSalon.id,
       salonName: queueSalon.name,
       customerName: queueData.name,
       customerPhone: queueData.phone,
@@ -715,18 +764,64 @@ function CustomerApp() {
       totalAmount: queueData.totalAmount,
       totalDuration: queueData.totalDuration,
       type: 'queue',
-      status: 'in_queue',
+      status: 'waiting',
       paymentId: queueData.paymentId,
       createdAt: new Date().toISOString(),
+      joinedAt: new Date(),
       queuePosition: queueSalon.queueLength + 1,
-      estimatedWaitTime: queueSalon.waitTime
+      estimatedWaitTime: queueSalon.waitTime,
+      isPrepaid: true
     };
     
     // Add to user bookings
-    setUserBookings(prev => [newBooking, ...prev]);
+    setUserBookings(prev => {
+      const updatedBookings = [newBooking, ...prev];
+      // Also save to localStorage for persistence
+      localStorage.setItem('userBookings', JSON.stringify(updatedBookings));
+      return updatedBookings;
+    });
     
     // Set as current booking for real-time updates
     setCurrentBooking(newBooking);
+    
+    // 🚀 REAL-TIME UPDATE: Send to owner dashboard
+    try {
+      // Store in localStorage for owner dashboard to pick up
+      const existingQueueData = JSON.parse(localStorage.getItem('salon_queue_data') || '{}');
+      const salonId = queueSalon.place_id || queueSalon.id;
+      
+      console.log('🔍 Salon ID for queue update:', salonId);
+      console.log('🔍 Existing queue data:', existingQueueData);
+      
+      if (!existingQueueData[salonId]) {
+        existingQueueData[salonId] = [];
+      }
+      
+      existingQueueData[salonId].push(newBooking);
+      localStorage.setItem('salon_queue_data', JSON.stringify(existingQueueData));
+      
+      console.log('💾 Updated localStorage with:', existingQueueData);
+      
+      // Trigger storage event for real-time updates
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: 'salon_queue_data',
+        newValue: JSON.stringify(existingQueueData)
+      }));
+      
+      console.log('✅ Queue data updated for owner dashboard');
+      
+      // Update salon queue count in the UI
+      setSalons(prevSalons => 
+        prevSalons.map(salon => 
+          (salon.place_id === salonId || salon.id === salonId) 
+            ? { ...salon, queueLength: salon.queueLength + 1, waitTime: salon.waitTime + 15 }
+            : salon
+        )
+      );
+      
+    } catch (error) {
+      console.error('Failed to update owner dashboard:', error);
+    }
     
     // Close queue modal and show booking updates modal
     setShowQueueModal(false);
@@ -734,122 +829,7 @@ function CustomerApp() {
     setShowBookingUpdates(true);
   };
 
-  // Initialize map with salons
-  const initializeMap = async (salons, userLocation) => {
-    try {
-      // Load Google Maps if not loaded
-      await loadGoogleMaps();
-      
-      // Wait for Google Maps to be fully available
-      while (!window.google || !window.google.maps) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
-      
-      const mapElement = document.getElementById('salon-map');
-      if (!mapElement) return;
-      
-      // Create map centered on user location
-      const map = new window.google.maps.Map(mapElement, {
-        center: { lat: userLocation.lat, lng: userLocation.lng },
-        zoom: 14,
-        styles: [
-          {
-            featureType: 'poi',
-            elementType: 'labels',
-            stylers: [{ visibility: 'off' }]
-          }
-        ]
-      });
-      
-      // Add user location marker
-      new window.google.maps.Marker({
-        position: { lat: userLocation.lat, lng: userLocation.lng },
-        map: map,
-        title: 'Your Location',
-        icon: {
-          url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="12" r="8" fill="#4285F4" stroke="white" stroke-width="2"/>
-              <circle cx="12" cy="12" r="3" fill="white"/>
-            </svg>
-          `),
-          scaledSize: new window.google.maps.Size(24, 24),
-          anchor: new window.google.maps.Point(12, 12)
-        }
-      });
-      
-      // Add salon markers
-      salons.forEach((salon, index) => {
-        const marker = new window.google.maps.Marker({
-          position: { 
-            lat: salon.geometry.location.lat, 
-            lng: salon.geometry.location.lng 
-          },
-          map: map,
-          title: salon.name,
-          icon: {
-            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M16 2C10.48 2 6 6.48 6 12C6 20 16 30 16 30S26 20 26 12C26 6.48 21.52 2 16 2Z" fill="#E74C3C" stroke="white" stroke-width="2"/>
-                <circle cx="16" cy="12" r="4" fill="white"/>
-                <text x="16" y="16" text-anchor="middle" fill="#E74C3C" font-size="10" font-weight="bold">${index + 1}</text>
-              </svg>
-            `),
-            scaledSize: new window.google.maps.Size(32, 32),
-            anchor: new window.google.maps.Point(16, 32)
-          }
-        });
-        
-        // Add info window
-        const infoWindow = new window.google.maps.InfoWindow({
-          content: `
-            <div style="padding: 10px; max-width: 250px;">
-              <h3 style="margin: 0 0 5px 0; color: #333;">${salon.name}</h3>
-              <p style="margin: 0 0 5px 0; color: #666; font-size: 14px;">${salon.type}</p>
-              <p style="margin: 0 0 5px 0; color: #666; font-size: 12px;">${salon.vicinity}</p>
-              <div style="margin: 5px 0;">
-                <span style="color: #f39c12;">⭐ ${salon.rating}</span>
-                <span style="color: #3498db; margin-left: 10px;">📍 ${salon.distance < 1 ? 
-                  `${Math.round(salon.distance * 1000)}m` : 
-                  `${salon.distance.toFixed(1)}km`
-                }</span>
-              </div>
-              <div style="margin: 5px 0; font-size: 12px;">
-                ${salon.opening_hours?.open_now ? '🟢 Open' : '🔴 Closed'}
-                <span style="margin-left: 10px;">👥 ${salon.queueLength} people</span>
-              </div>
-            </div>
-          `
-        });
-        
-        marker.addListener('click', () => {
-          infoWindow.open(map, marker);
-        });
-      });
-      
-      // Adjust map bounds to show all markers
-      if (salons.length > 0) {
-        const bounds = new window.google.maps.LatLngBounds();
-        bounds.extend({ lat: userLocation.lat, lng: userLocation.lng });
-        salons.forEach(salon => {
-          bounds.extend({ 
-            lat: salon.geometry.location.lat, 
-            lng: salon.geometry.location.lng 
-          });
-        });
-        map.fitBounds(bounds);
-        
-        // Ensure minimum zoom level
-        const listener = window.google.maps.event.addListener(map, 'idle', () => {
-          if (map.getZoom() > 16) map.setZoom(16);
-          window.google.maps.event.removeListener(listener);
-        });
-      }
-      
-    } catch (error) {
-      console.error('Failed to initialize map:', error);
-    }
-  };
+
 
   // Handle location detection
   const handleLocationDetection = async () => {
@@ -1013,36 +993,41 @@ function CustomerApp() {
   const loadUserBookings = () => {
     try {
       const savedBookings = localStorage.getItem('userBookings');
+      console.log('📚 Loading user bookings from localStorage:', savedBookings);
       if (savedBookings) {
         const bookings = JSON.parse(savedBookings);
+        console.log('📚 Parsed bookings:', bookings);
         setUserBookings(bookings);
+      } else {
+        console.log('📚 No saved bookings found');
       }
     } catch (error) {
       console.error('Failed to load bookings:', error);
     }
   };
 
-  // Save booking to localStorage
-  const saveBooking = (bookingData) => {
-    try {
-      const booking = {
-        id: `booking_${Date.now()}`,
-        ...bookingData,
-        status: 'confirmed',
-        createdAt: new Date().toISOString(),
-        type: bookingData.type || 'appointment' // 'appointment' or 'queue'
-      };
+  // Load bookings on app startup
+  useEffect(() => {
+    loadUserBookings();
+    
+    // Listen for force update events
+    const handleForceUpdate = (event) => {
+      console.log('🔧 Force update event received:', event.detail);
+      if (event.detail && event.detail.bookings) {
+        setUserBookings(event.detail.bookings);
+      } else {
+        loadUserBookings();
+      }
+    };
+    
+    window.addEventListener('forceBookingsUpdate', handleForceUpdate);
+    
+    return () => {
+      window.removeEventListener('forceBookingsUpdate', handleForceUpdate);
+    };
+  }, []);
 
-      const updatedBookings = [...userBookings, booking];
-      setUserBookings(updatedBookings);
-      localStorage.setItem('userBookings', JSON.stringify(updatedBookings));
-      
-      return booking;
-    } catch (error) {
-      console.error('Failed to save booking:', error);
-      return null;
-    }
-  };
+
 
   // Update booking status
   const updateBookingStatus = (bookingId, newStatus) => {
@@ -1076,16 +1061,54 @@ function CustomerApp() {
     setFilterByService('all');
     setFilterByRating('all');
     setFilterByPrice('all');
+    setSelectedServiceCategory(null);
+  };
+
+  // Handle service filter from navigation
+  const handleServiceFilter = (serviceName) => {
+    setFilterByService(serviceName.toLowerCase());
+    setSelectedServiceCategory(serviceName);
+    setActiveCategory(null); // Close dropdown
+    
+    // Scroll to results
+    setTimeout(() => {
+      const resultsSection = document.querySelector('.salon-list');
+      if (resultsSection) {
+        resultsSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
+  };
+
+  // Handle Add to Bag (H&M style)
+  const handleAddToBag = (salon) => {
+    setSelectedSalonForBag(salon);
+    setShowBagInterface(true);
+    
+    // Add salon to bag if not already there
+    const existingItem = shoppingBag.find(item => item.salon.place_id === salon.place_id);
+    if (!existingItem) {
+      const bagItem = {
+        id: `bag_${Date.now()}`,
+        salon: salon,
+        services: [],
+        totalAmount: 0,
+        addedAt: new Date().toISOString()
+      };
+      setShoppingBag(prev => [...prev, bagItem]);
+    }
   };
 
   // Render location setup if no location
   if (!userLocation) {
     return (
-      <div style={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%)',
-        color: '#ffffff'
-      }}>
+      <div className="premium-landing-page">
+        <div className="animated-background">
+          <div className="floating-orb orb-1"></div>
+          <div className="floating-orb orb-2"></div>
+          <div className="floating-orb orb-3"></div>
+          <div className="floating-orb orb-4"></div>
+          <div className="floating-orb orb-5"></div>
+        </div>
         <div className="app-nav">
           <Link to="/owner" className="owner-link">
             Salon Owner? Manage Your Queue →
@@ -1110,30 +1133,166 @@ function CustomerApp() {
       color: '#ffffff'
     }}>
       <header className="app-header">
-        <div className="header-brand">
-          <h1>Babuu</h1>
-          <p className="tagline">Groom kar de aapko?</p>
+        {/* Top Header Bar */}
+        <div className="top-header-bar">
+          <div className="header-brand">
+            <div className="brand-logo">
+              <div className="logo-placeholder">B</div>
+            </div>
+            <div className="brand-text">
+              <h1>Babuu</h1>
+              <p className="tagline">Grooming India</p>
+            </div>
+          </div>
+          
+          <div className="header-actions">
+            <div className="location-info">
+              <span className="location-icon">📍</span>
+              <span className="location-text">{locationName}</span>
+            </div>
+            <button 
+              onClick={() => setShowBagInterface(true)}
+              className="shopping-bag-btn"
+            >
+              🛍️ ({shoppingBag.length})
+            </button>
+            <button 
+              onClick={() => {
+                console.log('📱 My Bookings clicked. Current bookings:', userBookings);
+                setShowBookings(true);
+              }}
+              className="bookings-btn"
+            >
+              📋 ({userBookings.length})
+            </button>
+            <Link to="/owner" className="owner-link-header">
+              Owner
+            </Link>
+          </div>
         </div>
-        <div className="location-info">
-          <span className="location-icon"></span>
-          <span className="location-text">{locationName}</span>
-        </div>
-        <div className="header-actions">
-          <button 
-            onClick={() => setShowBookings(true)}
-            className="bookings-btn"
-          >
-            My Bookings ({userBookings.length})
-          </button>
-          <button 
-            onClick={() => setUserLocation(null)}
-            className="change-location-btn"
-          >
-            Change Location
-          </button>
-          <Link to="/owner" className="owner-link-header">
-            Owner Dashboard
-          </Link>
+
+        {/* Navigation Bar */}
+        <div className="navigation-bar">
+          <nav className="main-navigation">
+            <div 
+              className="nav-item"
+              onMouseEnter={() => setActiveCategory('ladies')}
+              onMouseLeave={() => setActiveCategory(null)}
+            >
+              <span className="nav-link">LADIES</span>
+              {activeCategory === 'ladies' && (
+                <div className="dropdown-menu">
+                  <div className="services-grid">
+                    <div className="service-category">
+                      <h4>Hair Services</h4>
+                      <ul>
+                        <li onClick={() => handleServiceFilter('Hair Cut & Styling')}>Hair Cut & Styling</li>
+                        <li onClick={() => handleServiceFilter('Hair Coloring')}>Hair Coloring</li>
+                        <li onClick={() => handleServiceFilter('Hair Treatment')}>Hair Treatment</li>
+                        <li onClick={() => handleServiceFilter('Blowdry')}>Blowdry & Styling</li>
+                      </ul>
+                    </div>
+                    <div className="service-category">
+                      <h4>Beauty Services</h4>
+                      <ul>
+                        <li onClick={() => handleServiceFilter('Facial')}>Facial Treatment</li>
+                        <li onClick={() => handleServiceFilter('Waxing')}>Waxing</li>
+                        <li onClick={() => handleServiceFilter('Threading')}>Threading</li>
+                        <li onClick={() => handleServiceFilter('Manicure')}>Manicure</li>
+                        <li onClick={() => handleServiceFilter('Pedicure')}>Pedicure</li>
+                      </ul>
+                    </div>
+                    <div className="service-category">
+                      <h4>Bridal & Special</h4>
+                      <ul>
+                        <li onClick={() => handleServiceFilter('Bridal Makeup')}>Bridal Makeup</li>
+                        <li onClick={() => handleServiceFilter('Party Makeup')}>Party Makeup</li>
+                        <li onClick={() => handleServiceFilter('Mehendi')}>Mehendi</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div 
+              className="nav-item"
+              onMouseEnter={() => setActiveCategory('men')}
+              onMouseLeave={() => setActiveCategory(null)}
+            >
+              <span className="nav-link">MEN</span>
+              {activeCategory === 'men' && (
+                <div className="dropdown-menu">
+                  <div className="services-grid">
+                    <div className="service-category">
+                      <h4>Hair Services</h4>
+                      <ul>
+                        <li onClick={() => handleServiceFilter('Haircut')}>Classic Haircut</li>
+                        <li onClick={() => handleServiceFilter('Hair Styling')}>Hair Styling</li>
+                        <li onClick={() => handleServiceFilter('Hair Wash')}>Hair Wash</li>
+                        <li onClick={() => handleServiceFilter('Hair Treatment')}>Hair Treatment</li>
+                      </ul>
+                    </div>
+                    <div className="service-category">
+                      <h4>Grooming</h4>
+                      <ul>
+                        <li onClick={() => handleServiceFilter('Beard Trim')}>Beard Trim</li>
+                        <li onClick={() => handleServiceFilter('Shaving')}>Clean Shave</li>
+                        <li onClick={() => handleServiceFilter('Mustache')}>Mustache Styling</li>
+                        <li onClick={() => handleServiceFilter('Facial')}>Men's Facial</li>
+                      </ul>
+                    </div>
+                    <div className="service-category">
+                      <h4>Spa & Wellness</h4>
+                      <ul>
+                        <li onClick={() => handleServiceFilter('Massage')}>Head Massage</li>
+                        <li onClick={() => handleServiceFilter('Body Massage')}>Body Massage</li>
+                        <li onClick={() => handleServiceFilter('Manicure')}>Men's Manicure</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div 
+              className="nav-item"
+              onMouseEnter={() => setActiveCategory('kids')}
+              onMouseLeave={() => setActiveCategory(null)}
+            >
+              <span className="nav-link">KIDS</span>
+              {activeCategory === 'kids' && (
+                <div className="dropdown-menu">
+                  <div className="services-grid">
+                    <div className="service-category">
+                      <h4>Kids Hair Services</h4>
+                      <ul>
+                        <li onClick={() => handleServiceFilter('Kids Haircut')}>Kids Haircut</li>
+                        <li onClick={() => handleServiceFilter('Baby Haircut')}>Baby's First Cut</li>
+                        <li onClick={() => handleServiceFilter('Hair Styling')}>Fun Hair Styling</li>
+                      </ul>
+                    </div>
+                    <div className="service-category">
+                      <h4>Special Services</h4>
+                      <ul>
+                        <li onClick={() => handleServiceFilter('Birthday Special')}>Birthday Special</li>
+                        <li onClick={() => handleServiceFilter('Hair Braiding')}>Hair Braiding</li>
+                        <li onClick={() => handleServiceFilter('Hair Accessories')}>Hair Accessories</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="nav-item">
+              <span className="nav-link">SPA</span>
+            </div>
+
+            <div className="nav-item">
+              <span className="nav-link">BEAUTY</span>
+            </div>
+          </nav>
         </div>
       </header>
 
@@ -1240,14 +1399,35 @@ function CustomerApp() {
         <div className="main-content">
           <div className="salon-list">
             <div className="salon-list-header">
+              {selectedServiceCategory && (
+                <div className="selected-service-badge">
+                  {selectedServiceCategory} Services
+                  <button 
+                    className="clear-service-btn"
+                    onClick={() => {
+                      setSelectedServiceCategory(null);
+                      setFilterByService('all');
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
               <h2>
-                {searchQuery || filterByService !== 'all' || filterByRating !== 'all' || filterByPrice !== 'all'
+                {selectedServiceCategory 
+                  ? `${filteredSalons.length} salons offering ${selectedServiceCategory}`
+                  : searchQuery || filterByService !== 'all' || filterByRating !== 'all' || filterByPrice !== 'all'
                   ? `Found ${filteredSalons.length} salons`
                   : `Nearby Salons (${salons.length})`
                 }
               </h2>
               {filteredSalons.length === 0 && salons.length > 0 && (
-                <p className="no-results">No salons match your criteria. Try adjusting your filters.</p>
+                <p className="no-results">
+                  {selectedServiceCategory 
+                    ? `No salons found offering ${selectedServiceCategory} services. Try browsing other categories.`
+                    : 'No salons match your criteria. Try adjusting your filters.'
+                  }
+                </p>
               )}
             </div>
             {(filteredSalons.length > 0 ? filteredSalons : salons).map(salon => (
@@ -1282,7 +1462,7 @@ function CustomerApp() {
 
                 <div className="salon-card-body">
                   <div className="salon-address">
-                    <span className="address-icon"></span>
+                    <span className="address-icon">📍</span>
                     <span className="address-text">{salon.vicinity}</span>
                   </div>
                   
@@ -1313,16 +1493,46 @@ function CustomerApp() {
 
                 <div className="salon-card-actions">
                   <button 
-                    className="action-btn primary-action"
-                    onClick={() => handleBookAppointmentSelect(salon)}
+                    className="action-btn add-services-btn full-width-btn"
+                    onClick={() => handleAddToBag(salon)}
+                    style={{
+                      background: '#e50010',
+                      color: 'white',
+                      fontWeight: '700',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.5rem',
+                      border: 'none',
+                      fontSize: '0.875rem',
+                      textTransform: 'uppercase',
+                      width: '100%'
+                    }}
                   >
-                    Book Appointment
+                    🛍️ Add Services to Bag
                   </button>
+                </div>
+                
+                {/* More Info as a separate smaller action */}
+                <div className="salon-card-info-action">
                   <button 
-                    className="info-action"
+                    className="info-btn"
                     onClick={() => handleMoreInfoSelect(salon)}
+                    style={{
+                      background: 'transparent',
+                      color: '#666',
+                      border: '1px solid #e0e0e0',
+                      padding: '0.5rem 1rem',
+                      fontSize: '0.75rem',
+                      cursor: 'pointer',
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.25rem'
+                    }}
                   >
-                    More Info
+                    ℹ️ More Info
                   </button>
                 </div>
               </div>
@@ -1419,6 +1629,32 @@ function CustomerApp() {
           <BookingUpdatesModal
             booking={currentBooking}
             onClose={() => setShowBookingUpdates(false)}
+          />
+        )}
+
+        {/* Shopping Bag Interface */}
+        {showBagInterface && (
+          <ShoppingBagInterface
+            salon={selectedSalonForBag}
+            bagItem={shoppingBag.find(item => item.salon.place_id === selectedSalonForBag?.place_id)}
+            onClose={() => {
+              setShowBagInterface(false);
+              setSelectedSalonForBag(null);
+            }}
+            onProceedToCheckout={(bookingData) => {
+              // Handle checkout based on booking type
+              if (bookingData.bookingType === 'queue') {
+                // Use existing queue modal logic
+                setQueueSalon(bookingData.salon);
+                setShowQueueModal(true);
+                setShowBagInterface(false);
+              } else {
+                // Use existing appointment booking logic
+                setSelectedSalonForPage(bookingData.salon);
+                setShowBookAppointmentPage(true);
+                setShowBagInterface(false);
+              }
+            }}
           />
         )}
       </main>
